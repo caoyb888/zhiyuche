@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# 智驭车 (ZhiYuChe)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+智驭车是一款基于 React + TypeScript + Vite 构建的智能车辆管理平台前端 Demo，提供仪表盘、行程管理、充电监控、车辆健康、审批流程及数据报表等核心模块。
 
-Currently, two official plugins are available:
+## 技术栈
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **框架**: React 18 + TypeScript
+- **构建工具**: Vite 5
+- **样式**: Tailwind CSS
+- **图表**: Recharts
+- **路由**: React Router DOM 6
+- **图标**: Lucide React
 
-## React Compiler
+## 一键部署
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+点击下方按钮即可将本项目一键部署到 Vercel：
 
-## Expanding the ESLint configuration
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcaoyb888%2Fzhiyuche)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 本地开发
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# 安装依赖
+npm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 启动开发服务器
+npm run dev
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 构建生产版本
+npm run build
+
+# 预览生产构建
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Vercel 手动部署
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. 访问 [Vercel Dashboard](https://vercel.com/new)
+2. 导入 GitHub 仓库 `caoyb888/zhiyuche`
+3. 框架预设选择 **Vite**
+4. 点击 **Deploy**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Vercel 会自动识别构建命令（`npm run build`）和输出目录（`dist`），并配置好 SPA 路由回退。
+
+## 项目结构
+
 ```
+src/
+├── pages/          # 页面组件（Dashboard, Trips, Charging, Health, Approval, Reports）
+├── components/     # 公共组件（Layout 等）
+├── data/           # 模拟数据
+├── assets/         # 静态资源
+├── App.tsx         # 根组件
+└── main.tsx        # 入口文件
+```
+
+## License
+
+MIT
