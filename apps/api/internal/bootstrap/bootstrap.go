@@ -39,6 +39,9 @@ func Run(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log zerolog.
 	if err := seedParams(ctx, db); err != nil {
 		return fmt.Errorf("seed params: %w", err)
 	}
+	if err := seedDicts(ctx, db); err != nil {
+		return fmt.Errorf("seed dicts: %w", err)
+	}
 	platformID, err := ensureTenant(ctx, db, PlatformTenantCode, "智御平台", true)
 	if err != nil {
 		return fmt.Errorf("platform tenant: %w", err)

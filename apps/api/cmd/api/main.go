@@ -16,6 +16,7 @@ import (
 	"github.com/caoyb888/zhiyuche/apps/api/internal/config"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/migrate"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/server"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/ws"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/cache"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/db"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/logger"
@@ -74,6 +75,6 @@ func run() error {
 	}
 	log.Info().Msg("bootstrap complete")
 
-	srv := server.New(&app.App{Cfg: cfg, Log: log, DB: pool, Redis: rdb})
+	srv := server.New(&app.App{Cfg: cfg, Log: log, DB: pool, Redis: rdb, Hub: ws.NewHub(log)})
 	return srv.Run(ctx)
 }

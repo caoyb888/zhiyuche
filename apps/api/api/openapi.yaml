@@ -24,6 +24,15 @@ tags:
   - { name: params, description: 系统参数 }
   - { name: audit, description: 审计日志 }
   - { name: templates, description: 通知模板 }
+  - { name: vehicles, description: 车辆档案与实时状态 }
+  - { name: devices, description: 车载网关设备 }
+  - { name: cards, description: NFC 卡 }
+  - { name: piles, description: 充电桩档案 }
+  - { name: approvals, description: 公务用车申请与审批 }
+  - { name: trips, description: 行程、轨迹与事件 }
+  - { name: dashboard, description: 总览 }
+  - { name: notifications, description: 站内通知与实时推送 }
+  - { name: ingest, description: 车载网关上报（设备鉴权） }
 
 security:
   - bearerAuth: []
@@ -721,9 +730,759 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/OK' }
 
+  # ================================================================== 阶段 2
+  # ------------------------------------------------------------------ vehicles
+  /assets/vehicles:
+    get:
+      tags: [vehicles]
+      summary: 车辆列表（含实时状态摘要）
+      operationId: listVehicles
+      x-permission: asset:vehicle:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string }, description: 车牌/VIN/品牌/型号 模糊 }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/VehicleStatusEnum' } }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid }, description: 归属部门（含子部门） }
+        - { name: online, in: query, schema: { type: boolean } }
+      responses:
+        '200': { $ref: '#/components/responses/VehiclePage' }
+    post:
+      tags: [vehicles]
+      summary: 新建车辆（同时创建实时状态行）
+      operationId: createVehicle
+      x-permission: asset:vehicle:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/VehicleCreate' } } } }
+      responses:
+        '201': { $ref: '#/components/responses/Vehicle' }
+        '409': { $ref: '#/components/responses/Error' }
+  /assets/vehicles/options:
+    get:
+      tags: [vehicles]
+      summary: 车辆简表（下拉：id/车牌/型号/状态）
+      operationId: listVehicleOptions
+      x-permission: asset:vehicle:view
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/VehicleStatusEnum' } }
+      responses:
+        '200':
+          description: 简表
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/VehicleBrief' } } } } ]
+  /assets/vehicles/status:
+    get:
+      tags: [vehicles]
+      summary: 全部车辆实时状态（地图用；含车牌、型号、驾驶员）
+      operationId: listVehicleLiveStatus
+      x-permission: asset:vehicle:view
+      responses:
+        '200':
+          description: 实时状态列表
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/VehicleLive' } } } } ]
+  /assets/vehicles/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [vehicles]
+      summary: 车辆详情（含实时状态、绑定设备、最近行程数）
+      operationId: getVehicle
+      x-permission: asset:vehicle:view
+      responses:
+        '200': { $ref: '#/components/responses/Vehicle' }
+    put:
+      tags: [vehicles]
+      summary: 编辑车辆（status 只允许在 idle/maintenance/disabled 之间手动切换；在途车辆不可改状态）
+      operationId: updateVehicle
+      x-permission: asset:vehicle:update
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/VehicleUpdate' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Vehicle' }
+        '409': { $ref: '#/components/responses/Error' }
+    delete:
+      tags: [vehicles]
+      summary: 删除车辆（软删；在途或有未完成申请时 409；自动解绑设备）
+      operationId: deleteVehicle
+      x-permission: asset:vehicle:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /assets/vehicles/{id}/status:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [vehicles]
+      summary: 单车实时状态
+      operationId: getVehicleLiveStatus
+      x-permission: asset:vehicle:view
+      responses:
+        '200':
+          description: 实时状态
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/VehicleLive' } } } ]
+  /assets/vehicles/{id}/telemetry:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [vehicles]
+      summary: 历史遥测（时间区间，最多 5000 点，按 ts 升序）
+      operationId: listVehicleTelemetry
+      x-permission: asset:vehicle:view
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: limit, in: query, schema: { type: integer, default: 1000, maximum: 5000 } }
+      responses:
+        '200':
+          description: 遥测点
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/TelemetryPoint' } } } } ]
+
+  # ------------------------------------------------------------------ devices
+  /assets/devices:
+    get:
+      tags: [devices]
+      summary: 设备列表
+      operationId: listDevices
+      x-permission: asset:device:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string }, description: 序列号/ICCID/车牌 }
+        - { name: status, in: query, schema: { type: string, enum: [active, disabled] } }
+        - { name: bound, in: query, schema: { type: boolean }, description: 是否已绑定车辆 }
+        - { name: online, in: query, schema: { type: boolean } }
+      responses:
+        '200': { $ref: '#/components/responses/DevicePage' }
+    post:
+      tags: [devices]
+      summary: 新建设备（返回一次性 api_key，用于网关鉴权）
+      operationId: createDevice
+      x-permission: asset:device:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeviceCreate' } } } }
+      responses:
+        '201': { $ref: '#/components/responses/DeviceWithKey' }
+  /assets/devices/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [devices]
+      summary: 设备详情
+      operationId: getDevice
+      x-permission: asset:device:view
+      responses:
+        '200': { $ref: '#/components/responses/Device' }
+    put:
+      tags: [devices]
+      summary: 编辑设备（型号/固件/ICCID/状态/备注；status=disabled 后上报被拒）
+      operationId: updateDevice
+      x-permission: asset:device:update
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/DeviceUpdate' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Device' }
+    delete:
+      tags: [devices]
+      summary: 删除设备（软删；已绑定车辆时先解绑）
+      operationId: deleteDevice
+      x-permission: asset:device:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /assets/devices/{id}/bind:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [devices]
+      summary: 绑定车辆（一车一网关；目标车辆已有设备时 409）
+      operationId: bindDevice
+      x-permission: asset:device:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [vehicle_id], properties: { vehicle_id: { type: string, format: uuid } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Device' }
+        '409': { $ref: '#/components/responses/Error' }
+  /assets/devices/{id}/unbind:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [devices]
+      summary: 解绑车辆（车辆在途时 409）
+      operationId: unbindDevice
+      x-permission: asset:device:update
+      responses:
+        '200': { $ref: '#/components/responses/Device' }
+  /assets/devices/{id}/rotate-key:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [devices]
+      summary: 重新生成 api_key（旧 key 立即失效，新 key 只返回一次）
+      operationId: rotateDeviceKey
+      x-permission: asset:device:update
+      responses:
+        '200': { $ref: '#/components/responses/DeviceWithKey' }
+
+  # ------------------------------------------------------------------ nfc cards
+  /assets/nfc-cards:
+    get:
+      tags: [cards]
+      summary: NFC 卡列表
+      operationId: listCards
+      x-permission: asset:card:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string }, description: 卡号/持卡人姓名/用户名 }
+        - { name: status, in: query, schema: { type: string, enum: [active, lost, disabled] } }
+        - { name: bound, in: query, schema: { type: boolean } }
+      responses:
+        '200': { $ref: '#/components/responses/CardPage' }
+    post:
+      tags: [cards]
+      summary: 发卡（可同时绑定用户；一个用户可持多张卡）
+      operationId: createCard
+      x-permission: asset:card:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CardCreate' } } } }
+      responses:
+        '201': { $ref: '#/components/responses/Card' }
+        '409': { $ref: '#/components/responses/Error' }
+  /assets/nfc-cards/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [cards]
+      summary: 卡详情
+      operationId: getCard
+      x-permission: asset:card:view
+      responses:
+        '200': { $ref: '#/components/responses/Card' }
+    put:
+      tags: [cards]
+      summary: 编辑卡（状态/备注；status=lost 等同挂失）
+      operationId: updateCard
+      x-permission: asset:card:update
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CardUpdate' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Card' }
+    delete:
+      tags: [cards]
+      summary: 删除卡（软删）
+      operationId: deleteCard
+      x-permission: asset:card:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /assets/nfc-cards/{id}/bind:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [cards]
+      summary: 绑定持卡人
+      operationId: bindCard
+      x-permission: asset:card:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [user_id], properties: { user_id: { type: string, format: uuid } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Card' }
+  /assets/nfc-cards/{id}/unbind:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [cards]
+      summary: 解绑持卡人
+      operationId: unbindCard
+      x-permission: asset:card:update
+      responses:
+        '200': { $ref: '#/components/responses/Card' }
+  /assets/nfc-cards/{id}/report-loss:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [cards]
+      summary: 挂失（status=lost，刷卡取车被拒）
+      operationId: reportCardLoss
+      x-permission: asset:card:update
+      responses:
+        '200': { $ref: '#/components/responses/Card' }
+
+  # ------------------------------------------------------------------ charge piles
+  /assets/charge-piles:
+    get:
+      tags: [piles]
+      summary: 充电桩列表
+      operationId: listPiles
+      x-permission: asset:pile:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string }, description: 桩编号/名称/位置 }
+        - { name: type, in: query, schema: { type: string, enum: [fast, slow] } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/PileStatusEnum' } }
+      responses:
+        '200': { $ref: '#/components/responses/PilePage' }
+    post:
+      tags: [piles]
+      summary: 新建充电桩
+      operationId: createPile
+      x-permission: asset:pile:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PileCreate' } } } }
+      responses:
+        '201': { $ref: '#/components/responses/Pile' }
+        '409': { $ref: '#/components/responses/Error' }
+  /assets/charge-piles/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [piles]
+      summary: 充电桩详情
+      operationId: getPile
+      x-permission: asset:pile:view
+      responses:
+        '200': { $ref: '#/components/responses/Pile' }
+    put:
+      tags: [piles]
+      summary: 编辑充电桩（status 手动只能设 disabled 或恢复 offline；其余由 OCPP 上报）
+      operationId: updatePile
+      x-permission: asset:pile:update
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PileUpdate' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Pile' }
+    delete:
+      tags: [piles]
+      summary: 删除充电桩（软删）
+      operationId: deletePile
+      x-permission: asset:pile:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+
+  # ------------------------------------------------------------------ approvals
+  /approvals:
+    get:
+      tags: [approvals]
+      summary: 申请列表
+      description: |
+        `scope=mine`（默认）：我发起的；`scope=todo`：待我审批的（需 approval:approve）；
+        `scope=all`：本租户全部（需 approval:manage）。
+      operationId: listApprovals
+      x-permission: approval:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: scope, in: query, schema: { type: string, enum: [mine, todo, all], default: mine } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ApprovalStatus' } }
+        - { name: trip_type, in: query, schema: { $ref: '#/components/schemas/TripType' } }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid } }
+        - { name: vehicle_id, in: query, schema: { type: string, format: uuid } }
+        - { name: applicant_id, in: query, schema: { type: string, format: uuid } }
+        - { name: from, in: query, schema: { type: string, format: date-time }, description: planned_start ≥ }
+        - { name: to, in: query, schema: { type: string, format: date-time }, description: planned_start ≤ }
+        - { name: keyword, in: query, schema: { type: string }, description: 单号/事由/目的地/申请人 }
+      responses:
+        '200': { $ref: '#/components/responses/ApprovalPage' }
+    post:
+      tags: [approvals]
+      summary: 发起用车申请
+      description: |
+        申请人默认为当前用户；持有 approval:manage 可传 applicant_id 代人发起。
+        服务端执行预检（时间合法、车辆可用且无冲突、规则判定所需审批级别、确定各级审批人），
+        创建后向一级审批人发送站内通知。审批人规则：一级 = 申请人所在部门负责人（逐级向上找，跳过申请人本人）；
+        找不到则回退到持有 fallback_approver_role 角色的用户；二级 = 规则中的 level2_approver。
+      operationId: createApproval
+      x-permission: approval:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalCreate' } } } }
+      responses:
+        '201': { $ref: '#/components/responses/Approval' }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { description: 车辆时段冲突, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+  /approvals/precheck:
+    post:
+      tags: [approvals]
+      summary: 预检（不落库）：返回所需审批级别、审批人、车辆冲突与不通过原因
+      operationId: precheckApproval
+      x-permission: approval:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalCreate' } } } }
+      responses:
+        '200':
+          description: 预检结果（即使不通过也返回 200，看 ok 字段）
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/PrecheckResult' } } } ]
+  /approvals/todo-count:
+    get:
+      tags: [approvals]
+      summary: 待我审批数量
+      operationId: getApprovalTodoCount
+      x-permission: approval:view
+      responses:
+        '200':
+          description: 数量
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: object, properties: { todo: { type: integer } } } } } ]
+  /approvals/available-vehicles:
+    get:
+      tags: [approvals]
+      summary: 时段内可用车辆（空闲/无冲突申请；含 SOC、续航）
+      operationId: listAvailableVehicles
+      x-permission: approval:create
+      parameters:
+        - { name: start, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: end, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: exclude_approval_id, in: query, schema: { type: string, format: uuid }, description: 编辑时排除自身 }
+      responses:
+        '200':
+          description: 可用车辆
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/VehicleBrief' } } } } ]
+  /approvals/rules:
+    get:
+      tags: [approvals]
+      summary: 本租户审批规则（不存在时返回缺省值）
+      operationId: getApprovalRules
+      x-permission: approval:rule
+      responses:
+        '200': { $ref: '#/components/responses/ApprovalRules' }
+    put:
+      tags: [approvals]
+      summary: 保存审批规则（upsert）
+      operationId: setApprovalRules
+      x-permission: approval:rule
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalRulesUpdate' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/ApprovalRules' }
+  /approvals/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [approvals]
+      summary: 申请详情（含审批步骤、车辆、申请人、关联行程摘要）
+      description: 可见范围：申请人本人、各级审批人、approval:manage
+      operationId: getApproval
+      x-permission: approval:view
+      responses:
+        '200': { $ref: '#/components/responses/Approval' }
+        '403': { $ref: '#/components/responses/Error' }
+  /approvals/{id}/approve:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [approvals]
+      summary: 通过当前步骤
+      description: |
+        仅当前步骤的审批人或 approval:manage 可操作。申请未指定车辆时必须传 vehicle_id（再次做冲突检查）。
+        一级通过且需二级 → pending_l2 并通知二级审批人；否则 → approved，通知申请人。
+      operationId: approveApproval
+      x-permission: approval:approve
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                remark: { type: string }
+                vehicle_id: { type: string, format: uuid }
+      responses:
+        '200': { $ref: '#/components/responses/Approval' }
+        '409': { $ref: '#/components/responses/Error' }
+  /approvals/{id}/reject:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [approvals]
+      summary: 驳回（任一级驳回即终止，通知申请人）
+      operationId: rejectApproval
+      x-permission: approval:approve
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [reason], properties: { reason: { type: string, minLength: 1 } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Approval' }
+  /approvals/{id}/cancel:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [approvals]
+      summary: 撤销（申请人本人在 pending/approved 且未开始行程时；approval:manage 可撤销任意未开始的申请）
+      operationId: cancelApproval
+      x-permission: approval:view
+      requestBody:
+        content: { application/json: { schema: { type: object, properties: { reason: { type: string } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Approval' }
+        '409': { $ref: '#/components/responses/Error' }
+
+  # ------------------------------------------------------------------ trips
+  /trips:
+    get:
+      tags: [trips]
+      summary: 行程列表
+      description: "`scope=mine`（默认）：我驾驶的；`scope=all`：本租户全部（需 trip:manage 或 trip:export）"
+      operationId: listTrips
+      x-permission: trip:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: scope, in: query, schema: { type: string, enum: [mine, all], default: mine } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/TripStatus' } }
+        - { name: trip_type, in: query, schema: { $ref: '#/components/schemas/TripType' } }
+        - { name: vehicle_id, in: query, schema: { type: string, format: uuid } }
+        - { name: driver_id, in: query, schema: { type: string, format: uuid } }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid }, description: 驾驶员部门（含子部门） }
+        - { name: from, in: query, schema: { type: string, format: date-time }, description: start_at ≥ }
+        - { name: to, in: query, schema: { type: string, format: date-time }, description: start_at ≤ }
+        - { name: keyword, in: query, schema: { type: string }, description: 行程号/车牌/驾驶员/事由 }
+        - { name: deviation, in: query, schema: { type: boolean } }
+      responses:
+        '200': { $ref: '#/components/responses/TripPage' }
+  /trips/start:
+    post:
+      tags: [trips]
+      summary: 手动开始行程（Web 调度；必须基于已批准的申请）
+      operationId: startTrip
+      x-permission: trip:manage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approval_id]
+              properties:
+                approval_id: { type: string, format: uuid }
+                driver_id: { type: string, format: uuid, description: 缺省为申请人 }
+                remark: { type: string }
+      responses:
+        '201': { $ref: '#/components/responses/Trip' }
+        '409': { $ref: '#/components/responses/Error' }
+  /trips/summary:
+    get:
+      tags: [trips]
+      summary: 日汇总（总览页用）：行程数、总里程、总耗电、在途数
+      operationId: getTripSummary
+      x-permission: trip:view
+      parameters:
+        - { name: date, in: query, schema: { type: string, format: date }, description: 缺省今天 }
+      responses:
+        '200':
+          description: 汇总
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/TripSummary' } } } ]
+  /trips/export:
+    get:
+      tags: [trips]
+      summary: 导出行程 xlsx（与列表相同筛选，最多 5000 行）
+      operationId: exportTrips
+      x-permission: trip:export
+      responses:
+        '200': { description: xlsx, content: { application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } } } }
+  /trips/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [trips]
+      summary: 行程详情（含车辆、驾驶员、申请摘要、事件列表）
+      description: 可见范围：驾驶员本人、关联申请的申请人/审批人、trip:manage
+      operationId: getTrip
+      x-permission: trip:view
+      responses:
+        '200': { $ref: '#/components/responses/Trip' }
+  /trips/{id}/track:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [trips]
+      summary: 轨迹点（按 ts 升序；可按 step 抽稀，如 step=5 每 5 点取 1）
+      operationId: getTripTrack
+      x-permission: trip:view
+      parameters:
+        - { name: step, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        '200':
+          description: 轨迹
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/TripTrack' } } } ]
+  /trips/{id}/events:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [trips]
+      summary: 行程事件
+      operationId: getTripEvents
+      x-permission: trip:view
+      responses:
+        '200':
+          description: 事件列表
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/TripEvent' } } } } ]
+  /trips/{id}/end:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [trips]
+      summary: 手动结束行程（汇总里程/能耗/速度/急加减速/偏离；车辆回到 idle；申请置 completed）
+      operationId: endTrip
+      x-permission: trip:manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                end_odometer: { type: number }
+                end_soc: { type: number }
+                remark: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Trip' }
+        '409': { $ref: '#/components/responses/Error' }
+  /trips/{id}/cancel:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [trips]
+      summary: 作废进行中的行程（误触发等；车辆回到 idle，申请回到 approved）
+      operationId: cancelTrip
+      x-permission: trip:manage
+      requestBody:
+        content: { application/json: { schema: { type: object, properties: { reason: { type: string } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Trip' }
+
+  # ------------------------------------------------------------------ dashboard
+  /dashboard/overview:
+    get:
+      tags: [dashboard]
+      summary: 总览数据：车辆状态计数、待办审批、今日行程汇总、离线设备数、最近事件
+      operationId: getDashboardOverview
+      x-permission: dashboard:view
+      responses:
+        '200':
+          description: 总览
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/DashboardOverview' } } } ]
+
+  # ------------------------------------------------------------------ notifications
+  /notifications:
+    get:
+      tags: [notifications]
+      summary: 我的通知（分页，按时间倒序）
+      operationId: listNotifications
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - { name: unread, in: query, schema: { type: boolean } }
+        - { name: type, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: 通知分页
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Notification' } } } } ] } } } ]
+  /notifications/unread-count:
+    get:
+      tags: [notifications]
+      summary: 未读数
+      operationId: getUnreadCount
+      responses:
+        '200':
+          description: 未读数
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: object, properties: { unread: { type: integer } } } } } ]
+  /notifications/read:
+    put:
+      tags: [notifications]
+      summary: 标记已读
+      operationId: markNotificationsRead
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [ids], properties: { ids: { type: array, items: { type: string, format: uuid } } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /notifications/read-all:
+    put:
+      tags: [notifications]
+      summary: 全部标记已读
+      operationId: markAllNotificationsRead
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /ws:
+    get:
+      tags: [notifications]
+      summary: WebSocket 实时推送
+      description: |
+        `GET /api/v1/ws?access_token=<jwt>` 升级为 WebSocket。服务端消息为 JSON `{type, ts, data}`：
+        `vehicle.status`（租户）、`trip.started`/`trip.ended`/`trip.event`（租户）、`approval.updated`（租户）、
+        `notification.new`（仅本人）、`device.online`（租户）。客户端可发送 `{"type":"ping"}` 得到 `{"type":"pong"}`。
+      operationId: websocket
+      responses:
+        '101': { description: 协议升级 }
+
+  # ------------------------------------------------------------------ ingest (device auth)
+  /ingest/telemetry:
+    post:
+      tags: [ingest]
+      security: [ { deviceAuth: [] } ]
+      summary: 网关上报遥测（批量）
+      description: 请求头 `X-Device-Serial` + `X-Device-Key`。设备未绑定车辆时返回 409。点按 ts 升序处理；写入 vehicle_telemetry、更新实时状态、追加到进行中的行程并评估超速/低电/偏离。
+      operationId: ingestTelemetry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [points]
+              properties:
+                points: { type: array, minItems: 1, maxItems: 500, items: { $ref: '#/components/schemas/TelemetryPoint' } }
+      responses:
+        '200':
+          description: 接收结果
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: object, properties: { accepted: { type: integer }, trip_id: { type: [string, 'null'], format: uuid } } } } } ]
+        '401': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /ingest/events:
+    post:
+      tags: [ingest]
+      security: [ { deviceAuth: [] } ]
+      summary: 网关上报事件（取车/还车）
+      description: |
+        `trip_start`：按 card_uid（或 user_id）识别驾驶员，匹配该车辆在当前时间窗（planned_start−30min ～ planned_end+30min）内已批准的申请
+        （或 approval_no 指定），开行程并返回是否点亮灯牌；无匹配申请、卡挂失、车辆非空闲 → 4xx 并给出原因。
+        `trip_end`：结束该车辆进行中的行程。
+      operationId: ingestEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IngestEvent' }
+      responses:
+        '200':
+          description: 处理结果
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/IngestEventResult' } } } ]
+        '400': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+    deviceAuth:
+      type: apiKey
+      in: header
+      name: X-Device-Key
+      description: 与 X-Device-Serial 一起使用
 
   parameters:
     id:
@@ -852,6 +1611,90 @@ components:
         application/json:
           schema:
             allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Template' } } } } ] } } } ]
+    Vehicle:
+      description: 车辆
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Vehicle' } } } ]
+    VehiclePage:
+      description: 车辆分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Vehicle' } } } } ] } } } ]
+    Device:
+      description: 设备
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Device' } } } ]
+    DeviceWithKey:
+      description: 设备（含一次性 api_key）
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Device' }, { type: object, required: [api_key], properties: { api_key: { type: string } } } ] } } } ]
+    DevicePage:
+      description: 设备分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Device' } } } } ] } } } ]
+    Card:
+      description: NFC 卡
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Card' } } } ]
+    CardPage:
+      description: NFC 卡分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Card' } } } } ] } } } ]
+    Pile:
+      description: 充电桩
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Pile' } } } ]
+    PilePage:
+      description: 充电桩分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Pile' } } } } ] } } } ]
+    Approval:
+      description: 申请
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Approval' } } } ]
+    ApprovalPage:
+      description: 申请分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Approval' } } } } ] } } } ]
+    ApprovalRules:
+      description: 审批规则
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/ApprovalRules' } } } ]
+    Trip:
+      description: 行程
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Trip' } } } ]
+    TripPage:
+      description: 行程分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Trip' } } } } ] } } } ]
 
   schemas:
     Envelope:
@@ -1285,3 +2128,561 @@ components:
         title: { type: string }
         content: { type: string }
         enabled: { type: boolean }
+
+    # ================================================================ 阶段 2 schemas
+    # ---- vehicles
+    VehicleStatusEnum:
+      type: string
+      enum: [idle, in_use, charging, maintenance, disabled]
+    LngLat:
+      type: array
+      description: "[lng, lat]"
+      minItems: 2
+      maxItems: 2
+      items: { type: number }
+    VehicleBrief:
+      type: object
+      required: [id, plate_no, status]
+      properties:
+        id: { type: string, format: uuid }
+        plate_no: { type: string }
+        brand: { type: [string, 'null'] }
+        model: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/VehicleStatusEnum' }
+        soc: { type: [number, 'null'] }
+        range_km: { type: [number, 'null'] }
+        home_dept_id: { type: [string, 'null'], format: uuid }
+        home_dept_name: { type: [string, 'null'] }
+    VehicleLive:
+      type: object
+      description: 车辆实时状态（vehicle_status 行 + 车辆摘要）
+      required: [vehicle_id, plate_no, status, sign_on, locked, charging, online, updated_at]
+      properties:
+        vehicle_id: { type: string, format: uuid }
+        plate_no: { type: string }
+        brand: { type: [string, 'null'] }
+        model: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/VehicleStatusEnum' }
+        current_trip_id: { type: [string, 'null'], format: uuid }
+        driver_id: { type: [string, 'null'], format: uuid }
+        driver_name: { type: [string, 'null'] }
+        lng: { type: [number, 'null'] }
+        lat: { type: [number, 'null'] }
+        speed: { type: [number, 'null'] }
+        heading: { type: [number, 'null'] }
+        soc: { type: [number, 'null'] }
+        soh: { type: [number, 'null'] }
+        range_km: { type: [number, 'null'] }
+        odometer_km: { type: [number, 'null'] }
+        sign_on: { type: boolean }
+        locked: { type: boolean }
+        charging: { type: boolean }
+        online: { type: boolean, description: 5 分钟内有遥测 }
+        last_telemetry_at: { type: [string, 'null'], format: date-time }
+        updated_at: { type: string, format: date-time }
+    Vehicle:
+      type: object
+      required: [id, tenant_id, plate_no, seat_count, battery_kwh, range_km_full, status, odometer_km, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        plate_no: { type: string }
+        vin: { type: [string, 'null'] }
+        brand: { type: [string, 'null'] }
+        model: { type: [string, 'null'] }
+        color: { type: [string, 'null'] }
+        seat_count: { type: integer }
+        battery_kwh: { type: number }
+        range_km_full: { type: integer }
+        status: { $ref: '#/components/schemas/VehicleStatusEnum' }
+        odometer_km: { type: number }
+        soc: { type: [number, 'null'] }
+        soh: { type: [number, 'null'] }
+        purchase_date: { type: [string, 'null'], format: date }
+        insurance_expire: { type: [string, 'null'], format: date }
+        inspection_expire: { type: [string, 'null'], format: date }
+        home_dept_id: { type: [string, 'null'], format: uuid }
+        home_dept_name: { type: [string, 'null'] }
+        device_id: { type: [string, 'null'], format: uuid, description: 绑定的网关 }
+        device_serial: { type: [string, 'null'] }
+        remark: { type: [string, 'null'] }
+        live: { anyOf: [ { $ref: '#/components/schemas/VehicleLive' }, { type: 'null' } ], description: 详情与列表均带 }
+        trip_count: { type: integer, description: 详情返回：累计行程数 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    VehicleCreate:
+      type: object
+      required: [plate_no]
+      properties:
+        plate_no: { type: string, minLength: 2, maxLength: 16 }
+        vin: { type: string, maxLength: 32 }
+        brand: { type: string }
+        model: { type: string }
+        color: { type: string }
+        seat_count: { type: integer, minimum: 1, maximum: 60, default: 5 }
+        battery_kwh: { type: number, minimum: 1, default: 60 }
+        range_km_full: { type: integer, minimum: 1, default: 400 }
+        odometer_km: { type: number, minimum: 0 }
+        purchase_date: { type: string, format: date }
+        insurance_expire: { type: string, format: date }
+        inspection_expire: { type: string, format: date }
+        home_dept_id: { type: string, format: uuid }
+        remark: { type: string }
+    VehicleUpdate:
+      type: object
+      properties:
+        plate_no: { type: string }
+        vin: { type: string }
+        brand: { type: string }
+        model: { type: string }
+        color: { type: string }
+        seat_count: { type: integer }
+        battery_kwh: { type: number }
+        range_km_full: { type: integer }
+        odometer_km: { type: number }
+        purchase_date: { type: string, format: date }
+        insurance_expire: { type: string, format: date }
+        inspection_expire: { type: string, format: date }
+        home_dept_id: { type: string, format: uuid }
+        clear_home_dept: { type: boolean }
+        status: { type: string, enum: [idle, maintenance, disabled], description: 手动状态切换 }
+        remark: { type: string }
+    TelemetryPoint:
+      type: object
+      required: [ts]
+      properties:
+        ts: { type: string, format: date-time }
+        lng: { type: number }
+        lat: { type: number }
+        speed: { type: number, description: km/h }
+        heading: { type: number, description: 0-360 }
+        soc: { type: number }
+        soh: { type: number }
+        cell_temp: { type: number }
+        motor_temp: { type: number }
+        odometer_km: { type: number }
+        acc_on: { type: boolean }
+        locked: { type: boolean }
+        sign_on: { type: boolean }
+        charging: { type: boolean }
+
+    # ---- devices
+    Device:
+      type: object
+      required: [id, tenant_id, serial_no, model, status, online, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        serial_no: { type: string }
+        vehicle_id: { type: [string, 'null'], format: uuid }
+        vehicle_plate: { type: [string, 'null'] }
+        model: { type: string }
+        firmware: { type: [string, 'null'] }
+        iccid: { type: [string, 'null'] }
+        status: { type: string, enum: [active, disabled] }
+        online: { type: boolean, description: 5 分钟内有上报 }
+        last_online_at: { type: [string, 'null'], format: date-time }
+        last_ip: { type: [string, 'null'] }
+        remark: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    DeviceCreate:
+      type: object
+      required: [serial_no]
+      properties:
+        serial_no: { type: string, pattern: '^[A-Za-z0-9_-]{4,64}$' }
+        vehicle_id: { type: string, format: uuid, description: 可同时绑定 }
+        model: { type: string, default: VIG-100E }
+        firmware: { type: string }
+        iccid: { type: string }
+        remark: { type: string }
+    DeviceUpdate:
+      type: object
+      properties:
+        model: { type: string }
+        firmware: { type: string }
+        iccid: { type: string }
+        status: { type: string, enum: [active, disabled] }
+        remark: { type: string }
+
+    # ---- cards
+    Card:
+      type: object
+      required: [id, tenant_id, card_uid, status, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        card_uid: { type: string }
+        user_id: { type: [string, 'null'], format: uuid }
+        user_name: { type: [string, 'null'] }
+        username: { type: [string, 'null'] }
+        status: { type: string, enum: [active, lost, disabled] }
+        issued_at: { type: [string, 'null'], format: date-time }
+        remark: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    CardCreate:
+      type: object
+      required: [card_uid]
+      properties:
+        card_uid: { type: string, pattern: '^[A-Fa-f0-9]{8,32}$', description: 卡片 UID 十六进制 }
+        user_id: { type: string, format: uuid }
+        issued_at: { type: string, format: date-time }
+        remark: { type: string }
+    CardUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [active, lost, disabled] }
+        remark: { type: string }
+
+    # ---- piles
+    PileStatusEnum:
+      type: string
+      enum: [available, charging, offline, faulted, disabled]
+    Pile:
+      type: object
+      required: [id, tenant_id, pile_code, name, type, power_kw, connector_count, status, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        pile_code: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [fast, slow] }
+        power_kw: { type: number }
+        connector_count: { type: integer }
+        vendor: { type: [string, 'null'] }
+        location: { type: [string, 'null'] }
+        lng: { type: [number, 'null'] }
+        lat: { type: [number, 'null'] }
+        status: { $ref: '#/components/schemas/PileStatusEnum' }
+        last_heartbeat_at: { type: [string, 'null'], format: date-time }
+        remark: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    PileCreate:
+      type: object
+      required: [pile_code, name]
+      properties:
+        pile_code: { type: string, pattern: '^[A-Za-z0-9_-]{2,64}$' }
+        name: { type: string }
+        type: { type: string, enum: [fast, slow], default: slow }
+        power_kw: { type: number, default: 7 }
+        connector_count: { type: integer, default: 1 }
+        vendor: { type: string }
+        location: { type: string }
+        lng: { type: number }
+        lat: { type: number }
+        remark: { type: string }
+    PileUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [fast, slow] }
+        power_kw: { type: number }
+        connector_count: { type: integer }
+        vendor: { type: string }
+        location: { type: string }
+        lng: { type: number }
+        lat: { type: number }
+        status: { type: string, enum: [offline, disabled] }
+        remark: { type: string }
+
+    # ---- approvals
+    TripType:
+      type: string
+      enum: [official, daily]
+    ApprovalStatus:
+      type: string
+      enum: [pending_l1, pending_l2, approved, rejected, cancelled, in_use, completed, expired]
+    UserBrief:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        username: { type: string }
+        dept_name: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+    PlannedRoute:
+      type: object
+      description: 前端地图路线规划结果；无地图 Key 时可只填 distance_km
+      properties:
+        points: { type: array, items: { $ref: '#/components/schemas/LngLat' } }
+        distance_km: { type: number }
+        duration_min: { type: number }
+        summary: { type: string }
+    ApprovalStep:
+      type: object
+      required: [step_no, approver, action]
+      properties:
+        step_no: { type: integer }
+        approver: { $ref: '#/components/schemas/UserBrief' }
+        action: { type: string, enum: [pending, approved, rejected, skipped] }
+        remark: { type: [string, 'null'] }
+        acted_at: { type: [string, 'null'], format: date-time }
+    Approval:
+      type: object
+      required: [id, apply_no, applicant, trip_type, purpose_code, purpose_detail, planned_start, planned_end, destination, urgency, status, level_required, current_step, steps, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        apply_no: { type: string, example: ZY-20260909-0001 }
+        applicant: { $ref: '#/components/schemas/UserBrief' }
+        dept_id: { type: [string, 'null'], format: uuid }
+        dept_name: { type: [string, 'null'] }
+        trip_type: { $ref: '#/components/schemas/TripType' }
+        purpose_code: { type: string }
+        purpose_label: { type: [string, 'null'], description: 字典 approval_purpose 的 label }
+        purpose_detail: { type: string }
+        planned_start: { type: string, format: date-time }
+        planned_end: { type: string, format: date-time }
+        destination: { type: string }
+        dest_lng: { type: [number, 'null'] }
+        dest_lat: { type: [number, 'null'] }
+        planned_route: { anyOf: [ { $ref: '#/components/schemas/PlannedRoute' }, { type: 'null' } ] }
+        planned_km: { type: [number, 'null'] }
+        passengers: { type: array, items: { $ref: '#/components/schemas/UserBrief' } }
+        attachments: { type: array, items: { type: object, properties: { name: { type: string }, url: { type: string } } } }
+        vehicle: { anyOf: [ { $ref: '#/components/schemas/VehicleBrief' }, { type: 'null' } ] }
+        urgency: { type: string, enum: [normal, urgent] }
+        status: { $ref: '#/components/schemas/ApprovalStatus' }
+        level_required: { type: integer, enum: [1, 2] }
+        current_step: { type: integer }
+        steps: { type: array, items: { $ref: '#/components/schemas/ApprovalStep' } }
+        reject_reason: { type: [string, 'null'] }
+        cancel_reason: { type: [string, 'null'] }
+        approved_at: { type: [string, 'null'], format: date-time }
+        trip: { anyOf: [ { $ref: '#/components/schemas/TripBrief' }, { type: 'null' } ], description: 关联行程摘要 }
+        can_approve: { type: boolean, description: 当前用户是否可对当前步骤操作 }
+        can_cancel: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ApprovalCreate:
+      type: object
+      required: [trip_type, purpose_code, purpose_detail, planned_start, planned_end, destination]
+      properties:
+        applicant_id: { type: string, format: uuid, description: 代人发起（需 approval:manage） }
+        trip_type: { $ref: '#/components/schemas/TripType' }
+        purpose_code: { type: string }
+        purpose_detail: { type: string, minLength: 2, maxLength: 500 }
+        planned_start: { type: string, format: date-time }
+        planned_end: { type: string, format: date-time }
+        destination: { type: string, minLength: 1, maxLength: 200 }
+        dest_lng: { type: number }
+        dest_lat: { type: number }
+        planned_route: { $ref: '#/components/schemas/PlannedRoute' }
+        planned_km: { type: number, minimum: 0 }
+        passenger_ids: { type: array, items: { type: string, format: uuid } }
+        attachments: { type: array, items: { type: object, required: [name, url], properties: { name: { type: string }, url: { type: string } } } }
+        vehicle_id: { type: string, format: uuid, description: 可不选，由审批人指派 }
+        urgency: { type: string, enum: [normal, urgent], default: normal }
+    PrecheckResult:
+      type: object
+      required: [ok, level_required, approvers, conflicts, problems]
+      properties:
+        ok: { type: boolean }
+        level_required: { type: integer }
+        level2_reasons: { type: array, items: { type: string }, description: 触发二级审批的原因，如 "预计里程 ≥ 50km" }
+        approvers: { type: array, items: { $ref: '#/components/schemas/UserBrief' }, description: 按步骤顺序 }
+        conflicts: { type: array, items: { type: object, properties: { apply_no: { type: string }, applicant_name: { type: string }, planned_start: { type: string, format: date-time }, planned_end: { type: string, format: date-time }, status: { type: string } } } }
+        problems: { type: array, items: { type: string }, description: 不通过的原因 }
+    ApprovalRules:
+      type: object
+      required: [enabled, level2_night, night_start, night_end, level2_cross_dept, level2_trip_types, fallback_approver_role, overdue_alert_minutes]
+      properties:
+        enabled: { type: boolean }
+        level2_km: { type: [number, 'null'] }
+        level2_night: { type: boolean }
+        night_start: { type: string, example: '22:00' }
+        night_end: { type: string, example: '06:00' }
+        level2_cross_dept: { type: boolean }
+        level2_trip_types: { type: array, items: { $ref: '#/components/schemas/TripType' } }
+        level2_approver: { anyOf: [ { $ref: '#/components/schemas/UserBrief' }, { type: 'null' } ] }
+        fallback_approver_role: { type: string }
+        overdue_alert_minutes: { type: integer }
+        updated_at: { type: [string, 'null'], format: date-time }
+    ApprovalRulesUpdate:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        level2_km: { type: [number, 'null'] }
+        level2_night: { type: boolean }
+        night_start: { type: string, pattern: '^\d{2}:\d{2}$' }
+        night_end: { type: string, pattern: '^\d{2}:\d{2}$' }
+        level2_cross_dept: { type: boolean }
+        level2_trip_types: { type: array, items: { $ref: '#/components/schemas/TripType' } }
+        level2_approver_id: { type: [string, 'null'], format: uuid }
+        fallback_approver_role: { type: string }
+        overdue_alert_minutes: { type: integer, minimum: 5 }
+
+    # ---- trips
+    TripStatus:
+      type: string
+      enum: [ongoing, completed, cancelled]
+    TripBrief:
+      type: object
+      required: [id, trip_no, status, start_at]
+      properties:
+        id: { type: string, format: uuid }
+        trip_no: { type: string }
+        status: { $ref: '#/components/schemas/TripStatus' }
+        start_at: { type: string, format: date-time }
+        end_at: { type: [string, 'null'], format: date-time }
+        distance_km: { type: [number, 'null'] }
+    Trip:
+      type: object
+      required: [id, trip_no, vehicle, trip_type, source, status, start_at, harsh_accel, harsh_brake, point_count, roof_sign_status, deviation_flag, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        trip_no: { type: string, example: T-20260909-0001 }
+        vehicle: { $ref: '#/components/schemas/VehicleBrief' }
+        driver: { anyOf: [ { $ref: '#/components/schemas/UserBrief' }, { type: 'null' } ] }
+        card_uid: { type: [string, 'null'] }
+        approval: { anyOf: [ { type: object, properties: { id: { type: string, format: uuid }, apply_no: { type: string }, purpose_detail: { type: string }, planned_km: { type: [number, 'null'] }, destination: { type: string } } }, { type: 'null' } ] }
+        trip_type: { $ref: '#/components/schemas/TripType' }
+        purpose: { type: [string, 'null'] }
+        source: { type: string, enum: [device, web, simulator] }
+        status: { $ref: '#/components/schemas/TripStatus' }
+        start_at: { type: string, format: date-time }
+        end_at: { type: [string, 'null'], format: date-time }
+        duration_min: { type: [number, 'null'] }
+        start_odometer: { type: [number, 'null'] }
+        end_odometer: { type: [number, 'null'] }
+        distance_km: { type: [number, 'null'] }
+        energy_kwh: { type: [number, 'null'] }
+        energy_per_100km: { type: [number, 'null'] }
+        start_soc: { type: [number, 'null'] }
+        end_soc: { type: [number, 'null'] }
+        avg_speed: { type: [number, 'null'] }
+        max_speed: { type: [number, 'null'] }
+        harsh_accel: { type: integer }
+        harsh_brake: { type: integer }
+        point_count: { type: integer }
+        roof_sign_status: { type: string, enum: [on, off, unknown] }
+        deviation_flag: { type: boolean }
+        deviation_max_m: { type: [number, 'null'] }
+        start_lng: { type: [number, 'null'] }
+        start_lat: { type: [number, 'null'] }
+        end_lng: { type: [number, 'null'] }
+        end_lat: { type: [number, 'null'] }
+        cost: { type: [number, 'null'] }
+        cost_detail: { type: [object, 'null'] }
+        remark: { type: [string, 'null'] }
+        events: { type: array, items: { $ref: '#/components/schemas/TripEvent' }, description: 详情返回 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    TripTrack:
+      type: object
+      required: [trip_id, points]
+      properties:
+        trip_id: { type: string, format: uuid }
+        planned_route: { anyOf: [ { $ref: '#/components/schemas/PlannedRoute' }, { type: 'null' } ] }
+        points:
+          type: array
+          items:
+            type: object
+            required: [ts, lng, lat]
+            properties:
+              ts: { type: string, format: date-time }
+              lng: { type: number }
+              lat: { type: number }
+              speed: { type: [number, 'null'] }
+              heading: { type: [number, 'null'] }
+              soc: { type: [number, 'null'] }
+    TripEvent:
+      type: object
+      required: [id, trip_id, type, ts, payload]
+      properties:
+        id: { type: integer, format: int64 }
+        trip_id: { type: string, format: uuid }
+        type: { type: string, enum: [start, end, deviation, overspeed, low_soc, sign_on, sign_off, cancel] }
+        ts: { type: string, format: date-time }
+        payload: { type: object, additionalProperties: true, description: '如 {speed, limit} / {distance_m} / {soc} / {lng, lat}' }
+    TripSummary:
+      type: object
+      required: [date, trips, distance_km, energy_kwh, ongoing]
+      properties:
+        date: { type: string, format: date }
+        trips: { type: integer }
+        distance_km: { type: number }
+        energy_kwh: { type: number }
+        ongoing: { type: integer }
+        official_trips: { type: integer }
+        deviation_trips: { type: integer }
+
+    # ---- dashboard
+    DashboardOverview:
+      type: object
+      required: [vehicles, approvals_todo, today, devices, recent_events]
+      properties:
+        vehicles:
+          type: object
+          required: [total, idle, in_use, charging, maintenance, disabled, offline]
+          properties:
+            total: { type: integer }
+            idle: { type: integer }
+            in_use: { type: integer }
+            charging: { type: integer }
+            maintenance: { type: integer }
+            disabled: { type: integer }
+            offline: { type: integer, description: 非停用车辆中 5 分钟无遥测的 }
+        approvals_todo: { type: integer, description: 待当前用户审批数 }
+        approvals_pending: { type: integer, description: 租户内待审批总数（manage） }
+        today: { $ref: '#/components/schemas/TripSummary' }
+        devices: { type: object, properties: { total: { type: integer }, online: { type: integer } } }
+        recent_events: { type: array, items: { allOf: [ { $ref: '#/components/schemas/TripEvent' }, { type: object, properties: { plate_no: { type: string }, driver_name: { type: [string, 'null'] } } } ] }, description: 最近 10 条异常事件 }
+
+    # ---- notifications
+    Notification:
+      type: object
+      required: [id, type, title, content, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        type: { type: string }
+        title: { type: string }
+        content: { type: string }
+        ref_type: { type: [string, 'null'], description: approval | trip | vehicle }
+        ref_id: { type: [string, 'null'] }
+        read_at: { type: [string, 'null'], format: date-time }
+        created_at: { type: string, format: date-time }
+
+    # ---- ingest
+    IngestEvent:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [trip_start, trip_end] }
+        trip_start:
+          type: object
+          required: [ts]
+          properties:
+            ts: { type: string, format: date-time }
+            card_uid: { type: string }
+            user_id: { type: string, format: uuid }
+            approval_no: { type: string }
+            lng: { type: number }
+            lat: { type: number }
+            odometer_km: { type: number }
+            soc: { type: number }
+        trip_end:
+          type: object
+          required: [ts]
+          properties:
+            ts: { type: string, format: date-time }
+            lng: { type: number }
+            lat: { type: number }
+            odometer_km: { type: number }
+            soc: { type: number }
+    IngestEventResult:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string }
+        trip_id: { type: [string, 'null'], format: uuid }
+        trip_no: { type: [string, 'null'] }
+        trip_type: { type: [string, 'null'] }
+        sign_on: { type: boolean, description: trip_start：网关应点亮灯牌 }
+        driver_id: { type: [string, 'null'], format: uuid }

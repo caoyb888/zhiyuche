@@ -35,10 +35,16 @@ var Defs = []Def{
 	{Code: "dashboard:view", Name: "查看总览", Type: Action, Parent: "dashboard"},
 
 	{Code: "approval", Name: "公务审批", Type: Menu, Path: "/approval", Icon: "FileText", Sort: 20},
-	{Code: "approval:view", Name: "查看审批", Type: Action, Parent: "approval"},
+	{Code: "approval:view", Name: "查看审批（本人相关）", Type: Action, Parent: "approval"},
+	{Code: "approval:create", Name: "发起用车申请", Type: Action, Parent: "approval"},
+	{Code: "approval:approve", Name: "审批（处理指派给我的步骤）", Type: Action, Parent: "approval"},
+	{Code: "approval:manage", Name: "管理全部申请（查看/取消/代审批/指派车辆）", Type: Action, Parent: "approval"},
+	{Code: "approval:rule", Name: "配置审批规则", Type: Action, Parent: "approval"},
 
 	{Code: "trip", Name: "行程管理", Type: Menu, Path: "/trips", Icon: "Map", Sort: 30},
-	{Code: "trip:view", Name: "查看行程", Type: Action, Parent: "trip"},
+	{Code: "trip:view", Name: "查看行程（本人相关）", Type: Action, Parent: "trip"},
+	{Code: "trip:manage", Name: "管理全部行程（查看全部/手动开始结束/取消）", Type: Action, Parent: "trip"},
+	{Code: "trip:export", Name: "导出行程", Type: Action, Parent: "trip"},
 
 	{Code: "report", Name: "费用报表", Type: Menu, Path: "/reports", Icon: "BarChart2", Sort: 40},
 	{Code: "report:view", Name: "查看报表", Type: Action, Parent: "report"},
@@ -48,6 +54,33 @@ var Defs = []Def{
 
 	{Code: "charging", Name: "充电管理", Type: Menu, Path: "/charging", Icon: "Zap", Sort: 60},
 	{Code: "charging:view", Name: "查看充电", Type: Action, Parent: "charging"},
+
+	// ---- 资产管理 ----
+	{Code: "asset", Name: "资产管理", Type: Menu, Path: "/assets", Icon: "Car", Sort: 70},
+
+	{Code: "asset.vehicle", Name: "车辆档案", Type: Menu, Parent: "asset", Path: "/assets/vehicles", Icon: "Car", Sort: 10},
+	{Code: "asset:vehicle:view", Name: "查看车辆", Type: Action, Parent: "asset.vehicle"},
+	{Code: "asset:vehicle:create", Name: "新建车辆", Type: Action, Parent: "asset.vehicle"},
+	{Code: "asset:vehicle:update", Name: "编辑车辆（含置维保/停用）", Type: Action, Parent: "asset.vehicle"},
+	{Code: "asset:vehicle:delete", Name: "删除车辆", Type: Action, Parent: "asset.vehicle"},
+
+	{Code: "asset.device", Name: "网关设备", Type: Menu, Parent: "asset", Path: "/assets/devices", Icon: "Cpu", Sort: 20},
+	{Code: "asset:device:view", Name: "查看设备", Type: Action, Parent: "asset.device"},
+	{Code: "asset:device:create", Name: "新建设备", Type: Action, Parent: "asset.device"},
+	{Code: "asset:device:update", Name: "编辑设备（含绑定/解绑/换密钥）", Type: Action, Parent: "asset.device"},
+	{Code: "asset:device:delete", Name: "删除设备", Type: Action, Parent: "asset.device"},
+
+	{Code: "asset.card", Name: "NFC 卡", Type: Menu, Parent: "asset", Path: "/assets/cards", Icon: "CreditCard", Sort: 30},
+	{Code: "asset:card:view", Name: "查看卡", Type: Action, Parent: "asset.card"},
+	{Code: "asset:card:create", Name: "发卡", Type: Action, Parent: "asset.card"},
+	{Code: "asset:card:update", Name: "编辑卡（含绑定/解绑/挂失）", Type: Action, Parent: "asset.card"},
+	{Code: "asset:card:delete", Name: "删除卡", Type: Action, Parent: "asset.card"},
+
+	{Code: "asset.pile", Name: "充电桩档案", Type: Menu, Parent: "asset", Path: "/assets/piles", Icon: "PlugZap", Sort: 40},
+	{Code: "asset:pile:view", Name: "查看充电桩", Type: Action, Parent: "asset.pile"},
+	{Code: "asset:pile:create", Name: "新建充电桩", Type: Action, Parent: "asset.pile"},
+	{Code: "asset:pile:update", Name: "编辑充电桩", Type: Action, Parent: "asset.pile"},
+	{Code: "asset:pile:delete", Name: "删除充电桩", Type: Action, Parent: "asset.pile"},
 
 	// ---- 系统管理 ----
 	{Code: "system", Name: "系统管理", Type: Menu, Path: "/system", Icon: "Settings", Sort: 900},
@@ -188,14 +221,19 @@ type DefaultRole struct {
 var DefaultRoles = []DefaultRole{
 	{Code: "tenant_admin", Name: "租户管理员", Description: "拥有本租户全部权限"},
 	{Code: "fleet_manager", Name: "车队管理员", Description: "车辆调度、行程、健康、充电管理",
-		Perms: []string{"dashboard:view", "approval:view", "trip:view", "health:view", "charging:view", "report:view",
+		Perms: []string{"dashboard:view", "approval:view", "approval:manage", "approval:rule",
+			"trip:view", "trip:manage", "trip:export", "health:view", "charging:view", "report:view",
+			"asset:vehicle:view", "asset:vehicle:create", "asset:vehicle:update", "asset:vehicle:delete",
+			"asset:device:view", "asset:device:create", "asset:device:update", "asset:device:delete",
+			"asset:card:view", "asset:card:create", "asset:card:update", "asset:card:delete",
+			"asset:pile:view", "asset:pile:create", "asset:pile:update", "asset:pile:delete",
 			"system:dict:view", "system:param:view", "system:user:view", "system:dept:view"}},
 	{Code: "approver", Name: "审批人", Description: "审批公务用车申请",
-		Perms: []string{"dashboard:view", "approval:view", "trip:view"}},
+		Perms: []string{"dashboard:view", "approval:view", "approval:approve", "approval:create", "trip:view", "asset:vehicle:view"}},
 	{Code: "finance", Name: "财务", Description: "费用报表、账单与充电费用",
-		Perms: []string{"dashboard:view", "report:view", "charging:view", "trip:view"}},
+		Perms: []string{"dashboard:view", "report:view", "charging:view", "trip:view", "trip:export"}},
 	{Code: "employee", Name: "员工", Description: "申请用车、查看自己的行程",
-		Perms: []string{"dashboard:view"}},
+		Perms: []string{"dashboard:view", "approval:view", "approval:create", "trip:view"}},
 }
 
 // SuperAdminRole is the platform-level role (tenant_id NULL); its holders are also users.is_super.

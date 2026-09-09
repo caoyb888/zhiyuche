@@ -10,8 +10,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/approval"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/card"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/device"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/pile"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/vehicle"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/audit"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/auth"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/notify"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/auditlog"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/dept"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/dict"
@@ -20,6 +26,9 @@ import (
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/template"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/tenant"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/user"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/telemetry"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/trip"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/ws"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/httpx"
 )
 
@@ -119,6 +128,29 @@ func (s *Server) registerRoutes() {
 	param.Register(protected, s.app)
 	auditlog.Register(protected, s.app)
 	template.Register(protected, s.app)
+
+	// 资产、审批、行程、通知（阶段 2）
+	vehicle.Register(protected, s.app)
+	device.Register(protected, s.app)
+	card.Register(protected, s.app)
+	pile.Register(protected, s.app)
+	approval.Register(protected, s.app)
+	trip.Register(protected, s.app)
+	notify.Register(protected, s.app)
+
+	// WebSocket 推送：token 经 ?access_token= 传入（RequireAuth 已支持）
+	if s.app.Hub != nil {
+		protected.GET("/ws", s.app.Hub.Handler(s.app.Cfg.HTTP.CORSOrigins, func(c *gin.Context) (ws.Principal, bool) {
+			p := auth.Current(c)
+			if p == nil {
+				return ws.Principal{}, false
+			}
+			return ws.Principal{UserID: p.UserID, TenantID: auth.TenantID(c)}, true
+		}))
+	}
+
+	// 车载网关上报（设备鉴权，不走 JWT）
+	telemetry.Register(v1, s.app, trip.NewDeviceHooks(s.app))
 }
 
 type healthResponse struct {

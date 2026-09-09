@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/caoyb888/zhiyuche/apps/api/internal/config"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/ws"
 )
 
 type App struct {
@@ -15,4 +16,5 @@ type App struct {
 	Log   zerolog.Logger
 	DB    *pgxpool.Pool
 	Redis *redis.Client
+	Hub   *ws.Hub // nil-safe: Publish on a nil hub is a no-op
 }

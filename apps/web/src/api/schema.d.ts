@@ -668,6 +668,846 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assets/vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 车辆列表（含实时状态摘要） */
+        get: operations["listVehicles"];
+        put?: never;
+        /** 新建车辆（同时创建实时状态行） */
+        post: operations["createVehicle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/vehicles/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 车辆简表（下拉：id/车牌/型号/状态） */
+        get: operations["listVehicleOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/vehicles/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 全部车辆实时状态（地图用；含车牌、型号、驾驶员） */
+        get: operations["listVehicleLiveStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/vehicles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 车辆详情（含实时状态、绑定设备、最近行程数） */
+        get: operations["getVehicle"];
+        /** 编辑车辆（status 只允许在 idle/maintenance/disabled 之间手动切换；在途车辆不可改状态） */
+        put: operations["updateVehicle"];
+        post?: never;
+        /** 删除车辆（软删；在途或有未完成申请时 409；自动解绑设备） */
+        delete: operations["deleteVehicle"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/vehicles/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 单车实时状态 */
+        get: operations["getVehicleLiveStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/vehicles/{id}/telemetry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 历史遥测（时间区间，最多 5000 点，按 ts 升序） */
+        get: operations["listVehicleTelemetry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 设备列表 */
+        get: operations["listDevices"];
+        put?: never;
+        /** 新建设备（返回一次性 api_key，用于网关鉴权） */
+        post: operations["createDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/devices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 设备详情 */
+        get: operations["getDevice"];
+        /** 编辑设备（型号/固件/ICCID/状态/备注；status=disabled 后上报被拒） */
+        put: operations["updateDevice"];
+        post?: never;
+        /** 删除设备（软删；已绑定车辆时先解绑） */
+        delete: operations["deleteDevice"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/devices/{id}/bind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 绑定车辆（一车一网关；目标车辆已有设备时 409） */
+        post: operations["bindDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/devices/{id}/unbind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 解绑车辆（车辆在途时 409） */
+        post: operations["unbindDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/devices/{id}/rotate-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 重新生成 api_key（旧 key 立即失效，新 key 只返回一次） */
+        post: operations["rotateDeviceKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/nfc-cards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** NFC 卡列表 */
+        get: operations["listCards"];
+        put?: never;
+        /** 发卡（可同时绑定用户；一个用户可持多张卡） */
+        post: operations["createCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/nfc-cards/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 卡详情 */
+        get: operations["getCard"];
+        /** 编辑卡（状态/备注；status=lost 等同挂失） */
+        put: operations["updateCard"];
+        post?: never;
+        /** 删除卡（软删） */
+        delete: operations["deleteCard"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/nfc-cards/{id}/bind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 绑定持卡人 */
+        post: operations["bindCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/nfc-cards/{id}/unbind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 解绑持卡人 */
+        post: operations["unbindCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/nfc-cards/{id}/report-loss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 挂失（status=lost，刷卡取车被拒） */
+        post: operations["reportCardLoss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/charge-piles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 充电桩列表 */
+        get: operations["listPiles"];
+        put?: never;
+        /** 新建充电桩 */
+        post: operations["createPile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/assets/charge-piles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 充电桩详情 */
+        get: operations["getPile"];
+        /** 编辑充电桩（status 手动只能设 disabled 或恢复 offline；其余由 OCPP 上报） */
+        put: operations["updatePile"];
+        post?: never;
+        /** 删除充电桩（软删） */
+        delete: operations["deletePile"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 申请列表
+         * @description `scope=mine`（默认）：我发起的；`scope=todo`：待我审批的（需 approval:approve）；
+         *     `scope=all`：本租户全部（需 approval:manage）。
+         */
+        get: operations["listApprovals"];
+        put?: never;
+        /**
+         * 发起用车申请
+         * @description 申请人默认为当前用户；持有 approval:manage 可传 applicant_id 代人发起。
+         *     服务端执行预检（时间合法、车辆可用且无冲突、规则判定所需审批级别、确定各级审批人），
+         *     创建后向一级审批人发送站内通知。审批人规则：一级 = 申请人所在部门负责人（逐级向上找，跳过申请人本人）；
+         *     找不到则回退到持有 fallback_approver_role 角色的用户；二级 = 规则中的 level2_approver。
+         */
+        post: operations["createApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/precheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 预检（不落库）：返回所需审批级别、审批人、车辆冲突与不通过原因 */
+        post: operations["precheckApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/todo-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 待我审批数量 */
+        get: operations["getApprovalTodoCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/available-vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 时段内可用车辆（空闲/无冲突申请；含 SOC、续航） */
+        get: operations["listAvailableVehicles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 本租户审批规则（不存在时返回缺省值） */
+        get: operations["getApprovalRules"];
+        /** 保存审批规则（upsert） */
+        put: operations["setApprovalRules"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /**
+         * 申请详情（含审批步骤、车辆、申请人、关联行程摘要）
+         * @description 可见范围：申请人本人、各级审批人、approval:manage
+         */
+        get: operations["getApproval"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 通过当前步骤
+         * @description 仅当前步骤的审批人或 approval:manage 可操作。申请未指定车辆时必须传 vehicle_id（再次做冲突检查）。
+         *     一级通过且需二级 → pending_l2 并通知二级审批人；否则 → approved，通知申请人。
+         */
+        post: operations["approveApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 驳回（任一级驳回即终止，通知申请人） */
+        post: operations["rejectApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/approvals/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 撤销（申请人本人在 pending/approved 且未开始行程时；approval:manage 可撤销任意未开始的申请） */
+        post: operations["cancelApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 行程列表
+         * @description `scope=mine`（默认）：我驾驶的；`scope=all`：本租户全部（需 trip:manage 或 trip:export）
+         */
+        get: operations["listTrips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 手动开始行程（Web 调度；必须基于已批准的申请） */
+        post: operations["startTrip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 日汇总（总览页用）：行程数、总里程、总耗电、在途数 */
+        get: operations["getTripSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 导出行程 xlsx（与列表相同筛选，最多 5000 行） */
+        get: operations["exportTrips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /**
+         * 行程详情（含车辆、驾驶员、申请摘要、事件列表）
+         * @description 可见范围：驾驶员本人、关联申请的申请人/审批人、trip:manage
+         */
+        get: operations["getTrip"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}/track": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 轨迹点（按 ts 升序；可按 step 抽稀，如 step=5 每 5 点取 1） */
+        get: operations["getTripTrack"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 行程事件 */
+        get: operations["getTripEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 手动结束行程（汇总里程/能耗/速度/急加减速/偏离；车辆回到 idle；申请置 completed） */
+        post: operations["endTrip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trips/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 作废进行中的行程（误触发等；车辆回到 idle，申请回到 approved） */
+        post: operations["cancelTrip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 总览数据：车辆状态计数、待办审批、今日行程汇总、离线设备数、最近事件 */
+        get: operations["getDashboardOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的通知（分页，按时间倒序） */
+        get: operations["listNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 未读数 */
+        get: operations["getUnreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 标记已读 */
+        put: operations["markNotificationsRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 全部标记已读 */
+        put: operations["markAllNotificationsRead"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ws": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * WebSocket 实时推送
+         * @description `GET /api/v1/ws?access_token=<jwt>` 升级为 WebSocket。服务端消息为 JSON `{type, ts, data}`：
+         *     `vehicle.status`（租户）、`trip.started`/`trip.ended`/`trip.event`（租户）、`approval.updated`（租户）、
+         *     `notification.new`（仅本人）、`device.online`（租户）。客户端可发送 `{"type":"ping"}` 得到 `{"type":"pong"}`。
+         */
+        get: operations["websocket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingest/telemetry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 网关上报遥测（批量）
+         * @description 请求头 `X-Device-Serial` + `X-Device-Key`。设备未绑定车辆时返回 409。点按 ts 升序处理；写入 vehicle_telemetry、更新实时状态、追加到进行中的行程并评估超速/低电/偏离。
+         */
+        post: operations["ingestTelemetry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ingest/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 网关上报事件（取车/还车）
+         * @description `trip_start`：按 card_uid（或 user_id）识别驾驶员，匹配该车辆在当前时间窗（planned_start−30min ～ planned_end+30min）内已批准的申请
+         *     （或 approval_no 指定），开行程并返回是否点亮灯牌；无匹配申请、卡挂失、车辆非空闲 → 4xx 并给出原因。
+         *     `trip_end`：结束该车辆进行中的行程。
+         */
+        post: operations["ingestEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1117,6 +1957,652 @@ export interface components {
             content?: string;
             enabled?: boolean;
         };
+        /** @enum {string} */
+        VehicleStatusEnum: "idle" | "in_use" | "charging" | "maintenance" | "disabled";
+        /** @description [lng, lat] */
+        LngLat: number[];
+        VehicleBrief: {
+            /** Format: uuid */
+            id: string;
+            plate_no: string;
+            brand?: string | null;
+            model?: string | null;
+            status: components["schemas"]["VehicleStatusEnum"];
+            soc?: number | null;
+            range_km?: number | null;
+            /** Format: uuid */
+            home_dept_id?: string | null;
+            home_dept_name?: string | null;
+        };
+        /** @description 车辆实时状态（vehicle_status 行 + 车辆摘要） */
+        VehicleLive: {
+            /** Format: uuid */
+            vehicle_id: string;
+            plate_no: string;
+            brand?: string | null;
+            model?: string | null;
+            status: components["schemas"]["VehicleStatusEnum"];
+            /** Format: uuid */
+            current_trip_id?: string | null;
+            /** Format: uuid */
+            driver_id?: string | null;
+            driver_name?: string | null;
+            lng?: number | null;
+            lat?: number | null;
+            speed?: number | null;
+            heading?: number | null;
+            soc?: number | null;
+            soh?: number | null;
+            range_km?: number | null;
+            odometer_km?: number | null;
+            sign_on: boolean;
+            locked: boolean;
+            charging: boolean;
+            /** @description 5 分钟内有遥测 */
+            online: boolean;
+            /** Format: date-time */
+            last_telemetry_at?: string | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        Vehicle: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id: string;
+            plate_no: string;
+            vin?: string | null;
+            brand?: string | null;
+            model?: string | null;
+            color?: string | null;
+            seat_count: number;
+            battery_kwh: number;
+            range_km_full: number;
+            status: components["schemas"]["VehicleStatusEnum"];
+            odometer_km: number;
+            soc?: number | null;
+            soh?: number | null;
+            /** Format: date */
+            purchase_date?: string | null;
+            /** Format: date */
+            insurance_expire?: string | null;
+            /** Format: date */
+            inspection_expire?: string | null;
+            /** Format: uuid */
+            home_dept_id?: string | null;
+            home_dept_name?: string | null;
+            /**
+             * Format: uuid
+             * @description 绑定的网关
+             */
+            device_id?: string | null;
+            device_serial?: string | null;
+            remark?: string | null;
+            /** @description 详情与列表均带 */
+            live?: components["schemas"]["VehicleLive"] | null;
+            /** @description 详情返回：累计行程数 */
+            trip_count?: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        VehicleCreate: {
+            plate_no: string;
+            vin?: string;
+            brand?: string;
+            model?: string;
+            color?: string;
+            /** @default 5 */
+            seat_count: number;
+            /** @default 60 */
+            battery_kwh: number;
+            /** @default 400 */
+            range_km_full: number;
+            odometer_km?: number;
+            /** Format: date */
+            purchase_date?: string;
+            /** Format: date */
+            insurance_expire?: string;
+            /** Format: date */
+            inspection_expire?: string;
+            /** Format: uuid */
+            home_dept_id?: string;
+            remark?: string;
+        };
+        VehicleUpdate: {
+            plate_no?: string;
+            vin?: string;
+            brand?: string;
+            model?: string;
+            color?: string;
+            seat_count?: number;
+            battery_kwh?: number;
+            range_km_full?: number;
+            odometer_km?: number;
+            /** Format: date */
+            purchase_date?: string;
+            /** Format: date */
+            insurance_expire?: string;
+            /** Format: date */
+            inspection_expire?: string;
+            /** Format: uuid */
+            home_dept_id?: string;
+            clear_home_dept?: boolean;
+            /**
+             * @description 手动状态切换
+             * @enum {string}
+             */
+            status?: "idle" | "maintenance" | "disabled";
+            remark?: string;
+        };
+        TelemetryPoint: {
+            /** Format: date-time */
+            ts: string;
+            lng?: number;
+            lat?: number;
+            /** @description km/h */
+            speed?: number;
+            /** @description 0-360 */
+            heading?: number;
+            soc?: number;
+            soh?: number;
+            cell_temp?: number;
+            motor_temp?: number;
+            odometer_km?: number;
+            acc_on?: boolean;
+            locked?: boolean;
+            sign_on?: boolean;
+            charging?: boolean;
+        };
+        Device: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id: string;
+            serial_no: string;
+            /** Format: uuid */
+            vehicle_id?: string | null;
+            vehicle_plate?: string | null;
+            model: string;
+            firmware?: string | null;
+            iccid?: string | null;
+            /** @enum {string} */
+            status: "active" | "disabled";
+            /** @description 5 分钟内有上报 */
+            online: boolean;
+            /** Format: date-time */
+            last_online_at?: string | null;
+            last_ip?: string | null;
+            remark?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        DeviceCreate: {
+            serial_no: string;
+            /**
+             * Format: uuid
+             * @description 可同时绑定
+             */
+            vehicle_id?: string;
+            /** @default VIG-100E */
+            model: string;
+            firmware?: string;
+            iccid?: string;
+            remark?: string;
+        };
+        DeviceUpdate: {
+            model?: string;
+            firmware?: string;
+            iccid?: string;
+            /** @enum {string} */
+            status?: "active" | "disabled";
+            remark?: string;
+        };
+        Card: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id: string;
+            card_uid: string;
+            /** Format: uuid */
+            user_id?: string | null;
+            user_name?: string | null;
+            username?: string | null;
+            /** @enum {string} */
+            status: "active" | "lost" | "disabled";
+            /** Format: date-time */
+            issued_at?: string | null;
+            remark?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CardCreate: {
+            /** @description 卡片 UID 十六进制 */
+            card_uid: string;
+            /** Format: uuid */
+            user_id?: string;
+            /** Format: date-time */
+            issued_at?: string;
+            remark?: string;
+        };
+        CardUpdate: {
+            /** @enum {string} */
+            status?: "active" | "lost" | "disabled";
+            remark?: string;
+        };
+        /** @enum {string} */
+        PileStatusEnum: "available" | "charging" | "offline" | "faulted" | "disabled";
+        Pile: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id: string;
+            pile_code: string;
+            name: string;
+            /** @enum {string} */
+            type: "fast" | "slow";
+            power_kw: number;
+            connector_count: number;
+            vendor?: string | null;
+            location?: string | null;
+            lng?: number | null;
+            lat?: number | null;
+            status: components["schemas"]["PileStatusEnum"];
+            /** Format: date-time */
+            last_heartbeat_at?: string | null;
+            remark?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PileCreate: {
+            pile_code: string;
+            name: string;
+            /**
+             * @default slow
+             * @enum {string}
+             */
+            type: "fast" | "slow";
+            /** @default 7 */
+            power_kw: number;
+            /** @default 1 */
+            connector_count: number;
+            vendor?: string;
+            location?: string;
+            lng?: number;
+            lat?: number;
+            remark?: string;
+        };
+        PileUpdate: {
+            name?: string;
+            /** @enum {string} */
+            type?: "fast" | "slow";
+            power_kw?: number;
+            connector_count?: number;
+            vendor?: string;
+            location?: string;
+            lng?: number;
+            lat?: number;
+            /** @enum {string} */
+            status?: "offline" | "disabled";
+            remark?: string;
+        };
+        /** @enum {string} */
+        TripType: "official" | "daily";
+        /** @enum {string} */
+        ApprovalStatus: "pending_l1" | "pending_l2" | "approved" | "rejected" | "cancelled" | "in_use" | "completed" | "expired";
+        UserBrief: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            username?: string;
+            dept_name?: string | null;
+            phone?: string | null;
+        };
+        /** @description 前端地图路线规划结果；无地图 Key 时可只填 distance_km */
+        PlannedRoute: {
+            points?: components["schemas"]["LngLat"][];
+            distance_km?: number;
+            duration_min?: number;
+            summary?: string;
+        };
+        ApprovalStep: {
+            step_no: number;
+            approver: components["schemas"]["UserBrief"];
+            /** @enum {string} */
+            action: "pending" | "approved" | "rejected" | "skipped";
+            remark?: string | null;
+            /** Format: date-time */
+            acted_at?: string | null;
+        };
+        Approval: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** @example ZY-20260909-0001 */
+            apply_no: string;
+            applicant: components["schemas"]["UserBrief"];
+            /** Format: uuid */
+            dept_id?: string | null;
+            dept_name?: string | null;
+            trip_type: components["schemas"]["TripType"];
+            purpose_code: string;
+            /** @description 字典 approval_purpose 的 label */
+            purpose_label?: string | null;
+            purpose_detail: string;
+            /** Format: date-time */
+            planned_start: string;
+            /** Format: date-time */
+            planned_end: string;
+            destination: string;
+            dest_lng?: number | null;
+            dest_lat?: number | null;
+            planned_route?: components["schemas"]["PlannedRoute"] | null;
+            planned_km?: number | null;
+            passengers?: components["schemas"]["UserBrief"][];
+            attachments?: {
+                name?: string;
+                url?: string;
+            }[];
+            vehicle?: components["schemas"]["VehicleBrief"] | null;
+            /** @enum {string} */
+            urgency: "normal" | "urgent";
+            status: components["schemas"]["ApprovalStatus"];
+            /** @enum {integer} */
+            level_required: 1 | 2;
+            current_step: number;
+            steps: components["schemas"]["ApprovalStep"][];
+            reject_reason?: string | null;
+            cancel_reason?: string | null;
+            /** Format: date-time */
+            approved_at?: string | null;
+            /** @description 关联行程摘要 */
+            trip?: components["schemas"]["TripBrief"] | null;
+            /** @description 当前用户是否可对当前步骤操作 */
+            can_approve?: boolean;
+            can_cancel?: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ApprovalCreate: {
+            /**
+             * Format: uuid
+             * @description 代人发起（需 approval:manage）
+             */
+            applicant_id?: string;
+            trip_type: components["schemas"]["TripType"];
+            purpose_code: string;
+            purpose_detail: string;
+            /** Format: date-time */
+            planned_start: string;
+            /** Format: date-time */
+            planned_end: string;
+            destination: string;
+            dest_lng?: number;
+            dest_lat?: number;
+            planned_route?: components["schemas"]["PlannedRoute"];
+            planned_km?: number;
+            passenger_ids?: string[];
+            attachments?: {
+                name: string;
+                url: string;
+            }[];
+            /**
+             * Format: uuid
+             * @description 可不选，由审批人指派
+             */
+            vehicle_id?: string;
+            /**
+             * @default normal
+             * @enum {string}
+             */
+            urgency: "normal" | "urgent";
+        };
+        PrecheckResult: {
+            ok: boolean;
+            level_required: number;
+            /** @description 触发二级审批的原因，如 "预计里程 ≥ 50km" */
+            level2_reasons?: string[];
+            /** @description 按步骤顺序 */
+            approvers: components["schemas"]["UserBrief"][];
+            conflicts: {
+                apply_no?: string;
+                applicant_name?: string;
+                /** Format: date-time */
+                planned_start?: string;
+                /** Format: date-time */
+                planned_end?: string;
+                status?: string;
+            }[];
+            /** @description 不通过的原因 */
+            problems: string[];
+        };
+        ApprovalRules: {
+            enabled: boolean;
+            level2_km?: number | null;
+            level2_night: boolean;
+            /** @example 22:00 */
+            night_start: string;
+            /** @example 06:00 */
+            night_end: string;
+            level2_cross_dept: boolean;
+            level2_trip_types: components["schemas"]["TripType"][];
+            level2_approver?: components["schemas"]["UserBrief"] | null;
+            fallback_approver_role: string;
+            overdue_alert_minutes: number;
+            /** Format: date-time */
+            updated_at?: string | null;
+        };
+        ApprovalRulesUpdate: {
+            enabled?: boolean;
+            level2_km?: number | null;
+            level2_night?: boolean;
+            night_start?: string;
+            night_end?: string;
+            level2_cross_dept?: boolean;
+            level2_trip_types?: components["schemas"]["TripType"][];
+            /** Format: uuid */
+            level2_approver_id?: string | null;
+            fallback_approver_role?: string;
+            overdue_alert_minutes?: number;
+        };
+        /** @enum {string} */
+        TripStatus: "ongoing" | "completed" | "cancelled";
+        TripBrief: {
+            /** Format: uuid */
+            id: string;
+            trip_no: string;
+            status: components["schemas"]["TripStatus"];
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at?: string | null;
+            distance_km?: number | null;
+        };
+        Trip: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** @example T-20260909-0001 */
+            trip_no: string;
+            vehicle: components["schemas"]["VehicleBrief"];
+            driver?: components["schemas"]["UserBrief"] | null;
+            card_uid?: string | null;
+            approval?: {
+                /** Format: uuid */
+                id?: string;
+                apply_no?: string;
+                purpose_detail?: string;
+                planned_km?: number | null;
+                destination?: string;
+            } | null;
+            trip_type: components["schemas"]["TripType"];
+            purpose?: string | null;
+            /** @enum {string} */
+            source: "device" | "web" | "simulator";
+            status: components["schemas"]["TripStatus"];
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at?: string | null;
+            duration_min?: number | null;
+            start_odometer?: number | null;
+            end_odometer?: number | null;
+            distance_km?: number | null;
+            energy_kwh?: number | null;
+            energy_per_100km?: number | null;
+            start_soc?: number | null;
+            end_soc?: number | null;
+            avg_speed?: number | null;
+            max_speed?: number | null;
+            harsh_accel: number;
+            harsh_brake: number;
+            point_count: number;
+            /** @enum {string} */
+            roof_sign_status: "on" | "off" | "unknown";
+            deviation_flag: boolean;
+            deviation_max_m?: number | null;
+            start_lng?: number | null;
+            start_lat?: number | null;
+            end_lng?: number | null;
+            end_lat?: number | null;
+            cost?: number | null;
+            cost_detail?: Record<string, never> | null;
+            remark?: string | null;
+            /** @description 详情返回 */
+            events?: components["schemas"]["TripEvent"][];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        TripTrack: {
+            /** Format: uuid */
+            trip_id: string;
+            planned_route?: components["schemas"]["PlannedRoute"] | null;
+            points: {
+                /** Format: date-time */
+                ts: string;
+                lng: number;
+                lat: number;
+                speed?: number | null;
+                heading?: number | null;
+                soc?: number | null;
+            }[];
+        };
+        TripEvent: {
+            /** Format: int64 */
+            id: number;
+            /** Format: uuid */
+            trip_id: string;
+            /** @enum {string} */
+            type: "start" | "end" | "deviation" | "overspeed" | "low_soc" | "sign_on" | "sign_off" | "cancel";
+            /** Format: date-time */
+            ts: string;
+            /** @description 如 {speed, limit} / {distance_m} / {soc} / {lng, lat} */
+            payload: {
+                [key: string]: unknown;
+            };
+        };
+        TripSummary: {
+            /** Format: date */
+            date: string;
+            trips: number;
+            distance_km: number;
+            energy_kwh: number;
+            ongoing: number;
+            official_trips?: number;
+            deviation_trips?: number;
+        };
+        DashboardOverview: {
+            vehicles: {
+                total: number;
+                idle: number;
+                in_use: number;
+                charging: number;
+                maintenance: number;
+                disabled: number;
+                /** @description 非停用车辆中 5 分钟无遥测的 */
+                offline: number;
+            };
+            /** @description 待当前用户审批数 */
+            approvals_todo: number;
+            /** @description 租户内待审批总数（manage） */
+            approvals_pending?: number;
+            today: components["schemas"]["TripSummary"];
+            devices: {
+                total?: number;
+                online?: number;
+            };
+            /** @description 最近 10 条异常事件 */
+            recent_events: (components["schemas"]["TripEvent"] & {
+                plate_no?: string;
+                driver_name?: string | null;
+            })[];
+        };
+        Notification: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** Format: uuid */
+            user_id?: string;
+            type: string;
+            title: string;
+            content: string;
+            /** @description approval | trip | vehicle */
+            ref_type?: string | null;
+            ref_id?: string | null;
+            /** Format: date-time */
+            read_at?: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        IngestEvent: {
+            /** @enum {string} */
+            type: "trip_start" | "trip_end";
+            trip_start?: {
+                /** Format: date-time */
+                ts: string;
+                card_uid?: string;
+                /** Format: uuid */
+                user_id?: string;
+                approval_no?: string;
+                lng?: number;
+                lat?: number;
+                odometer_km?: number;
+                soc?: number;
+            };
+            trip_end?: {
+                /** Format: date-time */
+                ts: string;
+                lng?: number;
+                lat?: number;
+                odometer_km?: number;
+                soc?: number;
+            };
+        };
+        IngestEventResult: {
+            type: string;
+            /** Format: uuid */
+            trip_id?: string | null;
+            trip_no?: string | null;
+            trip_type?: string | null;
+            /** @description trip_start：网关应点亮灯牌 */
+            sign_on?: boolean;
+            /** Format: uuid */
+            driver_id?: string | null;
+        };
     };
     responses: {
         /** @description 成功（data 为简单对象或缺省） */
@@ -1321,6 +2807,174 @@ export interface components {
                 "application/json": components["schemas"]["Envelope"] & {
                     data?: components["schemas"]["Page"] & {
                         items?: components["schemas"]["Template"][];
+                    };
+                };
+            };
+        };
+        /** @description 车辆 */
+        Vehicle: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Vehicle"];
+                };
+            };
+        };
+        /** @description 车辆分页 */
+        VehiclePage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Vehicle"][];
+                    };
+                };
+            };
+        };
+        /** @description 设备 */
+        Device: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Device"];
+                };
+            };
+        };
+        /** @description 设备（含一次性 api_key） */
+        DeviceWithKey: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Device"] & {
+                        api_key: string;
+                    };
+                };
+            };
+        };
+        /** @description 设备分页 */
+        DevicePage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Device"][];
+                    };
+                };
+            };
+        };
+        /** @description NFC 卡 */
+        Card: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Card"];
+                };
+            };
+        };
+        /** @description NFC 卡分页 */
+        CardPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Card"][];
+                    };
+                };
+            };
+        };
+        /** @description 充电桩 */
+        Pile: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Pile"];
+                };
+            };
+        };
+        /** @description 充电桩分页 */
+        PilePage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Pile"][];
+                    };
+                };
+            };
+        };
+        /** @description 申请 */
+        Approval: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Approval"];
+                };
+            };
+        };
+        /** @description 申请分页 */
+        ApprovalPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Approval"][];
+                    };
+                };
+            };
+        };
+        /** @description 审批规则 */
+        ApprovalRules: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["ApprovalRules"];
+                };
+            };
+        };
+        /** @description 行程 */
+        Trip: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Trip"];
+                };
+            };
+        };
+        /** @description 行程分页 */
+        TripPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Trip"][];
                     };
                 };
             };
@@ -2385,6 +4039,1177 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: components["responses"]["OK"];
+        };
+    };
+    listVehicles: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                /** @description 车牌/VIN/品牌/型号 模糊 */
+                keyword?: string;
+                status?: components["schemas"]["VehicleStatusEnum"];
+                /** @description 归属部门（含子部门） */
+                dept_id?: string;
+                online?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["VehiclePage"];
+        };
+    };
+    createVehicle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VehicleCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["Vehicle"];
+            409: components["responses"]["Error"];
+        };
+    };
+    listVehicleOptions: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["VehicleStatusEnum"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 简表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["VehicleBrief"][];
+                    };
+                };
+            };
+        };
+    };
+    listVehicleLiveStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 实时状态列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["VehicleLive"][];
+                    };
+                };
+            };
+        };
+    };
+    getVehicle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Vehicle"];
+        };
+    };
+    updateVehicle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VehicleUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["Vehicle"];
+            409: components["responses"]["Error"];
+        };
+    };
+    deleteVehicle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["OK"];
+        };
+    };
+    getVehicleLiveStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 实时状态 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["VehicleLive"];
+                    };
+                };
+            };
+        };
+    };
+    listVehicleTelemetry: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 遥测点 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["TelemetryPoint"][];
+                    };
+                };
+            };
+        };
+    };
+    listDevices: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                /** @description 序列号/ICCID/车牌 */
+                keyword?: string;
+                status?: "active" | "disabled";
+                /** @description 是否已绑定车辆 */
+                bound?: boolean;
+                online?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["DevicePage"];
+        };
+    };
+    createDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["DeviceWithKey"];
+        };
+    };
+    getDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Device"];
+        };
+    };
+    updateDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["Device"];
+        };
+    };
+    deleteDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["OK"];
+        };
+    };
+    bindDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    vehicle_id: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Device"];
+            409: components["responses"]["Error"];
+        };
+    };
+    unbindDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Device"];
+        };
+    };
+    rotateDeviceKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["DeviceWithKey"];
+        };
+    };
+    listCards: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                /** @description 卡号/持卡人姓名/用户名 */
+                keyword?: string;
+                status?: "active" | "lost" | "disabled";
+                bound?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["CardPage"];
+        };
+    };
+    createCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CardCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["Card"];
+            409: components["responses"]["Error"];
+        };
+    };
+    getCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Card"];
+        };
+    };
+    updateCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CardUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["Card"];
+        };
+    };
+    deleteCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["OK"];
+        };
+    };
+    bindCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    user_id: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Card"];
+        };
+    };
+    unbindCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Card"];
+        };
+    };
+    reportCardLoss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Card"];
+        };
+    };
+    listPiles: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                /** @description 桩编号/名称/位置 */
+                keyword?: string;
+                type?: "fast" | "slow";
+                status?: components["schemas"]["PileStatusEnum"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["PilePage"];
+        };
+    };
+    createPile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PileCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["Pile"];
+            409: components["responses"]["Error"];
+        };
+    };
+    getPile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Pile"];
+        };
+    };
+    updatePile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PileUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["Pile"];
+        };
+    };
+    deletePile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["OK"];
+        };
+    };
+    listApprovals: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                scope?: "mine" | "todo" | "all";
+                status?: components["schemas"]["ApprovalStatus"];
+                trip_type?: components["schemas"]["TripType"];
+                dept_id?: string;
+                vehicle_id?: string;
+                applicant_id?: string;
+                /** @description planned_start ≥ */
+                from?: string;
+                /** @description planned_start ≤ */
+                to?: string;
+                /** @description 单号/事由/目的地/申请人 */
+                keyword?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["ApprovalPage"];
+        };
+    };
+    createApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["Approval"];
+            400: components["responses"]["Error"];
+            /** @description 车辆时段冲突 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"];
+                };
+            };
+        };
+    };
+    precheckApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalCreate"];
+            };
+        };
+        responses: {
+            /** @description 预检结果（即使不通过也返回 200，看 ok 字段） */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["PrecheckResult"];
+                    };
+                };
+            };
+        };
+    };
+    getApprovalTodoCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 数量 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            todo?: number;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listAvailableVehicles: {
+        parameters: {
+            query: {
+                start: string;
+                end: string;
+                /** @description 编辑时排除自身 */
+                exclude_approval_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 可用车辆 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["VehicleBrief"][];
+                    };
+                };
+            };
+        };
+    };
+    getApprovalRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["ApprovalRules"];
+        };
+    };
+    setApprovalRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApprovalRulesUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["ApprovalRules"];
+        };
+    };
+    getApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Approval"];
+            403: components["responses"]["Error"];
+        };
+    };
+    approveApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    remark?: string;
+                    /** Format: uuid */
+                    vehicle_id?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Approval"];
+            409: components["responses"]["Error"];
+        };
+    };
+    rejectApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Approval"];
+        };
+    };
+    cancelApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Approval"];
+            409: components["responses"]["Error"];
+        };
+    };
+    listTrips: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                scope?: "mine" | "all";
+                status?: components["schemas"]["TripStatus"];
+                trip_type?: components["schemas"]["TripType"];
+                vehicle_id?: string;
+                driver_id?: string;
+                /** @description 驾驶员部门（含子部门） */
+                dept_id?: string;
+                /** @description start_at ≥ */
+                from?: string;
+                /** @description start_at ≤ */
+                to?: string;
+                /** @description 行程号/车牌/驾驶员/事由 */
+                keyword?: string;
+                deviation?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["TripPage"];
+        };
+    };
+    startTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    approval_id: string;
+                    /**
+                     * Format: uuid
+                     * @description 缺省为申请人
+                     */
+                    driver_id?: string;
+                    remark?: string;
+                };
+            };
+        };
+        responses: {
+            201: components["responses"]["Trip"];
+            409: components["responses"]["Error"];
+        };
+    };
+    getTripSummary: {
+        parameters: {
+            query?: {
+                /** @description 缺省今天 */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 汇总 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["TripSummary"];
+                    };
+                };
+            };
+        };
+    };
+    exportTrips: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description xlsx */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+        };
+    };
+    getTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Trip"];
+        };
+    };
+    getTripTrack: {
+        parameters: {
+            query?: {
+                step?: number;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 轨迹 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["TripTrack"];
+                    };
+                };
+            };
+        };
+    };
+    getTripEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 事件列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["TripEvent"][];
+                    };
+                };
+            };
+        };
+    };
+    endTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    end_odometer?: number;
+                    end_soc?: number;
+                    remark?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Trip"];
+            409: components["responses"]["Error"];
+        };
+    };
+    cancelTrip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Trip"];
+        };
+    };
+    getDashboardOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 总览 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["DashboardOverview"];
+                    };
+                };
+            };
+        };
+    };
+    listNotifications: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                unread?: boolean;
+                type?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 通知分页 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["Page"] & {
+                            items?: components["schemas"]["Notification"][];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    getUnreadCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 未读数 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            unread?: number;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    markNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids: string[];
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["OK"];
+        };
+    };
+    markAllNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["OK"];
+        };
+    };
+    websocket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 协议升级 */
+            101: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ingestTelemetry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    points: components["schemas"]["TelemetryPoint"][];
+                };
+            };
+        };
+        responses: {
+            /** @description 接收结果 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            accepted?: number;
+                            /** Format: uuid */
+                            trip_id?: string | null;
+                        };
+                    };
+                };
+            };
+            401: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+        };
+    };
+    ingestEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestEvent"];
+            };
+        };
+        responses: {
+            /** @description 处理结果 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["IngestEventResult"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            409: components["responses"]["Error"];
         };
     };
 }
