@@ -277,9 +277,9 @@ section "网关事件（行程模块占位：hooks 的错误原样透传）"
 # 行程模块未实现时其占位 hooks 返回 httpx.Internal(501 AppError)，经 httpx.Fail 呈现为 500；实现后应为 4xx/200。
 # 这里只验证 ingest 层把 hooks 的错误原样交给 httpx.Fail（不吞、不改写为 400/409）。
 dreq "VG-$SUF" "$D1KEY" POST /ingest/events "{\"type\":\"trip_start\",\"trip_start\":{\"ts\":\"$NOW\",\"card_uid\":\"abcdef12\"}}"
-check "trip_start → hooks 错误透传（占位 500/501）" True "$([ "$STATUS" == 500 ] || [ "$STATUS" == 501 ] && echo True || echo "$STATUS")"
+check "trip_start → hooks 错误透传（未知卡 403）" True "$([ "$STATUS" == 403 ] && echo True || echo "$STATUS")"
 dreq "VG-$SUF" "$D1KEY" POST /ingest/events "{\"type\":\"trip_end\",\"trip_end\":{\"ts\":\"$NOW\"}}"
-check "trip_end → hooks 错误透传（占位 500/501）" True "$([ "$STATUS" == 500 ] || [ "$STATUS" == 501 ] && echo True || echo "$STATUS")"
+check "trip_end → hooks 错误透传（无进行中行程 409）" True "$([ "$STATUS" == 409 ] && echo True || echo "$STATUS")"
 dreq "VG-$SUF" "$D1KEY" POST /ingest/events '{"type":"trip_start"}'
 check "trip_start 缺 body 400" 400 "$STATUS"
 dreq "VG-$SUF" "$D1KEY" POST /ingest/events "{\"type\":\"trip_start\",\"trip_start\":{\"ts\":\"$NOW\"}}"

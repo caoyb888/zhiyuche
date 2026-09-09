@@ -50,6 +50,18 @@ docs/         方案、计划、接口文档、ADR
 
 在 Linux 机器上直接开发时，`make help` 列出全部目标；`make env` 从各 `.env.example` 生成缺省 `.env`。
 
+## 车辆模拟器
+
+没有真实车载网关时，用模拟器产生车辆、设备、驾驶员、申请、行程与遥测：
+
+```bash
+make api-start                                   # 后端跑在 20080
+./bin/zhiyuche-simulator -vehicles 6 -interval 5s -speedup 10   # Ctrl+C 退出并保存状态
+./bin/zhiyuche-simulator -telemetry-only         # 只上报遥测，不创建申请/行程
+```
+
+模拟器以演示租户管理员登录，首次运行创建 6 辆车（鲁A·S0001…）、对应网关（SIM-0001…）、3 名驾驶员与 NFC 卡、2 个充电桩，之后按"申请→审批→刷卡取车→沿路线行驶→还车→低电充电"循环运行。参数见 `-help`，状态保存在 `simulator-state.json`。
+
 ## 后端约定
 
 - 路由前缀 `/api/v1`，JWT Bearer 鉴权

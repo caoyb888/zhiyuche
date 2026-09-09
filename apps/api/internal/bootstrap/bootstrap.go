@@ -140,7 +140,36 @@ func propagateNewPerms(ctx context.Context, db *pgxpool.Pool, codes []string) er
 		SELECT r.id, c FROM roles r CROSS JOIN unnest($1::text[]) AS c
 		WHERE r.code = 'super_admin' AND r.tenant_id IS NULL AND r.deleted_at IS NULL
 		ON CONFLICT DO NOTHING`, codes)
-	return err
+	if err != nil {
+		return err
+	}
+	// 其他内置角色：新码若出现在该角色的缺省权限集里，也补给已有租户的同名内置角色
+	newSet := map[string]bool{}
+	for _, c := range codes {
+		newSet[c] = true
+	}
+	for _, r := range perm.DefaultRoles {
+		if r.Perms == nil {
+			continue
+		}
+		var grant []string
+		for _, p := range r.Perms {
+			if newSet[p] {
+				grant = append(grant, p)
+			}
+		}
+		if len(grant) == 0 {
+			continue
+		}
+		if _, err := db.Exec(ctx, `
+			INSERT INTO role_permissions (role_id, permission_code)
+			SELECT r.id, c FROM roles r CROSS JOIN unnest($2::text[]) AS c
+			WHERE r.code = $1 AND r.is_system AND r.tenant_id IS NOT NULL AND r.deleted_at IS NULL
+			ON CONFLICT DO NOTHING`, r.Code, grant); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func seedParams(ctx context.Context, db *pgxpool.Pool) error {
