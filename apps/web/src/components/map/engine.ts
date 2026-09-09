@@ -12,8 +12,8 @@ export interface MapEngineSnapshot {
   error: string | null
 }
 
-/** 高德 JS API 需要的插件（选点搜索、逆地理、比例尺） */
-const AMAP_PLUGINS = ['AMap.Scale', 'AMap.PlaceSearch', 'AMap.Geocoder']
+/** 高德 JS API 需要的插件（选点搜索、逆地理、比例尺、驾车路线规划） */
+const AMAP_PLUGINS = ['AMap.Scale', 'AMap.PlaceSearch', 'AMap.Geocoder', 'AMap.Driving']
 
 function envKey(): string | null {
   const key = (import.meta.env.VITE_AMAP_KEY ?? '').trim()

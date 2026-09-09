@@ -1,6 +1,5 @@
 import type {
   AiReport,
-  Approval,
   ChargeRecord,
   Charger,
   DailyUsagePoint,
@@ -9,26 +8,9 @@ import type {
   HealthItem,
   MonthlyTrendPoint,
   TopUser,
-  Trip,
 } from '../types'
 
-// ── 审批申请 ─────────────────────────────────────────
-export const approvals: Approval[] = [
-  { id:'ZY-2025-0618-0031', applicant:'陈部长', dept:'行政部', purpose:'公务出行', detail:'赴市政务中心办理年度报告备案', vehicle:'鲁A·A0003', startTime:'2025-06-19 09:00', endTime:'2025-06-19 12:00', dest:'某某市政务中心', route:'某某大道→政务中心路', distance:38, status:'待审批', submitTime:'2025-06-18 16:42', approver:'张总', level:1, urgency:'普通' },
-  { id:'ZY-2025-0618-0030', applicant:'刘工程师', dept:'工程部', purpose:'业务出行', detail:'赴某某科技园参加技术对接会议', vehicle:'鲁A·A0005', startTime:'2025-06-19 13:30', endTime:'2025-06-19 17:30', dest:'某某科技园B座', route:'工业路→科技大道→科技园', distance:52, status:'待审批', submitTime:'2025-06-18 15:20', approver:'张总', level:1, urgency:'普通' },
-  { id:'ZY-2025-0618-0029', applicant:'王总监', dept:'销售部', purpose:'客户拜访', detail:'拜访某某集团采购部，推进合同签署', vehicle:'鲁A·A0008', startTime:'2025-06-19 10:00', endTime:'2025-06-19 16:00', dest:'某某集团总部', route:'滨江大道→某某路', distance:67, status:'已通过', submitTime:'2025-06-18 14:05', approver:'张总', level:2, urgency:'紧急' },
-  { id:'ZY-2025-0618-0028', applicant:'赵专员', dept:'行政部', purpose:'物资采购', detail:'采购办公耗材及劳保用品', vehicle:'鲁A·A0009', startTime:'2025-06-18 14:00', endTime:'2025-06-18 17:00', dest:'某某采购中心', route:'园区路→采购大道', distance:24, status:'已通过', submitTime:'2025-06-18 10:30', approver:'李主任', level:1, urgency:'普通' },
-  { id:'ZY-2025-0618-0027', applicant:'孙经理', dept:'财务部', purpose:'公务出行', detail:'赴税务局办理季度税务申报', vehicle:'鲁A·A0003', startTime:'2025-06-18 09:00', endTime:'2025-06-18 11:30', dest:'某某税务局', route:'财务路→税务大道', distance:19, status:'已驳回', submitTime:'2025-06-17 17:00', approver:'李主任', level:1, urgency:'普通', rejectReason:'该时段车辆已被预约，请重新选择时间或车辆' },
-]
-
-// ── 行程记录 ──────────────────────────────────────────
-export const trips: Trip[] = [
-  { id:'T-20250618-047', plate:'鲁A·A0001', driver:'张经理', dept:'销售部', purpose:'公务出行', startTime:'09:05', endTime:'11:48', date:'2025-06-18', distance:47.3, duration:'2小时43分', energy:6.8, cost:46.4, avgSpeed:42, maxSpeed:78, accel:3, brake:5, sign:true, status:'已完成', route:'公司→某某路→客户大厦→返回', routePoints:[[113.338,23.113],[113.298,23.145],[113.265,23.162],[113.280,23.158],[113.338,23.113]] },
-  { id:'T-20250618-046', plate:'鲁A·A0004', driver:'李主任', dept:'行政部', purpose:'接送领导', startTime:'08:30', endTime:'10:15', date:'2025-06-18', distance:23.6, duration:'1小时45分', energy:3.4, cost:22.8, avgSpeed:38, maxSpeed:65, accel:1, brake:2, sign:true, status:'已完成', route:'公司→某某宾馆→政府大楼→返回', routePoints:[] },
-  { id:'T-20250618-045', plate:'鲁A·A0007', driver:'王工程师', dept:'工程部', purpose:'现场勘查', startTime:'13:00', endTime:'17:20', date:'2025-06-18', distance:61.2, duration:'4小时20分', energy:8.9, cost:59.3, avgSpeed:45, maxSpeed:92, accel:8, brake:11, sign:false, status:'已完成', route:'公司→某某工业园→返回', routePoints:[] },
-  { id:'T-20250618-044', plate:'鲁A·A0002', driver:'赵专员', dept:'行政部', purpose:'物资采购', startTime:'14:05', endTime:'16:50', date:'2025-06-18', distance:24.1, duration:'2小时45分', energy:3.5, cost:23.4, avgSpeed:32, maxSpeed:58, accel:2, brake:3, sign:false, status:'已完成', route:'公司→某某采购中心→返回', routePoints:[] },
-  { id:'T-20250617-038', plate:'鲁A·A0001', driver:'张经理', dept:'销售部', purpose:'客户拜访', startTime:'09:30', endTime:'12:10', date:'2025-06-17', distance:35.8, duration:'2小时40分', energy:5.2, cost:34.7, avgSpeed:40, maxSpeed:72, accel:4, brake:6, sign:false, status:'已完成', route:'公司→某某广场→返回', routePoints:[] },
-]
+// 审批申请与行程记录已接真实接口（src/api/approvals.ts、src/api/trips.ts），此处不再保留 mock。
 
 // ── 费用图表数据 ──────────────────────────────────────
 export const monthlyTrend: MonthlyTrendPoint[] = [

@@ -40,69 +40,7 @@ export interface Vehicle {
   trip: string
 }
 
-// ── 审批 ─────────────────────────────────────────────
-export type ApprovalStatus = '待审批' | '已通过' | '已驳回'
-export type ApprovalUrgency = '普通' | '紧急'
-export type ApprovalPurpose = '公务出行' | '客户拜访' | '接送领导' | '物资采购' | '业务出行'
-
-export interface Approval {
-  id: string
-  applicant: string
-  dept: Department
-  purpose: ApprovalPurpose
-  detail: string
-  /** 指派车辆车牌 */
-  vehicle: string
-  startTime: string
-  endTime: string
-  dest: string
-  route: string
-  /** 预计里程 km */
-  distance: number
-  status: ApprovalStatus
-  submitTime: string
-  approver: string
-  /** 审批层级 */
-  level: 1 | 2
-  urgency: ApprovalUrgency
-  rejectReason?: string
-}
-
-// ── 行程 ─────────────────────────────────────────────
-export type TripStatus = '已完成' | '进行中' | '已取消'
-
-export interface Trip {
-  id: string
-  plate: string
-  driver: string
-  dept: Department
-  purpose: string
-  /** HH:mm */
-  startTime: string
-  /** HH:mm */
-  endTime: string
-  /** YYYY-MM-DD */
-  date: string
-  /** km */
-  distance: number
-  /** 可读时长文本，如 "2小时43分" */
-  duration: string
-  /** 耗电 kWh */
-  energy: number
-  /** 费用 元 */
-  cost: number
-  avgSpeed: number
-  maxSpeed: number
-  /** 急加速次数 */
-  accel: number
-  /** 急刹车次数 */
-  brake: number
-  /** 是否亮起公务灯牌 */
-  sign: boolean
-  status: TripStatus
-  route: string
-  routePoints: LngLat[]
-}
+// 审批 / 行程的契约类型见 src/api/types.ts（Approval、Trip 等），这里不再保留 mock 形态。
 
 // ── 报表 / 图表 ──────────────────────────────────────
 /** 月度各部门费用（Recharts dataKey 直接使用部门名） */

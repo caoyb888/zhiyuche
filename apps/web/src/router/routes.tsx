@@ -12,8 +12,10 @@ export interface AppRoute {
 export const appRoutes: AppRoute[] = [
   // ---- 业务（Demo，mock 数据）----
   { path: '/', perm: 'dashboard:view', title: '总览', description: '实时车辆状态', component: lazy(() => import('../pages/Dashboard')) },
-  { path: '/approval', perm: 'approval:view', title: '公务审批', description: '申请与审批流', component: lazy(() => import('../pages/Approval')) },
-  { path: '/trips', perm: 'trip:view', title: '行程管理', description: '轨迹与记录', component: lazy(() => import('../pages/Trips')) },
+  // ---- 公务审批 / 行程（真实接口）----
+  { path: '/approval', perm: 'approval:view', title: '公务审批', description: '申请与审批流', component: lazy(() => import('../pages/approval')) },
+  { path: '/approval/rules', perm: 'approval:rule', title: '审批规则', description: '二级审批触发条件与审批人', component: lazy(() => import('../pages/approval/rules')) },
+  { path: '/trips', perm: 'trip:view', title: '行程管理', description: '轨迹与记录', component: lazy(() => import('../pages/trips')) },
   { path: '/reports', perm: 'report:view', title: '费用报表', description: '部门费用分析', component: lazy(() => import('../pages/Reports')) },
   { path: '/health', perm: 'health:view', title: '车辆健康', description: 'AI 诊断', component: lazy(() => import('../pages/Health')) },
   { path: '/charging', perm: 'charging:view', title: '充电管理', description: '充电桩状态', component: lazy(() => import('../pages/Charging')) },

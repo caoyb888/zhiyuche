@@ -78,6 +78,32 @@ export interface AMapGeocoder {
   getAddress(lnglat: [number, number], callback: (status: AMapServiceStatus, result: AMapGeocoderResult | string) => void): void
 }
 
+export interface AMapDrivingStep {
+  instruction?: string
+  road?: string
+  distance?: number
+  path?: AMapLngLat[]
+}
+
+export interface AMapDrivingRoute {
+  /** 米 */
+  distance: number
+  /** 秒 */
+  time: number
+  steps?: AMapDrivingStep[]
+}
+
+export interface AMapDrivingResult {
+  info?: string
+  routes?: AMapDrivingRoute[]
+}
+
+/** 驾车路线规划（AMap.Driving 插件） */
+export interface AMapDriving {
+  search(origin: [number, number], destination: [number, number], callback: (status: AMapServiceStatus, result: AMapDrivingResult | string) => void): void
+  clear(): void
+}
+
 /** `AMapLoader.load()` 返回的命名空间 */
 export interface AMapNS {
   Map: new (container: HTMLElement | string, options?: Record<string, unknown>) => AMapMap
@@ -87,6 +113,7 @@ export interface AMapNS {
   Pixel: new (x: number, y: number) => unknown
   PlaceSearch: new (options?: Record<string, unknown>) => AMapPlaceSearch
   Geocoder: new (options?: Record<string, unknown>) => AMapGeocoder
+  Driving: new (options?: Record<string, unknown>) => AMapDriving
 }
 
 /** 高德安全密钥需在脚本加载前写入 window._AMapSecurityConfig */
