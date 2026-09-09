@@ -76,10 +76,12 @@ type apiCard struct {
 }
 
 type apiPile struct {
-	ID       string   `json:"id"`
-	PileCode string   `json:"pile_code"`
-	Lng      *float64 `json:"lng"`
-	Lat      *float64 `json:"lat"`
+	ID             string   `json:"id"`
+	PileCode       string   `json:"pile_code"`
+	PowerKw        float64  `json:"power_kw"`
+	ConnectorCount int      `json:"connector_count"`
+	Lng            *float64 `json:"lng"`
+	Lat            *float64 `json:"lat"`
 }
 
 type apiDictItem struct {
@@ -320,14 +322,21 @@ func (p *provisioner) ensurePiles(ctx context.Context) error {
 		}
 		pa.Name = def.name
 		pa.Lng, pa.Lat = round(p.cfg.Center.Lng+def.dLng, 6), round(p.cfg.Center.Lat+def.dLat, 6)
+		pa.PowerKw, pa.ConnectorCount = defaultPileKw, defaultConnCount
 		if x, ok := byCode[def.code]; ok {
 			pa.ID = x.ID
 			if x.Lng != nil && x.Lat != nil {
 				pa.Lng, pa.Lat = *x.Lng, *x.Lat
 			}
+			if x.PowerKw > 0 {
+				pa.PowerKw = x.PowerKw
+			}
+			if x.ConnectorCount > 0 {
+				pa.ConnectorCount = x.ConnectorCount
+			}
 		} else {
 			body := map[string]any{
-				"pile_code": def.code, "name": def.name, "type": "fast", "power_kw": 60, "connector_count": 2,
+				"pile_code": def.code, "name": def.name, "type": "fast", "power_kw": defaultPileKw, "connector_count": defaultConnCount,
 				"vendor": "模拟", "location": "济南市（模拟站点）", "lng": pa.Lng, "lat": pa.Lat, "remark": "模拟器创建",
 			}
 			var x apiPile
