@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/caoyb888/zhiyuche/apps/api/internal/approval"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/vstatus"
 )
 
 // Pure decision logic: the reserved window, the status machine and the labels
@@ -66,6 +67,29 @@ func NextStatus(status, event string) (string, error) {
 
 // Editable reports whether the booking's fields may still be changed.
 func Editable(status string) bool { return status == StatusReserved }
+
+// CanDepart reports whether a vehicle in this state may be sent out. Same rule
+// as the trip module: idle or charging (unplugging is part of leaving); a car
+// already in use, under maintenance or disabled may not.
+func CanDepart(vehicleStatus string) bool {
+	return vehicleStatus == vstatus.Idle || vehicleStatus == vstatus.Charging
+}
+
+var vehicleStatusLabels = map[string]string{
+	vstatus.Idle:        "空闲",
+	vstatus.InUse:       "使用中",
+	vstatus.Charging:    "充电中",
+	vstatus.Maintenance: "维保中",
+	vstatus.Disabled:    "已停用",
+}
+
+// VehicleStatusLabel falls back to the raw code for unknown values.
+func VehicleStatusLabel(s string) string {
+	if v, ok := vehicleStatusLabels[s]; ok {
+		return v
+	}
+	return s
+}
 
 var sourceLabels = map[string]string{
 	SourcePhone:  "电话预约",

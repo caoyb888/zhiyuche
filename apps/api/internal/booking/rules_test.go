@@ -78,6 +78,25 @@ func TestEditable(t *testing.T) {
 	}
 }
 
+func TestCanDepart(t *testing.T) {
+	for _, s := range []string{"idle", "charging"} {
+		if !CanDepart(s) {
+			t.Fatalf("%s should be allowed to depart", s)
+		}
+	}
+	for _, s := range []string{"in_use", "maintenance", "disabled"} {
+		if CanDepart(s) {
+			t.Fatalf("%s should not be allowed to depart", s)
+		}
+	}
+	if got, want := VehicleStatusLabel("maintenance"), "维保中"; got != want {
+		t.Fatalf("VehicleStatusLabel = %q, want %q", got, want)
+	}
+	if got := VehicleStatusLabel("unknown"); got != "unknown" {
+		t.Fatalf("VehicleStatusLabel fallback = %q, want raw code", got)
+	}
+}
+
 func TestFormatWindow(t *testing.T) {
 	start := time.Date(2026, 9, 10, 0, 0, 0, 0, time.UTC)   // 08:00 CST
 	sameDay := time.Date(2026, 9, 10, 4, 0, 0, 0, time.UTC) // 12:00 CST

@@ -1284,7 +1284,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 确认出车（待出车 → 已出车；须已派车） */
+        /**
+         * 确认出车（待出车 → 已出车；须已派车）
+         * @description 车辆随之置为 in_use（与行程模块共用 vehicle_status 状态机）；车辆非空闲/充电中时返回 409。
+         */
         post: operations["departBooking"];
         delete?: never;
         options?: never;
@@ -1303,7 +1306,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 完成（已出车 → 已完成） */
+        /**
+         * 完成（已出车 → 已完成）
+         * @description 车辆退回 idle；若期间已被行程接管（current_trip_id 非空）或转为充电/维保，则保持不动。
+         */
         post: operations["completeBooking"];
         delete?: never;
         options?: never;

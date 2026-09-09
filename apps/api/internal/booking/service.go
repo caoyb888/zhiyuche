@@ -10,6 +10,7 @@ import (
 
 	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/approval"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/vstatus"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/auth"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/httpx"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/pagination"
@@ -18,9 +19,12 @@ import (
 type Service struct {
 	app   *app.App
 	store *store
+	vs    *vstatus.Store
 }
 
-func NewService(a *app.App) *Service { return &Service{app: a, store: &store{db: a.DB}} }
+func NewService(a *app.App) *Service {
+	return &Service{app: a, store: &store{db: a.DB}, vs: vstatus.New(a)}
+}
 
 // ---- read
 
@@ -213,7 +217,8 @@ func (s *Service) Update(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, 
 	return before, after, err
 }
 
-// Transition applies depart / complete / cancel.
+// Transition applies depart / complete / cancel. 出车占用车辆（vehicles.status
+// → in_use），完成后再释放；取消只发生在出车前，不涉及车辆状态。
 func (s *Service) Transition(ctx context.Context, tenantID, id uuid.UUID, event string, reason *string) (*Booking, error) {
 	b, err := s.Get(ctx, tenantID, id)
 	if err != nil {
@@ -223,13 +228,58 @@ func (s *Service) Transition(ctx context.Context, tenantID, id uuid.UUID, event 
 	if err != nil {
 		return nil, httpx.Conflict(StatusLabel(b.Status) + "的预约不能" + eventLabel(event))
 	}
-	if next == StatusDeparted && b.Vehicle == nil {
-		return nil, httpx.Conflict("请先派车再确认出车")
+	if next == StatusDeparted {
+		if b.Vehicle == nil {
+			return nil, httpx.Conflict("请先派车再确认出车")
+		}
+		if !CanDepart(b.Vehicle.Status) {
+			return nil, httpx.Conflict("车辆 " + b.Vehicle.PlateNo + " 当前不可出车：" + VehicleStatusLabel(b.Vehicle.Status))
+		}
 	}
 	if err := s.store.setStatus(ctx, tenantID, id, next, Trimmed(reason)); err != nil {
 		return nil, err
 	}
+	switch next {
+	case StatusDeparted:
+		// driver_id 记用车人（可能为空），车辆快照与 WebSocket 推送由 vstatus 负责
+		if _, err := s.vs.SetStatus(ctx, b.Vehicle.ID, vstatus.InUse, nil, passengerID(b)); err != nil {
+			return nil, err
+		}
+	case StatusCompleted:
+		if err := s.releaseVehicle(ctx, b); err != nil {
+			return nil, err
+		}
+	}
 	return s.Get(ctx, tenantID, id)
+}
+
+// releaseVehicle puts the vehicle back to idle after the booking finished —
+// but only while it is still this booking that holds it. A trip started in the
+// meantime (current_trip_id) owns the vehicle, and a car that went to charging,
+// maintenance or disabled must keep that status.
+func (s *Service) releaseVehicle(ctx context.Context, b *Booking) error {
+	if b.Vehicle == nil {
+		return nil
+	}
+	live, err := s.vs.Get(ctx, b.Vehicle.ID)
+	if err != nil {
+		return err
+	}
+	if live == nil || live.Status != vstatus.InUse || live.CurrentTripID != nil {
+		return nil
+	}
+	_, err = s.vs.SetStatus(ctx, b.Vehicle.ID, vstatus.Idle, nil, nil)
+	return err
+}
+
+// passengerID is the 用车人 recorded on the booking, used as the vehicle's
+// driver in the live snapshot (nil when the booking has none).
+func passengerID(b *Booking) *uuid.UUID {
+	if b.Passenger == nil {
+		return nil
+	}
+	id := b.Passenger.ID
+	return &id
 }
 
 func eventLabel(event string) string {
