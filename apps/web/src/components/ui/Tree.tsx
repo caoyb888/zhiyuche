@@ -69,7 +69,7 @@ function TreeItem({ node, depth, expanded, toggle, selectedKey, onSelect, disabl
           <ChevronRight size={14} className={clsx('transition-transform', open && 'rotate-90')} />
         </button>
         {Icon && <Icon size={14} className="shrink-0 text-slate-400" />}
-        <span className="truncate flex-1">{node.label}</span>
+        <span className="truncate flex-1">{node.title ?? node.label}</span>
         {node.extra !== undefined && <span className="shrink-0 text-xs text-slate-400">{node.extra}</span>}
       </div>
       {open && node.children && (
