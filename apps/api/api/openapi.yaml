@@ -1,0 +1,112 @@
+openapi: 3.1.0
+info:
+  title: 智御系统 API
+  version: 0.1.0
+  description: |
+    统一约定：前缀 /api/v1；JWT Bearer 鉴权；所有响应为信封 `{code, message, data, request_id}`，
+    code 为 0 表示成功；列表接口统一 `page`、`pageSize`、`sort`（`field` 或 `-field`）。
+servers:
+  - url: /api/v1
+tags:
+  - name: system
+    description: 系统探针与基础接口
+paths:
+  /health:
+    get:
+      tags: [system]
+      summary: 存活探针
+      operationId: getHealth
+      responses:
+        '200':
+          description: 进程存活
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Health'
+  /ready:
+    get:
+      tags: [system]
+      summary: 就绪探针（检查 PostgreSQL 与 Redis）
+      operationId: getReady
+      responses:
+        '200':
+          description: 依赖全部可用
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Ready'
+        '503':
+          description: 至少一个依赖不可用
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Ready'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    pageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+    sort:
+      name: sort
+      in: query
+      description: 排序字段，前缀 `-` 表示降序
+      schema: { type: string }
+  schemas:
+    Envelope:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: integer
+          description: 0 成功；40000 参数错误；40100 未认证；40300 无权限；40400 不存在；40900 冲突；50000 内部错误
+        message: { type: string }
+        request_id: { type: string }
+    Page:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: {} }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+    Health:
+      type: object
+      required: [status, version, env, uptime_seconds]
+      properties:
+        status: { type: string, enum: [ok] }
+        version: { type: string }
+        env: { type: string }
+        uptime_seconds: { type: integer }
+    Ready:
+      type: object
+      required: [status, checks]
+      properties:
+        status: { type: string, enum: [ok, degraded] }
+        checks:
+          type: object
+          additionalProperties: { type: string }

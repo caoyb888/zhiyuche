@@ -1,58 +1,70 @@
-# 智驭车 (ZhiYuChe)
+# 智御系统（ZhiYuChe）
 
-智驭车是一款基于 React + TypeScript + Vite 构建的智能车辆管理平台前端 Demo，提供仪表盘、行程管理、充电监控、车辆健康、审批流程及数据报表等核心模块。
+智御车辆智能租赁与全生命周期管理系统。面向工业园区 B2B 场景的纯电动车队管理平台：公务用车审批、行程与轨迹、计费与账户、充电桩接入、车辆健康与 AI 诊断、系统管理。
 
-## 技术栈
+- 技术方案：`docs/zhiyuche_v1_1.md`
+- 实施计划：`docs/implementation_plan_v1.md`
 
-- **框架**: React 18 + TypeScript
-- **构建工具**: Vite 5
-- **样式**: Tailwind CSS
-- **图表**: Recharts
-- **路由**: React Router DOM 6
-- **图标**: Lucide React
-
-## 一键部署
-
-点击下方按钮即可将本项目一键部署到 Vercel：
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcaoyb888%2Fzhiyuche)
-
-## 本地开发
-
-```bash
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
-
-# 构建生产版本
-npm run build
-
-# 预览生产构建
-npm run preview
-```
-
-## Vercel 手动部署
-
-1. 访问 [Vercel Dashboard](https://vercel.com/new)
-2. 导入 GitHub 仓库 `caoyb888/zhiyuche`
-3. 框架预设选择 **Vite**
-4. 点击 **Deploy**
-
-Vercel 会自动识别构建命令（`npm run build`）和输出目录（`dist`），并配置好 SPA 路由回退。
-
-## 项目结构
+## 仓库结构
 
 ```
-src/
-├── pages/          # 页面组件（Dashboard, Trips, Charging, Health, Approval, Reports）
-├── components/     # 公共组件（Layout 等）
-├── data/           # 模拟数据
-├── assets/         # 静态资源
-├── App.tsx         # 根组件
-└── main.tsx        # 入口文件
+apps/
+  web/        Web 管理端：React 18 + TypeScript + Vite 5 + Tailwind 3 + Recharts
+  api/        后端：Go 1.25 + Gin，模块化单体；cmd/{api,iot,ocpp,worker,simulator}
+  mobile/     员工移动端（uni-app，阶段 5）
+packages/     前端共享包
+deploy/       docker-compose（PostgreSQL+TimescaleDB / Redis / EMQX / NATS / MinIO）、K3s 清单
+scripts/      开发辅助脚本（同步到远程编译机、远程执行）
+docs/         方案、计划、接口文档、ADR
+.github/      CI
 ```
+
+## 开发流程
+
+本仓库采用 **本机写代码、远程机器编译运行** 的方式（本机不装 Go / Docker）。
+
+```powershell
+# 1. 把本地工作区同步到远程编译机（无需先 git 提交）
+.\scripts\sync-remote.ps1
+
+# 2. 在远程项目目录执行命令
+.\scripts\remote.ps1 "make check"                 # vet + test + 前端 typecheck/lint
+.\scripts\remote.ps1 "make infra-up"              # 启动基础设施容器
+.\scripts\remote.ps1 "make api-migrate CMD=up"    # 数据库迁移
+.\scripts\remote.ps1 "make api-run"               # 前台运行 api
+.\scripts\remote.ps1 "cd apps/web && npm run dev" # 前端 dev server（端口 20173）
+```
+
+远程机器是共享环境，本项目固定使用 **20000–20999** 端口段：
+
+| 服务 | 端口 |
+|---|---|
+| Web dev server | 20173 |
+| API | 20080 |
+| OCPP（WebSocket） | 20081 |
+| PostgreSQL | 20432 |
+| Redis | 20379 |
+| EMQX MQTT / WS / Dashboard | 20883 / 20084 / 20183 |
+| NATS / 监控 | 20222 / 20822 |
+| MinIO API / Console | 20900 / 20901 |
+
+在 Linux 机器上直接开发时，`make help` 列出全部目标；`make env` 从各 `.env.example` 生成缺省 `.env`。
+
+## 后端约定
+
+- 路由前缀 `/api/v1`，JWT Bearer 鉴权
+- 统一响应信封 `{code, message, data, request_id}`，`code` 为 0 表示成功
+- 列表参数 `page` / `pageSize` / `sort`（`field` 或 `-field`）
+- 配置全部来自环境变量（`ZY_` 前缀），可用 `.env` 文件本地覆盖
+- 迁移用 goose，SQL 文件嵌入二进制：`zhiyuche-api migrate up|down|status`
+- 接口契约：`apps/api/api/openapi.yaml`
+
+## 前端约定
+
+- npm workspaces：依赖在仓库根安装（`npm install`），lockfile 只有根目录一份；Vercel 从仓库根构建（见 `vercel.json`）
+- 全量 TypeScript，`npm run typecheck` 与 `npm run lint` 零错误
+- 请求层 `src/api/`，dev server 将 `/api` 代理到 `http://localhost:20080`
+- 环境变量 `VITE_API_BASE`、`VITE_WS_URL`、`VITE_AMAP_KEY`
 
 ## License
 

@@ -1,0 +1,139 @@
+# 开发/测试环境依赖。远程编译机是共享机器，宿主端口固定使用 20000–20999 段。
+# 用法（在仓库根目录）：
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env --profile app up -d --build   # 连同 api 一起
+name: zhiyuche
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  postgres:
+    image: ${REGISTRY_PREFIX}timescale/timescaledb:2.17.2-pg16
+    container_name: zhiyuche-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PG_DB:-zhiyuche}
+      POSTGRES_USER: ${PG_USER:-zhiyuche}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-zhiyuche}
+      TZ: Asia/Shanghai
+    ports:
+      - "${PG_PORT:-20432}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-zhiyuche} -d ${PG_DB:-zhiyuche}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    <<: *logging
+
+  redis:
+    image: ${REGISTRY_PREFIX}library/redis:7-alpine
+    container_name: zhiyuche-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "${REDIS_PORT:-20379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    <<: *logging
+
+  emqx:
+    image: ${REGISTRY_PREFIX}emqx/emqx:5.8.3
+    container_name: zhiyuche-emqx
+    restart: unless-stopped
+    environment:
+      EMQX_NODE__NAME: emqx@zhiyuche-emqx
+      EMQX_DASHBOARD__DEFAULT_USERNAME: ${EMQX_ADMIN_USER:-admin}
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_ADMIN_PASSWORD:-zhiyuche123}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MQTT_PORT:-20883}:1883"     # MQTT
+      - "${MQTT_WS_PORT:-20084}:8083"  # MQTT over WebSocket
+      - "${EMQX_DASHBOARD_PORT:-20183}:18083"
+    volumes:
+      - emqx-data:/opt/emqx/data
+    healthcheck:
+      test: ["CMD", "emqx", "ctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    <<: *logging
+
+  nats:
+    image: ${REGISTRY_PREFIX}library/nats:2.10-alpine
+    container_name: zhiyuche-nats
+    restart: unless-stopped
+    command: ["--jetstream", "--store_dir", "/data", "--http_port", "8222"]
+    ports:
+      - "${NATS_PORT:-20222}:4222"
+      - "${NATS_MONITOR_PORT:-20822}:8222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    <<: *logging
+
+  minio:
+    image: ${REGISTRY_PREFIX}minio/minio:RELEASE.2024-11-07T00-52-20Z
+    container_name: zhiyuche-minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-zhiyuche}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-zhiyuche123}
+    ports:
+      - "${MINIO_PORT:-20900}:9000"
+      - "${MINIO_CONSOLE_PORT:-20901}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    <<: *logging
+
+  # 应用服务：默认不启动（本地直接 go run 更快），需要时 --profile app
+  api:
+    profiles: [app]
+    build:
+      context: ../apps/api
+      args:
+        VERSION: ${APP_VERSION:-dev}
+    image: zhiyuche/api:${APP_VERSION:-dev}
+    container_name: zhiyuche-api
+    restart: unless-stopped
+    environment:
+      ZY_ENV: ${ZY_ENV:-dev}
+      ZY_LOG_LEVEL: ${ZY_LOG_LEVEL:-info}
+      ZY_HTTP_ADDR: ":20080"
+      ZY_HTTP_CORS_ORIGINS: ${ZY_HTTP_CORS_ORIGINS:-http://localhost:20173}
+      ZY_DATABASE_URL: postgres://${PG_USER:-zhiyuche}:${PG_PASSWORD:-zhiyuche}@postgres:5432/${PG_DB:-zhiyuche}?sslmode=disable
+      ZY_DATABASE_AUTO_MIGRATE: "true"
+      ZY_REDIS_ADDR: redis:6379
+      ZY_JWT_SECRET: ${ZY_JWT_SECRET:-dev-only-secret}
+    ports:
+      - "${API_PORT:-20080}:20080"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    <<: *logging
+
+volumes:
+  pg-data:
+  redis-data:
+  emqx-data:
+  nats-data:
+  minio-data:
