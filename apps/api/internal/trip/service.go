@@ -592,8 +592,18 @@ func (s *Service) End(ctx context.Context, id uuid.UUID, in EndInput) error {
 	if r.ApprovalID != nil {
 		approval.PublishUpdated(s.app.Hub, r.TenantID, *r.ApprovalID, approval.StatusCompleted, strDeref(r.ApplyNo))
 	}
+	// 计费：由 billing 模块在接线时注入；失败不影响行程结束，账单可由结算流程补算
+	if CompletedHook != nil {
+		if err := CompletedHook(ctx, r.TenantID, id); err != nil {
+			s.app.Log.Warn().Err(err).Str("trip_id", id.String()).Msg("trip billing hook failed")
+		}
+	}
 	return nil
 }
+
+// CompletedHook is called after a trip is closed and summarized (billing).
+// Injected by the server wiring to avoid an import cycle (billing reads trips).
+var CompletedHook func(ctx context.Context, tenantID, tripID uuid.UUID) error
 
 // getAny loads a trip by id regardless of tenant (device path).
 func (s *Service) getAny(ctx context.Context, id uuid.UUID) (*row, error) {

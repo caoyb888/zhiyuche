@@ -12,7 +12,9 @@ import (
 	"syscall"
 
 	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/billing"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/bootstrap"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/ocpp"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/config"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/migrate"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/server"
@@ -75,6 +77,17 @@ func run() error {
 	}
 	log.Info().Msg("bootstrap complete")
 
-	srv := server.New(&app.App{Cfg: cfg, Log: log, DB: pool, Redis: rdb, Hub: ws.NewHub(log)})
+	a := &app.App{Cfg: cfg, Log: log, DB: pool, Redis: rdb, Hub: ws.NewHub(log)}
+
+	// 充电桩 OCPP 接入：独立监听端口，与 HTTP 服务同进程
+	ocppSrv := ocpp.New(a, billing.NewChargingHook(a))
+	go func() {
+		if err := ocppSrv.Run(ctx); err != nil {
+			log.Error().Err(err).Msg("ocpp server stopped")
+			stop()
+		}
+	}()
+
+	srv := server.New(a)
 	return srv.Run(ctx)
 }

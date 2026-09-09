@@ -126,6 +126,7 @@ services:
       ZY_JWT_SECRET: ${ZY_JWT_SECRET:-dev-only-secret}
     ports:
       - "${API_PORT:-20080}:20080"
+      - "${OCPP_PORT:-20081}:20081"   # 充电桩 OCPP 1.6J WebSocket
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }

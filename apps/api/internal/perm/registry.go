@@ -53,7 +53,29 @@ var Defs = []Def{
 	{Code: "health:view", Name: "查看车辆健康", Type: Action, Parent: "health"},
 
 	{Code: "charging", Name: "充电管理", Type: Menu, Path: "/charging", Icon: "Zap", Sort: 60},
-	{Code: "charging:view", Name: "查看充电", Type: Action, Parent: "charging"},
+	{Code: "charging:view", Name: "查看充电（桩状态、充电记录）", Type: Action, Parent: "charging"},
+	{Code: "charging:manage", Name: "远程启停充电", Type: Action, Parent: "charging"},
+	{Code: "charging:review", Name: "复核充电事务（归属/计量偏差）", Type: Action, Parent: "charging"},
+	{Code: "charging:export", Name: "导出充电记录", Type: Action, Parent: "charging"},
+
+	// ---- 计费账户 ----
+	{Code: "billing", Name: "计费账户", Type: Menu, Path: "/billing", Icon: "Wallet", Sort: 65},
+
+	{Code: "billing.rule", Name: "计费规则", Type: Menu, Parent: "billing", Path: "/billing/rules", Icon: "Calculator", Sort: 10},
+	{Code: "billing:rule:view", Name: "查看计费规则", Type: Action, Parent: "billing.rule"},
+	{Code: "billing:rule:update", Name: "编辑/启用计费规则", Type: Action, Parent: "billing.rule"},
+
+	{Code: "billing.account", Name: "账户管理", Type: Menu, Parent: "billing", Path: "/billing/accounts", Icon: "Wallet", Sort: 20},
+	{Code: "billing:account:view", Name: "查看账户与流水", Type: Action, Parent: "billing.account"},
+	{Code: "billing:account:recharge", Name: "企业账户充值", Type: Action, Parent: "billing.account"},
+	{Code: "billing:account:allocate", Name: "额度划拨（企业→部门→员工）", Type: Action, Parent: "billing.account"},
+	{Code: "billing:account:adjust", Name: "余额调整/退款", Type: Action, Parent: "billing.account"},
+
+	{Code: "billing.settlement", Name: "月度结算", Type: Menu, Parent: "billing", Path: "/billing/settlements", Icon: "Receipt", Sort: 30},
+	{Code: "billing:settlement:view", Name: "查看结算单", Type: Action, Parent: "billing.settlement"},
+	{Code: "billing:settlement:generate", Name: "生成/重算结算单", Type: Action, Parent: "billing.settlement"},
+	{Code: "billing:settlement:confirm", Name: "确认结算单", Type: Action, Parent: "billing.settlement"},
+	{Code: "billing:settlement:export", Name: "导出结算单", Type: Action, Parent: "billing.settlement"},
 
 	// ---- 资产管理 ----
 	{Code: "asset", Name: "资产管理", Type: Menu, Path: "/assets", Icon: "Car", Sort: 70},
@@ -227,11 +249,16 @@ var DefaultRoles = []DefaultRole{
 			"asset:device:view", "asset:device:create", "asset:device:update", "asset:device:delete",
 			"asset:card:view", "asset:card:create", "asset:card:update", "asset:card:delete",
 			"asset:pile:view", "asset:pile:create", "asset:pile:update", "asset:pile:delete",
+			"charging:manage", "charging:review", "billing:account:view", "billing:settlement:view", "billing:rule:view",
 			"system:dict:view", "system:param:view", "system:user:view", "system:dept:view"}},
 	{Code: "approver", Name: "审批人", Description: "审批公务用车申请",
 		Perms: []string{"dashboard:view", "approval:view", "approval:approve", "approval:create", "trip:view", "asset:vehicle:view"}},
 	{Code: "finance", Name: "财务", Description: "费用报表、账单与充电费用",
-		Perms: []string{"dashboard:view", "report:view", "charging:view", "trip:view", "trip:export"}},
+		Perms: []string{"dashboard:view", "report:view", "charging:view", "charging:review", "charging:export", "trip:view", "trip:export",
+			"billing:rule:view", "billing:rule:update",
+			"billing:account:view", "billing:account:recharge", "billing:account:allocate", "billing:account:adjust",
+			"billing:settlement:view", "billing:settlement:generate", "billing:settlement:confirm", "billing:settlement:export",
+			"system:dept:view", "system:user:view"}},
 	{Code: "employee", Name: "员工", Description: "申请用车、查看自己的行程",
 		Perms: []string{"dashboard:view", "approval:view", "approval:create", "trip:view"}},
 }

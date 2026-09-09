@@ -18,6 +18,8 @@ import (
 	"github.com/caoyb888/zhiyuche/apps/api/internal/asset/vehicle"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/audit"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/auth"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/billing"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/charging"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/notify"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/auditlog"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/dept"
@@ -138,6 +140,11 @@ func (s *Server) registerRoutes() {
 	approval.Register(protected, s.app)
 	trip.Register(protected, s.app)
 	notify.Register(protected, s.app)
+
+	// 计费与充电（阶段 3）：行程结束 → 计费扣费；充电结束 → 计价扣费
+	trip.CompletedHook = billing.NewTripHook(s.app)
+	billing.Register(protected, s.app)
+	charging.Register(protected, s.app, billing.NewChargingHook(s.app))
 
 	// WebSocket 推送：token 经 ?access_token= 传入（RequireAuth 已支持）；
 	// 浏览器无法在 WS 握手上设请求头，超级管理员用 ?tenant_id= 指定订阅的租户

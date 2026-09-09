@@ -22,6 +22,12 @@ type Config struct {
 		CORSOrigins     []string      `env:"ZY_HTTP_CORS_ORIGINS" envSeparator:"," envDefault:"http://localhost:20173"`
 	}
 
+	OCPP struct {
+		Addr              string        `env:"ZY_OCPP_ADDR" envDefault:":20081"`        // 充电桩 OCPP 1.6J WebSocket 监听地址；空字符串则不启动
+		HeartbeatInterval time.Duration `env:"ZY_OCPP_HEARTBEAT" envDefault:"60s"`      // BootNotification 返回给桩的心跳间隔
+		MeterInterval     time.Duration `env:"ZY_OCPP_METER_INTERVAL" envDefault:"30s"` // 期望的 MeterValues 上报间隔
+	}
+
 	Database struct {
 		URL         string `env:"ZY_DATABASE_URL" envDefault:"postgres://zhiyuche:zhiyuche@localhost:20432/zhiyuche?sslmode=disable"`
 		MaxConns    int32  `env:"ZY_DATABASE_MAX_CONNS" envDefault:"10"`

@@ -1526,6 +1526,532 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/billing/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 计费规则列表（本租户；is_default 为当前生效规则） */
+        get: operations["listBillingRules"];
+        put?: never;
+        /** 新建计费规则（rule 结构见 BillingRuleDoc；首条规则自动设为生效） */
+        post: operations["createBillingRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/rules/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 缺省规则模板（纯电车队标准套餐） */
+        get: operations["getBillingRuleTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/rules/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 模拟计算（不落库）：给定规则（id 或内联）与行程参数，返回账单明细 */
+        post: operations["simulateBillingRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/rules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 规则详情 */
+        get: operations["getBillingRule"];
+        /** 编辑规则（名称/rule/生效期/启用；rule 需通过校验） */
+        put: operations["updateBillingRule"];
+        post?: never;
+        /** 删除规则（生效中的规则 409） */
+        delete: operations["deleteBillingRule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/rules/{id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 设为生效规则（其余取消生效；对之后结束的行程/充电生效） */
+        post: operations["activateBillingRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 账户树：企业 → 部门 → 员工（部门/员工账户按需自动创建，未创建的显示 exists=false、余额 0） */
+        get: operations["getAccountTree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 账户列表（分页；level 过滤；keyword 匹配部门名/用户名/姓名） */
+        get: operations["listAccounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的员工账户（不存在则返回余额 0 的虚拟账户）与最近 20 条流水 */
+        get: operations["getMyAccount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/recharge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 企业账户充值（线下到账登记；type=recharge） */
+        post: operations["rechargeEnterprise"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 账户详情（含本月支出、预算使用率） */
+        get: operations["getAccount"];
+        /** 编辑账户（透支额度、月度预算、冻结/解冻） */
+        put: operations["updateAccount"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/{id}/allocate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 从本账户向下级账户划拨额度（企业→部门、部门→员工；目标账户不存在则自动创建；余额不足 409） */
+        post: operations["allocateAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/{id}/adjust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 余额调整（正数入账/退款，负数扣减；type=adjust 或 refund） */
+        post: operations["adjustAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/accounts/{id}/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 账户流水（分页） */
+        get: operations["listAccountTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 租户全部流水（分页；按账户级别/类型/时间/关键词） */
+        get: operations["listTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/settlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 结算单列表（按期；每期一条企业汇总 + 每部门一条） */
+        get: operations["listSettlements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/settlements/periods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 可结算的期（有行程或充电数据的月份，倒序）及各期状态 */
+        get: operations["listSettlementPeriods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/settlements/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 生成/重算某期结算单（已确认的期 409；重算会先补算未计费行程，再重建草稿与明细） */
+        post: operations["generateSettlement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/settlements/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 导出某期结算单 xlsx（汇总 sheet + 明细 sheet） */
+        get: operations["exportSettlements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/settlements/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 结算单详情（含明细行） */
+        get: operations["getSettlement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/settlements/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认结算单（确认后该期不可重算；企业汇总行确认即全部确认） */
+        post: operations["confirmSettlement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/piles/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 充电桩实时视图（桩 + 各连接器状态 + 进行中的事务） */
+        get: operations["listPilesLive"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/piles/{id}/remote-start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 远程启动充电（桩须在线且连接器可用；id_tag 缺省用当前用户的第一张有效卡） */
+        post: operations["remoteStartCharging"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/piles/{id}/remote-stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 远程停止充电 */
+        post: operations["remoteStopCharging"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 充电事务列表 */
+        get: operations["listChargeTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/transactions/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 导出充电记录 xlsx（同列表筛选） */
+        get: operations["exportChargeTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 充电汇总（当日/当月：次数、电量、费用、进行中数、待复核数、按桩统计） */
+        get: operations["getChargingSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/transactions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 充电事务详情（含电表曲线抽样、归属信息、复核信息） */
+        get: operations["getChargeTransaction"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/transactions/{id}/meter-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 电表曲线（全部点） */
+        get: operations["getChargeMeterValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/charging/transactions/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 复核（待复核事务：确认归属并计费 approve，或拒绝 reject 不计费）
+         * @description approve 时可修正 vehicle_id / user_id；确认后按当前生效规则计价并扣费，status→settled。
+         */
+        post: operations["reviewChargeTransaction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2621,6 +3147,360 @@ export interface components {
             /** Format: uuid */
             driver_id?: string | null;
         };
+        BillingRuleDoc: {
+            rule_name: string;
+            base_rate: {
+                per_km?: number;
+                per_hour?: number;
+                /** @description 每 24 小时封顶，0 不封顶 */
+                daily_cap?: number;
+            };
+            ev_specific?: {
+                electricity_cost_per_kwh?: number;
+                /** @description 行程账单是否包含"电费"行（能耗×电价） */
+                include_electricity_in_trip?: boolean;
+                /** @description 充电事务扣哪一级账户 */
+                charging_attribution?: components["schemas"]["AccountLevel"];
+                low_battery_surcharge?: {
+                    threshold_soc?: number;
+                    surcharge_pct?: number;
+                };
+            };
+            time_multipliers?: {
+                name: string;
+                /**
+                 * @description 按行程开始时间匹配，可跨午夜
+                 * @example 07:30-09:00
+                 */
+                range: string;
+                factor: number;
+            }[];
+            penalty_rules?: {
+                /** @enum {string} */
+                type: "overspeed" | "not_charging_on_return" | "harsh_driving" | "late_return";
+                threshold_kmh?: number;
+                fine_per_event?: number;
+                min_soc_required?: number;
+                fine?: number;
+                fine_per_hour?: number;
+                /** @description 单次行程该项罚金上限，0 不限 */
+                max_fine?: number;
+            }[];
+            trip_attribution?: {
+                official?: components["schemas"]["AccountLevel"];
+                daily?: components["schemas"]["AccountLevel"];
+            };
+        };
+        BillingRule: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            name: string;
+            rule: components["schemas"]["BillingRuleDoc"];
+            is_default: boolean;
+            enabled: boolean;
+            /** Format: date */
+            effective_from?: string | null;
+            /** Format: date */
+            effective_to?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BillingRuleCreate: {
+            name: string;
+            rule: components["schemas"]["BillingRuleDoc"];
+            /** Format: date */
+            effective_from?: string;
+            /** Format: date */
+            effective_to?: string;
+            /**
+             * @description 创建后立即设为生效
+             * @default false
+             */
+            activate: boolean;
+        };
+        BillingRuleUpdate: {
+            name?: string;
+            rule?: components["schemas"]["BillingRuleDoc"];
+            enabled?: boolean;
+            /** Format: date */
+            effective_from?: string | null;
+            /** Format: date */
+            effective_to?: string | null;
+        };
+        BillingTripInput: {
+            trip_type?: components["schemas"]["TripType"];
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            distance_km: number;
+            energy_kwh?: number;
+            end_soc?: number;
+            overspeed_events?: number;
+            harsh_events?: number;
+            /** Format: date-time */
+            planned_end?: string;
+        };
+        BillingLine: {
+            item: string;
+            /** @enum {string} */
+            kind: "base" | "multiplier" | "cap" | "surcharge" | "electricity" | "penalty";
+            qty: number;
+            unit: string;
+            unit_price: number;
+            /** @description 元；减免为负 */
+            amount: number;
+            note?: string;
+        };
+        BillingResult: {
+            rule_name: string;
+            lines: components["schemas"]["BillingLine"][];
+            base: number;
+            multiplier: number;
+            cap_applied: boolean;
+            surcharge: number;
+            electricity: number;
+            penalty: number;
+            total: number;
+            attribution: components["schemas"]["AccountLevel"];
+        };
+        /** @enum {string} */
+        AccountLevel: "enterprise" | "department" | "employee";
+        /** @enum {string} */
+        TransactionType: "recharge" | "allocate_in" | "allocate_out" | "trip" | "charge" | "penalty" | "refund" | "adjust";
+        Account: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            level: components["schemas"]["AccountLevel"];
+            /** Format: uuid */
+            owner_id: string;
+            /** @description 企业名 / 部门名 / 员工姓名 */
+            owner_name: string;
+            /** @description 员工的部门名 / 部门的上级名 */
+            owner_sub?: string | null;
+            balance: number;
+            credit_limit: number;
+            monthly_budget: number;
+            /** @description 本月支出（trip+charge+penalty 绝对值和） */
+            month_spent?: number;
+            /** @enum {string} */
+            status: "active" | "frozen";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        AccountNode: components["schemas"]["Account"] & {
+            /** @description 账户行是否已创建 */
+            exists?: boolean;
+            children?: components["schemas"]["AccountNode"][];
+        };
+        AccountTransaction: {
+            /** Format: int64 */
+            id: number;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** Format: uuid */
+            account_id: string;
+            account_level?: components["schemas"]["AccountLevel"];
+            account_name?: string;
+            type: components["schemas"]["TransactionType"];
+            amount: number;
+            balance_after: number;
+            ref_type?: string | null;
+            ref_id?: string | null;
+            /** @description 行程号/充电事务号 */
+            ref_no?: string | null;
+            remark?: string | null;
+            /** Format: uuid */
+            created_by?: string | null;
+            created_by_name?: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        Settlement: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** @example 2026-09 */
+            period: string;
+            /**
+             * Format: uuid
+             * @description null 为企业汇总
+             */
+            dept_id?: string | null;
+            dept_name?: string | null;
+            trip_count: number;
+            trip_cost: number;
+            charge_count: number;
+            charge_cost: number;
+            penalty: number;
+            total: number;
+            budget: number;
+            /** @enum {string} */
+            status: "draft" | "confirmed";
+            /** Format: date-time */
+            generated_at: string;
+            /** Format: date-time */
+            confirmed_at?: string | null;
+            confirmed_by_name?: string | null;
+            /** @description 详情返回 */
+            lines?: components["schemas"]["SettlementLine"][];
+        };
+        SettlementLine: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            kind: "trip" | "charge" | "penalty";
+            ref_id: string;
+            ref_no?: string | null;
+            /** Format: uuid */
+            user_id?: string | null;
+            user_name?: string | null;
+            vehicle_plate?: string | null;
+            /** Format: date-time */
+            occurred_at: string;
+            /** @description km 或 kWh */
+            quantity?: number | null;
+            amount: number;
+            detail?: Record<string, never> | null;
+        };
+        /** @enum {string} */
+        ChargeStatus: "charging" | "ended" | "settled" | "cancelled";
+        /** @enum {string} */
+        ConnectorStatus: "Available" | "Preparing" | "Charging" | "SuspendedEV" | "SuspendedEVSE" | "Finishing" | "Reserved" | "Unavailable" | "Faulted";
+        PileLive: {
+            /** Format: uuid */
+            id: string;
+            pile_code: string;
+            name: string;
+            /** @enum {string} */
+            type: "fast" | "slow";
+            power_kw: number;
+            location?: string | null;
+            lng?: number | null;
+            lat?: number | null;
+            status: components["schemas"]["PileStatusEnum"];
+            /** @description 有 OCPP 连接且心跳未超时 */
+            online: boolean;
+            /** Format: date-time */
+            last_heartbeat_at?: string | null;
+            connectors: {
+                connector_id: number;
+                status: components["schemas"]["ConnectorStatus"];
+                error_code?: string | null;
+                /** @description 进行中的事务（含实时 kWh/功率） */
+                transaction?: components["schemas"]["ChargeTransaction"] | null;
+            }[];
+        };
+        ChargeTransaction: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** @example C-20260909-001 */
+            tx_no: string;
+            /** Format: uuid */
+            pile_id: string;
+            pile_code: string;
+            pile_name: string;
+            connector_id: number;
+            ocpp_tx_id?: number;
+            id_tag: string;
+            user?: components["schemas"]["UserBrief"] | null;
+            dept_name?: string | null;
+            vehicle?: components["schemas"]["VehicleBrief"] | null;
+            /** @enum {string|null} */
+            bind_method?: "card" | "location" | "recent_trip" | "manual" | "none" | "null" | null;
+            status: components["schemas"]["ChargeStatus"];
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at?: string | null;
+            duration_min?: number | null;
+            /** @description Wh */
+            meter_start?: number;
+            meter_stop?: number | null;
+            /** @description 结束后为桩侧计量；进行中为实时累计 */
+            kwh?: number | null;
+            /** @description 进行中的最近功率 */
+            power_kw?: number | null;
+            unit_price?: number | null;
+            cost?: number | null;
+            stop_reason?: string | null;
+            bms_soc_start?: number | null;
+            bms_soc_end?: number | null;
+            /** @description (SOC 增量 × 电池容量) */
+            bms_kwh_est?: number | null;
+            /** @description |桩侧 − BMS 估算| / 桩侧 × 100 */
+            deviation_pct?: number | null;
+            /** @enum {string} */
+            review_status: "none" | "pending" | "approved" | "rejected";
+            review_note?: string | null;
+            reviewed_by_name?: string | null;
+            /** Format: date-time */
+            reviewed_at?: string | null;
+            attribution?: string | null;
+            /** Format: uuid */
+            account_id?: string | null;
+            /** Format: int64 */
+            account_txn_id?: number | null;
+            /** @description 详情返回（抽样 ≤ 200 点） */
+            meter_values?: components["schemas"]["MeterValue"][];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        MeterValue: {
+            /** Format: date-time */
+            ts: string;
+            wh?: number | null;
+            /** @description 相对 meter_start 的累计电量 */
+            kwh?: number | null;
+            voltage?: number | null;
+            current?: number | null;
+            power_kw?: number | null;
+            soc?: number | null;
+        };
+        ChargingSummary: {
+            /** Format: date */
+            date: string;
+            today: {
+                sessions?: number;
+                kwh?: number;
+                cost?: number;
+            };
+            month: {
+                sessions?: number;
+                kwh?: number;
+                cost?: number;
+            };
+            ongoing: number;
+            pending_review: number;
+            piles: {
+                total?: number;
+                online?: number;
+                charging?: number;
+                faulted?: number;
+            };
+            /** @description 本月按桩统计 */
+            by_pile?: {
+                /** Format: uuid */
+                pile_id?: string;
+                pile_name?: string;
+                sessions?: number;
+                kwh?: number;
+                cost?: number;
+            }[];
+        };
     };
     responses: {
         /** @description 成功（data 为简单对象或缺省） */
@@ -2993,6 +3873,100 @@ export interface components {
                 "application/json": components["schemas"]["Envelope"] & {
                     data?: components["schemas"]["Page"] & {
                         items?: components["schemas"]["Trip"][];
+                    };
+                };
+            };
+        };
+        /** @description 计费规则 */
+        BillingRule: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["BillingRule"];
+                };
+            };
+        };
+        /** @description 账户 */
+        Account: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Account"];
+                };
+            };
+        };
+        /** @description 账户分页 */
+        AccountPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Account"][];
+                    };
+                };
+            };
+        };
+        /** @description 流水 */
+        AccountTransaction: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["AccountTransaction"];
+                };
+            };
+        };
+        /** @description 流水分页 */
+        AccountTransactionPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["AccountTransaction"][];
+                    };
+                };
+            };
+        };
+        /** @description 结算单 */
+        Settlement: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Settlement"];
+                };
+            };
+        };
+        /** @description 充电事务 */
+        ChargeTransaction: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["ChargeTransaction"];
+                };
+            };
+        };
+        /** @description 充电事务分页 */
+        ChargeTransactionPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["ChargeTransaction"][];
                     };
                 };
             };
@@ -5255,6 +6229,769 @@ export interface operations {
             };
             400: components["responses"]["Error"];
             403: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+        };
+    };
+    listBillingRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 规则列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["BillingRule"][];
+                    };
+                };
+            };
+        };
+    };
+    createBillingRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BillingRuleCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["BillingRule"];
+            400: components["responses"]["Error"];
+        };
+    };
+    getBillingRuleTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 模板 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["BillingRuleDoc"];
+                    };
+                };
+            };
+        };
+    };
+    simulateBillingRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description 与 rule 二选一；都不传用当前生效规则
+                     */
+                    rule_id?: string;
+                    rule?: components["schemas"]["BillingRuleDoc"];
+                    trip: components["schemas"]["BillingTripInput"];
+                };
+            };
+        };
+        responses: {
+            /** @description 账单 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["BillingResult"];
+                    };
+                };
+            };
+        };
+    };
+    getBillingRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["BillingRule"];
+        };
+    };
+    updateBillingRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BillingRuleUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["BillingRule"];
+        };
+    };
+    deleteBillingRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["OK"];
+            409: components["responses"]["Error"];
+        };
+    };
+    activateBillingRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["BillingRule"];
+        };
+    };
+    getAccountTree: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 账户树 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["AccountNode"];
+                    };
+                };
+            };
+        };
+    };
+    listAccounts: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                level?: components["schemas"]["AccountLevel"];
+                keyword?: string;
+                /** @description 仅余额为负 */
+                negative?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["AccountPage"];
+        };
+    };
+    getMyAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 我的账户 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["Account"] & {
+                            transactions?: components["schemas"]["AccountTransaction"][];
+                        };
+                    };
+                };
+            };
+        };
+    };
+    rechargeEnterprise: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    amount: number;
+                    remark?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["AccountTransaction"];
+        };
+    };
+    getAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Account"];
+        };
+    };
+    updateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    credit_limit?: number;
+                    monthly_budget?: number;
+                    /** @enum {string} */
+                    status?: "active" | "frozen";
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Account"];
+        };
+    };
+    allocateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Format: uuid
+                     * @description 与 to_level+to_owner_id 二选一
+                     */
+                    to_account_id?: string;
+                    to_level?: components["schemas"]["AccountLevel"];
+                    /**
+                     * Format: uuid
+                     * @description 部门 id 或用户 id
+                     */
+                    to_owner_id?: string;
+                    amount: number;
+                    remark?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 双方流水 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            from?: components["schemas"]["AccountTransaction"];
+                            to?: components["schemas"]["AccountTransaction"];
+                        };
+                    };
+                };
+            };
+            409: components["responses"]["Error"];
+        };
+    };
+    adjustAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description 非 0，有符号 */
+                    amount: number;
+                    /**
+                     * @default adjust
+                     * @enum {string}
+                     */
+                    type?: "adjust" | "refund";
+                    remark: string;
+                    ref_type?: string;
+                    ref_id?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["AccountTransaction"];
+        };
+    };
+    listAccountTransactions: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                type?: components["schemas"]["TransactionType"];
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["AccountTransactionPage"];
+        };
+    };
+    listTransactions: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                level?: components["schemas"]["AccountLevel"];
+                type?: components["schemas"]["TransactionType"];
+                /** @description 账户名/备注/ref_id */
+                keyword?: string;
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["AccountTransactionPage"];
+        };
+    };
+    listSettlements: {
+        parameters: {
+            query?: {
+                /** @description 缺省最近一期 */
+                period?: string;
+                status?: "draft" | "confirmed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 结算单列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["Settlement"][];
+                    };
+                };
+            };
+        };
+    };
+    listSettlementPeriods: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 期列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            period?: string;
+                            /** @enum {string} */
+                            status?: "none" | "draft" | "confirmed";
+                            total?: number;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    generateSettlement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    period: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 生成结果 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["Settlement"][];
+                    };
+                };
+            };
+            409: components["responses"]["Error"];
+        };
+    };
+    exportSettlements: {
+        parameters: {
+            query: {
+                period: string;
+                /** @description 只导出某部门 */
+                dept_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description xlsx */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+        };
+    };
+    getSettlement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Settlement"];
+        };
+    };
+    confirmSettlement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Settlement"];
+        };
+    };
+    listPilesLive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 实时视图 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["PileLive"][];
+                    };
+                };
+            };
+        };
+    };
+    remoteStartCharging: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @default 1 */
+                    connector_id?: number;
+                    id_tag?: string;
+                    /**
+                     * Format: uuid
+                     * @description 预先指定归属车辆
+                     */
+                    vehicle_id?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 桩的应答 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            /** @enum {string} */
+                            status?: "Accepted" | "Rejected";
+                        };
+                    };
+                };
+            };
+            409: components["responses"]["Error"];
+        };
+    };
+    remoteStopCharging: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    transaction_id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 桩的应答 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: {
+                            /** @enum {string} */
+                            status?: "Accepted" | "Rejected";
+                        };
+                    };
+                };
+            };
+        };
+    };
+    listChargeTransactions: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                status?: components["schemas"]["ChargeStatus"];
+                review_status?: "none" | "pending" | "approved" | "rejected";
+                pile_id?: string;
+                vehicle_id?: string;
+                user_id?: string;
+                dept_id?: string;
+                from?: string;
+                to?: string;
+                /** @description 事务号/桩/车牌/用户 */
+                keyword?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["ChargeTransactionPage"];
+        };
+    };
+    exportChargeTransactions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description xlsx */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+        };
+    };
+    getChargingSummary: {
+        parameters: {
+            query?: {
+                /** @description 缺省今天 */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 汇总 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["ChargingSummary"];
+                    };
+                };
+            };
+        };
+    };
+    getChargeTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["ChargeTransaction"];
+        };
+    };
+    getChargeMeterValues: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 曲线 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["MeterValue"][];
+                    };
+                };
+            };
+        };
+    };
+    reviewChargeTransaction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    action: "approve" | "reject";
+                    note?: string;
+                    /** Format: uuid */
+                    vehicle_id?: string;
+                    /** Format: uuid */
+                    user_id?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["ChargeTransaction"];
             409: components["responses"]["Error"];
         };
     };
