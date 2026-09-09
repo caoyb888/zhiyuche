@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/approval"
@@ -138,14 +139,23 @@ func (s *Server) registerRoutes() {
 	trip.Register(protected, s.app)
 	notify.Register(protected, s.app)
 
-	// WebSocket 推送：token 经 ?access_token= 传入（RequireAuth 已支持）
+	// WebSocket 推送：token 经 ?access_token= 传入（RequireAuth 已支持）；
+	// 浏览器无法在 WS 握手上设请求头，超级管理员用 ?tenant_id= 指定订阅的租户
 	if s.app.Hub != nil {
 		protected.GET("/ws", s.app.Hub.Handler(s.app.Cfg.HTTP.CORSOrigins, func(c *gin.Context) (ws.Principal, bool) {
 			p := auth.Current(c)
 			if p == nil {
 				return ws.Principal{}, false
 			}
-			return ws.Principal{UserID: p.UserID, TenantID: auth.TenantID(c)}, true
+			tenantID := auth.TenantID(c)
+			if p.IsSuper {
+				if q := c.Query("tenant_id"); q != "" {
+					if id, err := uuid.Parse(q); err == nil {
+						tenantID = id
+					}
+				}
+			}
+			return ws.Principal{UserID: p.UserID, TenantID: tenantID}, true
 		}))
 	}
 

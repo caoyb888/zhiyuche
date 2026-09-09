@@ -35,7 +35,7 @@ const TRIP_KEY = ['trips'] as const
  * WebSocket 地址：VITE_WS_URL（完整地址）优先；否则按当前页面协议/主机 + VITE_API_BASE + /ws 推导，
  * dev 模式下与 /api 一样经 vite proxy 转发。
  */
-export function buildWsUrl(token: string): string {
+export function buildWsUrl(token: string, tenantId?: string | null): string {
   const explicit = (import.meta.env.VITE_WS_URL ?? '').trim()
   let base: string
   if (explicit) {
@@ -49,7 +49,9 @@ export function buildWsUrl(token: string): string {
       base = `${proto}//${window.location.host}${apiBase.startsWith('/') ? apiBase : `/${apiBase}`}/ws`
     }
   }
-  return `${base}${base.includes('?') ? '&' : '?'}access_token=${encodeURIComponent(token)}`
+  const url = `${base}${base.includes('?') ? '&' : '?'}access_token=${encodeURIComponent(token)}`
+  // 超级管理员"切换查看租户"后订阅目标租户的事件（浏览器无法在握手上设 X-Tenant-ID 头）
+  return tenantId ? `${url}&tenant_id=${encodeURIComponent(tenantId)}` : url
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -145,6 +147,7 @@ export function useWebSocket(): void {
   const queryClient = useQueryClient()
   const toast = useToast()
   const token = useAuthStore((s) => s.accessToken)
+  const viewTenantId = useAuthStore((s) => s.viewTenantId)
 
   useEffect(() => {
     const store = useRealtimeStore.getState()
@@ -184,7 +187,7 @@ export function useWebSocket(): void {
       useRealtimeStore.getState().setStatus(attempt === 0 ? 'connecting' : 'reconnecting', attempt)
       let sock: WebSocket
       try {
-        sock = new WebSocket(buildWsUrl(current))
+        sock = new WebSocket(buildWsUrl(current, useAuthStore.getState().viewTenantId))
       } catch {
         scheduleReconnect()
         return
@@ -240,5 +243,5 @@ export function useWebSocket(): void {
       }
       useRealtimeStore.getState().setStatus('closed')
     }
-  }, [token, queryClient, toast])
+  }, [token, viewTenantId, queryClient, toast])
 }

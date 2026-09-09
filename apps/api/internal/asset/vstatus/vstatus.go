@@ -162,13 +162,15 @@ func (s *Store) ApplyTelemetry(ctx context.Context, vehicleID uuid.UUID, rangeKm
 	return s.publish(ctx, vehicleID)
 }
 
+// publish pushes the live view (contract VehicleLive: snapshot + plate/brand/model/driver_name)
+// so WebSocket clients can render a vehicle they have never fetched.
 func (s *Store) publish(ctx context.Context, vehicleID uuid.UUID) (*VehicleStatus, error) {
-	v, err := s.Get(ctx, vehicleID)
-	if err != nil || v == nil {
-		return v, err
+	live, err := s.GetLive(ctx, vehicleID)
+	if err != nil || live == nil {
+		return nil, err
 	}
-	s.app.Hub.Publish(v.TenantID, ws.Event{Type: ws.EvVehicleStatus, Data: v})
-	return v, nil
+	s.app.Hub.Publish(live.TenantID, ws.Event{Type: ws.EvVehicleStatus, Data: live})
+	return &live.VehicleStatus, nil
 }
 
 // VehicleLive is the snapshot joined with the vehicle summary and the driver

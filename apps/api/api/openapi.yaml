@@ -1416,7 +1416,8 @@ paths:
       tags: [notifications]
       summary: WebSocket 实时推送
       description: |
-        `GET /api/v1/ws?access_token=<jwt>` 升级为 WebSocket。服务端消息为 JSON `{type, ts, data}`：
+        `GET /api/v1/ws?access_token=<jwt>` 升级为 WebSocket；超级管理员可加 `&tenant_id=<uuid>` 订阅指定租户。
+        服务端消息为 JSON `{type, ts, data}`（`vehicle.status` 的 data 为 VehicleLive）：
         `vehicle.status`（租户）、`trip.started`/`trip.ended`/`trip.event`（租户）、`approval.updated`（租户）、
         `notification.new`（仅本人）、`device.online`（租户）。客户端可发送 `{"type":"ping"}` 得到 `{"type":"pong"}`。
       operationId: websocket
