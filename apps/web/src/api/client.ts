@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
-import { useAuthStore } from '../store/auth'
+import { getViewTenantId, useAuthStore } from '../store/auth'
 import type { TokenPair } from './types'
 
 declare module 'axios' {
@@ -8,10 +8,15 @@ declare module 'axios' {
     skipAuth?: boolean
     /** 收到 401 时不尝试刷新令牌（登录、刷新、退出本身） */
     skipAuthRefresh?: boolean
+    /** 不附加 X-Tenant-ID（租户管理等平台级接口，或需要按本租户操作的请求） */
+    skipTenantHeader?: boolean
     /** 内部标记：该请求已经因 401 刷新并重放过一次，避免死循环 */
     _retried?: boolean
   }
 }
+
+/** 超级管理员切换查看租户时附加的请求头（与后端 auth.HeaderTenant 一致） */
+export const TENANT_HEADER = 'X-Tenant-ID'
 
 /** 后端统一响应信封；错误时 data 缺省 */
 export interface ApiEnvelope<T> {
@@ -81,11 +86,17 @@ export const client = axios.create({
   headers: { Accept: 'application/json' },
 })
 
-// ── 请求拦截：附加 Bearer ─────────────────────────────
+// ── 请求拦截：附加 Bearer 与（超级管理员）X-Tenant-ID ────
 client.interceptors.request.use((config) => {
   if (!config.skipAuth) {
     const token = useAuthStore.getState().accessToken
     if (token) config.headers.set('Authorization', `Bearer ${token}`)
+    // /auth/* 是关于调用者本人的接口，不随查看租户切换
+    const isAuthApi = (config.url ?? '').startsWith('/auth')
+    if (!config.skipTenantHeader && !isAuthApi) {
+      const tenantId = getViewTenantId()
+      if (tenantId) config.headers.set(TENANT_HEADER, tenantId)
+    }
   }
   return config
 })

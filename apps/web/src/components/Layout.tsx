@@ -10,6 +10,7 @@ import { findAppRoute } from '../router/routes'
 import { useAuthStore } from '../store/auth'
 import ChangePasswordModal from './ChangePasswordModal'
 import MenuIcon from './MenuIcon'
+import TenantSwitcher from './TenantSwitcher'
 
 /** 后端连接状态 */
 type BackendStatus =
@@ -175,6 +176,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const profile = useAuthStore((s) => s.profile)
+  const viewTenant = useAuthStore((s) => s.viewTenant)
   const clear = useAuthStore((s) => s.clear)
   const menus = profile?.menus ?? []
 
@@ -249,7 +251,9 @@ export default function Layout() {
 
         <div className="px-4 py-4 border-t border-white/10">
           <div className="text-xs text-slate-500">测试版 V2.0</div>
-          <div className="text-xs text-slate-500 mt-0.5 truncate">{profile?.tenant.name ?? '—'} · 车队管理</div>
+          <div className="text-xs text-slate-500 mt-0.5 truncate">
+            {viewTenant ? `查看：${viewTenant.name}` : (profile?.tenant.name ?? '—')} · 车队管理
+          </div>
         </div>
       </aside>
 
@@ -261,6 +265,7 @@ export default function Layout() {
             {subtitle && <p className="text-xs text-slate-400 hidden sm:block truncate">{subtitle}</p>}
           </div>
           <div className="flex items-center gap-3 shrink-0">
+            <TenantSwitcher />
             <BackendBadge status={backend} />
             <UserMenu onChangePassword={() => setPwdOpen(true)} onLogout={() => logout.mutate()} loggingOut={logout.isPending} />
           </div>

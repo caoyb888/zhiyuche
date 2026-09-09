@@ -50,6 +50,34 @@ export type Role = Schemas['Role']
 export type RoleCreate = Schemas['RoleCreate']
 export type RoleUpdate = Schemas['RoleUpdate']
 export type PermissionNode = Schemas['PermissionNode']
+export type PermissionNodeType = PermissionNode['type']
 
 // ── 租户 ─────────────────────────────────────────────
 export type Tenant = Schemas['Tenant']
+export type TenantStatus = Tenant['status']
+export type TenantCreate = Schemas['TenantCreate']
+export type TenantUpdate = Schemas['TenantUpdate']
+
+// ── 字典 ─────────────────────────────────────────────
+export type DictType = Schemas['DictType']
+export type DictTypeCreate = Schemas['DictTypeCreate']
+export type DictTypeUpdate = Schemas['DictTypeUpdate']
+export type DictItem = Schemas['DictItem']
+export type DictItemStatus = DictItem['status']
+export type DictItemCreate = Schemas['DictItemCreate']
+export type DictItemUpdate = Schemas['DictItemUpdate']
+
+// ── 系统参数 ──────────────────────────────────────────
+export type Param = Schemas['Param']
+export type ParamValueType = Param['value_type']
+export type ParamSource = Param['source']
+export type ParamUpdate = Schemas['ParamUpdate']
+
+// ── 审计日志 ──────────────────────────────────────────
+export type AuditLog = Schemas['AuditLog']
+
+// ── 通知模板 ──────────────────────────────────────────
+export type NotifyChannel = Schemas['NotifyChannel']
+export type Template = Schemas['Template']
+export type TemplateCreate = Schemas['TemplateCreate']
+export type TemplateUpdate = Schemas['TemplateUpdate']

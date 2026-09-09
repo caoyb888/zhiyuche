@@ -5,6 +5,8 @@ export interface TreeNode {
   key: string
   /** 纯文本标题（用于显示与搜索） */
   label: string
+  /** 可选的富文本标题（如关键词高亮），有则代替 label 显示 */
+  title?: ReactNode
   children?: TreeNode[]
   /** 右侧附加内容（如人数） */
   extra?: ReactNode
@@ -42,6 +44,24 @@ export function filterTree(nodes: TreeNode[], keyword: string): TreeNode[] {
       return children.length > 0 ? [{ ...n, children }] : []
     })
   return walk(nodes)
+}
+
+/** 收集节点下全部可选叶子键（禁用叶子不参与"勾父全选子"） */
+export function collectLeafKeys(node: TreeNode, into: string[] = []): string[] {
+  const children = node.children ?? []
+  if (children.length === 0) {
+    if (!node.disabled) into.push(node.key)
+    return into
+  }
+  for (const c of children) collectLeafKeys(c, into)
+  return into
+}
+
+/** 整棵树的可选叶子键（深度优先） */
+export function allLeafKeys(nodes: TreeNode[]): string[] {
+  const out: string[] = []
+  for (const n of nodes) collectLeafKeys(n, out)
+  return out
 }
 
 /** 深度优先展平 */
