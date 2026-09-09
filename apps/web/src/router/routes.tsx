@@ -24,8 +24,13 @@ export const appRoutes: AppRoute[] = [
   { path: '/assets/devices', perm: 'asset:device:view', title: '网关设备', description: '车载网关与接入密钥', component: lazy(() => import('../pages/assets/devices')) },
   { path: '/assets/cards', perm: 'asset:card:view', title: 'NFC 卡', description: '刷卡取车用卡片', component: lazy(() => import('../pages/assets/cards')) },
   { path: '/assets/piles', perm: 'asset:pile:view', title: '充电桩档案', description: '桩位、功率与状态', component: lazy(() => import('../pages/assets/piles')) },
+  // ---- 计费账户（path 与 registry.go 的菜单 Path 一致）----
+  { path: '/billing/rules', perm: 'billing:rule:view', title: '计费规则', description: '可编程计费引擎与模拟计算', component: lazy(() => import('../pages/billing/rules')) },
+  { path: '/billing/accounts', perm: 'billing:account:view', title: '账户管理', description: '企业 / 部门 / 员工账户与流水', component: lazy(() => import('../pages/billing/accounts')) },
+  { path: '/billing/settlements', perm: 'billing:settlement:view', title: '月度结算', description: '结算单生成、确认、导出与打印', component: lazy(() => import('../pages/billing/settlements')) },
   // ---- 个人（无需权限码）----
   { path: '/notifications', perm: '', title: '通知中心', description: '站内通知', component: lazy(() => import('../pages/notifications')) },
+  { path: '/me/account', perm: '', title: '我的账户', description: '余额、本月支出与最近流水', component: lazy(() => import('../pages/account/me')) },
   // ---- 系统管理（path 与 apps/api/internal/perm/registry.go 的菜单 Path 一致）----
   { path: '/system/users', perm: 'system:user:view', title: '用户管理', description: '账号、角色与部门归属', component: lazy(() => import('../pages/system/users')) },
   { path: '/system/depts', perm: 'system:dept:view', title: '部门管理', description: '组织架构与预算', component: lazy(() => import('../pages/system/depts')) },

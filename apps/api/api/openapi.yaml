@@ -3500,7 +3500,7 @@ components:
         user: { anyOf: [ { $ref: '#/components/schemas/UserBrief' }, { type: 'null' } ] }
         dept_name: { type: [string, 'null'] }
         vehicle: { anyOf: [ { $ref: '#/components/schemas/VehicleBrief' }, { type: 'null' } ] }
-        bind_method: { type: [string, 'null'], enum: [card, location, recent_trip, manual, none, 'null'] }
+        bind_method: { type: [string, 'null'], enum: [card, location, recent_trip, manual, none, null] }
         status: { $ref: '#/components/schemas/ChargeStatus' }
         start_at: { type: string, format: date-time }
         end_at: { type: [string, 'null'], format: date-time }
