@@ -114,6 +114,10 @@ type Trip struct {
 	EndLat         *float64              `json:"end_lat"`
 	Cost           *float64              `json:"cost"`
 	CostDetail     json.RawMessage       `json:"cost_detail"`
+	BillingStatus  string                `json:"billing_status"` // pending | charged | skipped | failed
+	AccountID      *uuid.UUID            `json:"account_id"`
+	AccountTxnID   *int64                `json:"account_txn_id"`
+	BilledAt       *time.Time            `json:"billed_at"`
 	Remark         *string               `json:"remark"`
 	Events         []Event               `json:"events,omitempty"`
 	CreatedAt      time.Time             `json:"created_at"`

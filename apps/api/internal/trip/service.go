@@ -227,6 +227,7 @@ func toTrip(r row) Trip {
 		AvgSpeed: r.AvgSpeed, MaxSpeed: r.MaxSpeed, HarshAccel: r.HarshAccel, HarshBrake: r.HarshBrake, PointCount: r.PointCount,
 		RoofSignStatus: r.RoofSignStatus, DeviationFlag: r.DeviationFlag, DeviationMaxM: r.DeviationMaxM,
 		StartLng: r.StartLng, StartLat: r.StartLat, EndLng: r.EndLng, EndLat: r.EndLat, Cost: r.Cost, Remark: r.Remark,
+		BillingStatus: r.BillingStatus, AccountID: r.AccountID, AccountTxnID: r.AccountTxnID, BilledAt: r.BilledAt,
 		CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt,
 	}
 	if len(r.CostDetail) > 0 {

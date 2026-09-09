@@ -57,6 +57,10 @@ type row struct {
 	Remark         *string    `db:"remark"`
 	CreatedAt      time.Time  `db:"created_at"`
 	UpdatedAt      time.Time  `db:"updated_at"`
+	BillingStatus  string     `db:"billing_status"`
+	AccountID      *uuid.UUID `db:"account_id"`
+	AccountTxnID   *int64     `db:"account_txn_id"`
+	BilledAt       *time.Time `db:"billed_at"`
 
 	PlateNo             string     `db:"plate_no"`
 	VehicleBrand        *string    `db:"vehicle_brand"`
@@ -85,6 +89,7 @@ const baseSelect = `
 	       t.start_at, t.end_at, t.start_odometer, t.end_odometer, t.distance_km, t.energy_kwh, t.start_soc, t.end_soc,
 	       t.avg_speed, t.max_speed, t.harsh_accel, t.harsh_brake, t.point_count, t.roof_sign_status, t.deviation_flag, t.deviation_max_m,
 	       t.start_lng, t.start_lat, t.end_lng, t.end_lat, t.cost, t.cost_detail, t.remark, t.created_at, t.updated_at,
+	       t.billing_status, t.account_id, t.account_txn_id, t.billed_at,
 	       v.plate_no, v.brand AS vehicle_brand, v.model AS vehicle_model, v.status AS vehicle_status,
 	       v.home_dept_id AS vehicle_home_dept_id, vd.name AS vehicle_home_dept_name, vs.soc AS vehicle_soc, vs.range_km AS vehicle_range_km,
 	       u.name AS driver_name, u.username AS driver_username, u.phone AS driver_phone, ud.name AS driver_dept_name,

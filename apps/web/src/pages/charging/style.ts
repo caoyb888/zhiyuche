@@ -114,7 +114,6 @@ export const BIND_METHOD_LABEL: Record<ChargeBindMethod, string> = {
   recent_trip: '最近行程',
   manual: '人工指定',
   none: '未绑定',
-  null: '未绑定',
 }
 
 export function bindMethodLabel(v: string | null | undefined): string {

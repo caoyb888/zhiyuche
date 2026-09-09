@@ -3021,7 +3021,22 @@ export interface components {
             end_lng?: number | null;
             end_lat?: number | null;
             cost?: number | null;
-            cost_detail?: Record<string, never> | null;
+            /** @description 计费引擎账单明细 */
+            cost_detail?: components["schemas"]["BillingResult"] | null;
+            /** @enum {string} */
+            billing_status?: "pending" | "charged" | "skipped" | "failed";
+            /**
+             * Format: uuid
+             * @description 扣费账户
+             */
+            account_id?: string | null;
+            /**
+             * Format: int64
+             * @description 扣费流水
+             */
+            account_txn_id?: number | null;
+            /** Format: date-time */
+            billed_at?: string | null;
             remark?: string | null;
             /** @description 详情返回 */
             events?: components["schemas"]["TripEvent"][];
@@ -3418,7 +3433,7 @@ export interface components {
             dept_name?: string | null;
             vehicle?: components["schemas"]["VehicleBrief"] | null;
             /** @enum {string|null} */
-            bind_method?: "card" | "location" | "recent_trip" | "manual" | "none" | "null" | null;
+            bind_method?: "card" | "location" | "recent_trip" | "manual" | "none" | null;
             status: components["schemas"]["ChargeStatus"];
             /** Format: date-time */
             start_at: string;

@@ -3122,7 +3122,11 @@ components:
         end_lng: { type: [number, 'null'] }
         end_lat: { type: [number, 'null'] }
         cost: { type: [number, 'null'] }
-        cost_detail: { type: [object, 'null'] }
+        cost_detail: { anyOf: [ { $ref: '#/components/schemas/BillingResult' }, { type: 'null' } ], description: 计费引擎账单明细 }
+        billing_status: { type: string, enum: [pending, charged, skipped, failed] }
+        account_id: { type: [string, 'null'], format: uuid, description: 扣费账户 }
+        account_txn_id: { type: [integer, 'null'], format: int64, description: 扣费流水 }
+        billed_at: { type: [string, 'null'], format: date-time }
         remark: { type: [string, 'null'] }
         events: { type: array, items: { $ref: '#/components/schemas/TripEvent' }, description: 详情返回 }
         created_at: { type: string, format: date-time }
