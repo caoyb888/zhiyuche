@@ -1,10 +1,10 @@
 import { get } from './client'
+import type { Health, Ready } from './types'
 
-export interface SystemHealth {
-  status: string
-  version: string
-  uptime_seconds: number
-}
+export type SystemHealth = Health
 
-/** GET /health —— 后端存活与版本信息 */
-export const getHealth = (): Promise<SystemHealth> => get<SystemHealth>('/health')
+/** GET /health —— 后端存活与版本信息（公开接口） */
+export const getHealth = (): Promise<Health> => get<Health>('/health', { skipAuth: true, skipAuthRefresh: true })
+
+/** GET /ready —— 依赖就绪状态 */
+export const getReady = (): Promise<Ready> => get<Ready>('/ready', { skipAuth: true, skipAuthRefresh: true })
