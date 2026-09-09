@@ -1,8 +1,6 @@
 import type {
   AiReport,
-  Alert,
   Approval,
-  BadgeClass,
   ChargeRecord,
   Charger,
   DailyUsagePoint,
@@ -12,41 +10,7 @@ import type {
   MonthlyTrendPoint,
   TopUser,
   Trip,
-  Vehicle,
-  VehicleStatus,
 } from '../types'
-
-// ── 车辆数据 ──────────────────────────────────────────
-export const vehicles: Vehicle[] = [
-  { id:'V01', plate:'鲁A·A0001', model:'比亚迪 e6', status:'在途', driver:'张经理', soc:74, soh:91, odometer:28430, charge:'正常', location:[113.332,23.121], dept:'销售部', trip:'赴客户公司洽谈' },
-  { id:'V02', plate:'鲁A·A0002', model:'比亚迪 e6', status:'充电中', driver:'—',     soc:38, soh:88, odometer:31200, charge:'慢充', location:[113.341,23.118], dept:'—', trip:'—' },
-  { id:'V03', plate:'鲁A·A0003', model:'比亚迪 e6', status:'空闲',  driver:'—',     soc:95, soh:93, odometer:19870, charge:'正常', location:[113.338,23.113], dept:'—', trip:'—' },
-  { id:'V04', plate:'鲁A·A0004', model:'比亚迪 e6', status:'在途', driver:'李主任', soc:61, soh:85, odometer:45610, charge:'正常', location:[113.318,23.129], dept:'行政部', trip:'接送市局领导' },
-  { id:'V05', plate:'鲁A·A0005', model:'比亚迪 e6', status:'空闲',  driver:'—',     soc:82, soh:90, odometer:22100, charge:'正常', location:[113.345,23.107], dept:'—', trip:'—' },
-  { id:'V06', plate:'鲁A·A0006', model:'比亚迪 e6', status:'维保中', driver:'—',    soc:55, soh:78, odometer:58200, charge:'注意', location:[113.330,23.115], dept:'—', trip:'定期保养' },
-  { id:'V07', plate:'鲁A·A0007', model:'比亚迪 e6', status:'在途', driver:'王工程师',soc:29, soh:92, odometer:17320, charge:'低电警告', location:[113.325,23.132], dept:'工程部', trip:'现场勘查' },
-  { id:'V08', plate:'鲁A·A0008', model:'比亚迪 e6', status:'空闲',  driver:'—',     soc:100,soh:95, odometer:8940,  charge:'正常', location:[113.352,23.110], dept:'—', trip:'—' },
-  { id:'V09', plate:'鲁A·A0009', model:'比亚迪 e6', status:'空闲',  driver:'—',     soc:88, soh:87, odometer:33500, charge:'正常', location:[113.336,23.120], dept:'—', trip:'—' },
-  { id:'V10', plate:'鲁A·A0010', model:'比亚迪 e6', status:'充电中', driver:'—',    soc:12, soh:83, odometer:41800, charge:'快充', location:[113.342,23.116], dept:'—', trip:'—' },
-]
-
-export const statusColor: Record<VehicleStatus, BadgeClass> = {
-  '在途': 'badge-blue',
-  '空闲': 'badge-green',
-  '充电中': 'badge-amber',
-  '维保中': 'badge-red',
-  '预约中': 'badge-purple',
-}
-
-export const socColor = (soc: number): string =>
-  soc > 60 ? 'text-emerald-600' : soc > 25 ? 'text-amber-500' : 'text-red-500'
-
-// ── 今日告警 ──────────────────────────────────────────
-export const alerts: Alert[] = [
-  { level:'red',  msg:'7号车(鲁A·A0007) 电量仅剩 29%，当前仍在行驶，请提示驾驶员尽快返回充电', time:'14:32' },
-  { level:'amber',msg:'6号车(鲁A·A0006) 电池健康度 78%，已进入预警区间，建议安排检测', time:'09:15' },
-  { level:'amber',msg:'10号车(鲁A·A0010) 电量极低(12%)，充电桩1号快充中', time:'08:45' },
-]
 
 // ── 审批申请 ─────────────────────────────────────────
 export const approvals: Approval[] = [

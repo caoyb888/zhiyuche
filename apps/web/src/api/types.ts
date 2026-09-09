@@ -81,3 +81,52 @@ export type NotifyChannel = Schemas['NotifyChannel']
 export type Template = Schemas['Template']
 export type TemplateCreate = Schemas['TemplateCreate']
 export type TemplateUpdate = Schemas['TemplateUpdate']
+
+// ── 车辆 ─────────────────────────────────────────────
+export type VehicleStatus = Schemas['VehicleStatusEnum']
+export type Vehicle = Schemas['Vehicle']
+export type VehicleBrief = Schemas['VehicleBrief']
+export type VehicleLive = Schemas['VehicleLive']
+export type VehicleCreate = Schemas['VehicleCreate']
+export type VehicleUpdate = Schemas['VehicleUpdate']
+/** 手动可切换的车辆状态（VehicleUpdate.status） */
+export type VehicleManualStatus = NonNullable<VehicleUpdate['status']>
+export type TelemetryPoint = Schemas['TelemetryPoint']
+
+// ── 网关设备 ──────────────────────────────────────────
+export type Device = Schemas['Device']
+export type DeviceStatus = Device['status']
+export type DeviceCreate = Schemas['DeviceCreate']
+export type DeviceUpdate = Schemas['DeviceUpdate']
+/** 新建 / 换密钥返回：设备 + 一次性 api_key */
+export type DeviceWithKey = Device & { api_key: string }
+
+// ── NFC 卡 ───────────────────────────────────────────
+export type Card = Schemas['Card']
+export type CardStatus = Card['status']
+export type CardCreate = Schemas['CardCreate']
+export type CardUpdate = Schemas['CardUpdate']
+
+// ── 充电桩 ────────────────────────────────────────────
+export type Pile = Schemas['Pile']
+export type PileStatus = Schemas['PileStatusEnum']
+export type PileType = Pile['type']
+export type PileCreate = Schemas['PileCreate']
+export type PileUpdate = Schemas['PileUpdate']
+/** 手动可设置的桩状态（PileUpdate.status） */
+export type PileManualStatus = NonNullable<PileUpdate['status']>
+
+// ── 行程（轨迹 / 事件，供地图组件与总览复用）────────────
+export type PlannedRoute = Schemas['PlannedRoute']
+export type TripTrack = Schemas['TripTrack']
+export type TrackPoint = TripTrack['points'][number]
+export type TripEvent = Schemas['TripEvent']
+export type TripEventType = TripEvent['type']
+export type TripSummary = Schemas['TripSummary']
+
+// ── 总览 ─────────────────────────────────────────────
+export type DashboardOverview = Schemas['DashboardOverview']
+export type DashboardEvent = DashboardOverview['recent_events'][number]
+
+// ── 通知 ─────────────────────────────────────────────
+export type Notification = Schemas['Notification']
