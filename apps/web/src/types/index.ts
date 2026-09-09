@@ -115,37 +115,6 @@ export interface AiReport {
   items: AiReportItem[]
 }
 
-// ── 充电 ─────────────────────────────────────────────
-export type ChargerStatus = '使用中' | '空闲' | '故障'
-
-export interface Charger {
-  id: string
-  name: string
-  /** 如 "快充 60kW" */
-  type: string
-  status: ChargerStatus
-  /** 正在充电的车牌，空闲时为 '—' */
-  vehicle: string
-  /** 当前车辆电量，未接入车辆时为 null */
-  soc: number | null
-  startTime: string
-  /** 本次已充电量 kWh */
-  energy: number
-  /** 本次费用 元 */
-  cost: number
-}
-
-export interface ChargeRecord {
-  date: string
-  plate: string
-  driver: string
-  pile: string
-  kwh: number
-  cost: number
-  duration: string
-  dept: string
-}
-
 // ── 告警 ─────────────────────────────────────────────
 export type AlertLevel = 'red' | 'amber'
 

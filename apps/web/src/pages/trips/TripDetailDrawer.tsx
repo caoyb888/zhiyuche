@@ -16,8 +16,10 @@ import Empty from '../../components/ui/Empty'
 import ErrorState from '../../components/ui/ErrorState'
 import Spinner from '../../components/ui/Spinner'
 import { usePermission } from '../../hooks/usePermission'
-import { formatDateTime, formatMinutes, formatMoney, formatNumber, text } from '../../utils/format'
+import { formatDateTime, formatMinutes, formatNumber } from '../../utils/format'
 import { TRIP_TYPE_BADGE, TRIP_TYPE_LABEL } from '../approval/style'
+import { tripBilling } from './costDetail'
+import CostDetailView from './CostDetailView'
 import { EVENT_LEVEL_CLASS, ROOF_SIGN_BADGE, ROOF_SIGN_LABEL, TRACK_MAX_POINTS, TRIP_SOURCE_LABEL, TRIP_STATUS_BADGE, TRIP_STATUS_LABEL, describeEvent, eventMeta, trackStep } from './style'
 import { CancelTripModal, EndTripModal } from './TripActionModals'
 
@@ -227,23 +229,7 @@ function DetailBody({ id, onClose }: { id: string; onClose: () => void }) {
 
       <section>
         <h4 className="mb-3 text-sm font-semibold text-slate-700">费用</h4>
-        {typeof t.cost === 'number' ? (
-          <div className="rounded-xl border border-slate-100">
-            {t.cost_detail &&
-              Object.entries(t.cost_detail).map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between border-b border-slate-50 px-4 py-2.5 text-sm">
-                  <span className="text-slate-600">{k}</span>
-                  <span className="text-slate-800">{typeof v === 'number' ? `¥ ${formatMoney(v)}` : text(typeof v === 'string' ? v : JSON.stringify(v))}</span>
-                </div>
-              ))}
-            <div className="flex items-center justify-between bg-brand-50 px-4 py-3">
-              <span className="font-semibold text-brand-800">合计</span>
-              <span className="text-lg font-bold text-brand-700">¥ {formatMoney(t.cost)}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400">待计费（费用规则在阶段 3 上线）</div>
-        )}
+        <CostDetailView cost={t.cost} detail={t.cost_detail} billing={tripBilling(t)} />
       </section>
 
       {hasActions && (

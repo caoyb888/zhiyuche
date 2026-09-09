@@ -1,7 +1,5 @@
 import type {
   AiReport,
-  ChargeRecord,
-  Charger,
   DailyUsagePoint,
   DeptPieSlice,
   DeptStat,
@@ -67,19 +65,3 @@ export const aiReport: AiReport = {
   ],
 }
 
-// ── 充电桩 ───────────────────────────────────────────
-export const chargers: Charger[] = [
-  { id:'CP-01', name:'1号快充桩', type:'快充 60kW', status:'使用中', vehicle:'鲁A·A0010', soc:12, startTime:'08:45', energy:9.2, cost:8.7 },
-  { id:'CP-02', name:'2号快充桩', type:'快充 60kW', status:'空闲', vehicle:'—', soc:null, startTime:'—', energy:0, cost:0 },
-  { id:'CP-03', name:'3号慢充桩', type:'慢充 7kW',  status:'使用中', vehicle:'鲁A·A0002', soc:38, startTime:'07:30', energy:8.4, cost:5.5 },
-  { id:'CP-04', name:'4号慢充桩', type:'慢充 7kW',  status:'空闲', vehicle:'—', soc:null, startTime:'—', energy:0, cost:0 },
-  { id:'CP-05', name:'5号慢充桩', type:'慢充 7kW',  status:'故障', vehicle:'—', soc:null, startTime:'—', energy:0, cost:0 },
-  { id:'CP-06', name:'6号慢充桩', type:'慢充 7kW',  status:'空闲', vehicle:'—', soc:null, startTime:'—', energy:0, cost:0 },
-]
-
-export const chargeHistory: ChargeRecord[] = [
-  { date:'2025-06-18', plate:'鲁A·A0010', driver:'周专员', pile:'1号快充桩', kwh:28.4, cost:18.5, duration:'42分钟', dept:'工程部' },
-  { date:'2025-06-18', plate:'鲁A·A0002', driver:'赵专员', pile:'3号慢充桩', kwh:21.7, cost:14.1, duration:'3.1小时', dept:'行政部' },
-  { date:'2025-06-17', plate:'鲁A·A0006', driver:'运营', pile:'2号快充桩', kwh:35.2, cost:22.9, duration:'58分钟', dept:'车队' },
-  { date:'2025-06-17', plate:'鲁A·A0003', driver:'张经理', pile:'3号慢充桩', kwh:18.6, cost:12.1, duration:'2.7小时', dept:'销售部' },
-]

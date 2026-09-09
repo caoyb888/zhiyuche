@@ -152,3 +152,55 @@ export type DashboardEvent = DashboardOverview['recent_events'][number]
 
 // ── 通知 ─────────────────────────────────────────────
 export type Notification = Schemas['Notification']
+
+// ── 充电（阶段 3）───────────────────────────────────────
+export type ChargeStatus = Schemas['ChargeStatus']
+export type ConnectorStatus = Schemas['ConnectorStatus']
+export type PileLive = Schemas['PileLive']
+export type PileLiveConnector = PileLive['connectors'][number]
+export type ChargeTransaction = Schemas['ChargeTransaction']
+export type ChargeReviewStatus = ChargeTransaction['review_status']
+export type ChargeBindMethod = NonNullable<ChargeTransaction['bind_method']>
+export type MeterValue = Schemas['MeterValue']
+export type ChargingSummary = Schemas['ChargingSummary']
+export type ChargingPileStat = NonNullable<ChargingSummary['by_pile']>[number]
+export type AccountLevel = Schemas['AccountLevel']
+
+// ── 计费明细（trips.cost_detail：billing/engine.Result 的 JSON）──
+export type CostLineKind = 'base' | 'multiplier' | 'cap' | 'surcharge' | 'electricity' | 'penalty'
+export interface CostLine {
+  /** 里程费 / 时长费 / 电费 / 时段系数 / 低电附加 / 超速罚金 ... */
+  item: string
+  kind: CostLineKind
+  /** km / h / kWh / 次 */
+  qty: number
+  unit: string
+  /** 元/单位（系数行为 factor） */
+  unit_price: number
+  /** 元；罚金为正数单列，减免为负 */
+  amount: number
+  note?: string
+}
+export interface CostDetail {
+  rule_name: string
+  lines: CostLine[]
+  /** 里程费 + 时长费（未乘系数） */
+  base: number
+  /** 命中的时段系数（无则 1） */
+  multiplier: number
+  cap_applied: boolean
+  surcharge: number
+  electricity: number
+  penalty: number
+  total: number
+  /** 扣费账户级别 */
+  attribution: AccountLevel | string
+}
+/** 契约暂未收录、后端 trips 表已有的计费字段（migration 00004），返回时展示 */
+export interface TripBillingExt {
+  billing_status?: 'pending' | 'charged' | 'skipped' | 'failed' | string | null
+  billing_error?: string | null
+  account_id?: string | null
+  account_txn_id?: number | null
+  billed_at?: string | null
+}

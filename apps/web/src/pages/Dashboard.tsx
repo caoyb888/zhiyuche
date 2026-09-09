@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { AlertTriangle, Car, ChevronRight, ClipboardCheck, Cpu, Route, WifiOff, Wrench, Zap, type LucideIcon } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { chargingKeys, getChargingSummary } from '../api/charging'
 import { errorMessage } from '../api/client'
 import { dashboardKeys, getDashboardOverview } from '../api/dashboard'
 import type { DashboardEvent, DashboardOverview, TripEventType, VehicleLive } from '../api/types'
@@ -11,6 +12,7 @@ import VehicleMap from '../components/map/VehicleMap'
 import Empty from '../components/ui/Empty'
 import ErrorState from '../components/ui/ErrorState'
 import Spinner from '../components/ui/Spinner'
+import { usePermission } from '../hooks/usePermission'
 import { useRealtimeStore } from '../store/realtime'
 import { formatDateTime, text } from '../utils/format'
 
@@ -77,6 +79,59 @@ function countsFromLive(list: VehicleLive[]): DashboardOverview['vehicles'] {
     if (v.status !== 'disabled' && !v.online) c.offline += 1
   }
   return c
+}
+
+/** 充电统计卡：充电中事务数 / 今日充电 kWh（GET /charging/summary，需 charging:view），点击进入充电管理 */
+function ChargingCard() {
+  const { can } = usePermission()
+  const enabled = can('charging:view')
+  const summary = useQuery({ queryKey: chargingKeys.summary(), queryFn: () => getChargingSummary(), enabled, staleTime: 30_000, refetchInterval: 60_000 })
+  const s = summary.data
+  const body = (
+    <>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-slate-700">充电</h2>
+        {enabled ? <ChevronRight size={16} className="text-slate-300" /> : <Zap size={15} className="text-slate-300" />}
+      </div>
+      {!enabled ? (
+        <div className="py-4 text-center text-xs text-slate-400">无充电管理权限</div>
+      ) : s ? (
+        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
+          <div>
+            <div className={clsx('text-xl font-semibold', s.ongoing > 0 ? 'text-amber-600' : 'text-slate-800')}>{s.ongoing}</div>
+            <div className="text-xs text-slate-400">充电中</div>
+          </div>
+          <div>
+            <div className="text-xl font-semibold text-slate-800">{(s.today?.kwh ?? 0).toFixed(1)}</div>
+            <div className="text-xs text-slate-400">今日充电 kWh（{s.today?.sessions ?? 0} 次）</div>
+          </div>
+          <div>
+            <div className="text-xl font-semibold text-slate-800">
+              {s.piles?.online ?? 0}
+              <span className="text-sm font-normal text-slate-400"> / {s.piles?.total ?? 0}</span>
+            </div>
+            <div className="text-xs text-slate-400">桩在线{(s.piles?.faulted ?? 0) > 0 && <span className="ml-1 text-red-500">故障 {s.piles?.faulted}</span>}</div>
+          </div>
+          <div>
+            <div className={clsx('text-xl font-semibold', s.pending_review > 0 ? 'text-red-600' : 'text-slate-800')}>{s.pending_review}</div>
+            <div className="text-xs text-slate-400">待复核</div>
+          </div>
+        </div>
+      ) : summary.isPending ? (
+        <div className="flex justify-center py-6">
+          <Spinner size="sm" />
+        </div>
+      ) : (
+        <div className="py-4 text-center text-xs text-slate-400">{summary.isError ? '充电汇总暂不可用' : '暂无数据'}</div>
+      )}
+    </>
+  )
+  if (!enabled) return <div className="card p-4">{body}</div>
+  return (
+    <Link to="/charging" className="card block p-4 transition-colors hover:border-brand-200">
+      {body}
+    </Link>
+  )
 }
 
 function StatTile({ s }: { s: StatCard }) {
@@ -239,6 +294,8 @@ export default function Dashboard() {
               <div className="py-4 text-center text-xs text-slate-400">暂无数据</div>
             )}
           </div>
+
+          <ChargingCard />
 
           <div className="card p-4">
             <div className="flex items-center justify-between">
