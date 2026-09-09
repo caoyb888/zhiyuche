@@ -79,6 +79,34 @@ func (s *store) list(ctx context.Context, tenantID uuid.UUID, q ListQuery, pg pa
 	return rows, total, nil
 }
 
+// options returns active users of the tenant as a brief list for pickers.
+func (s *store) options(ctx context.Context, tenantID uuid.UUID, q OptionsQuery) ([]UserOption, error) {
+	where := []string{"u.tenant_id = $1", "u.status = 'active'"}
+	args := []any{tenantID}
+	if kw := strings.TrimSpace(q.Keyword); kw != "" {
+		args = append(args, "%"+kw+"%")
+		where = append(where, fmt.Sprintf("(u.username ILIKE $%[1]d OR u.name ILIKE $%[1]d OR u.phone ILIKE $%[1]d)", len(args)))
+	}
+	if q.DeptID != "" {
+		if id, err := uuid.Parse(q.DeptID); err == nil {
+			args = append(args, id)
+			where = append(where, fmt.Sprintf("u.dept_id IN (SELECT id FROM departments WHERE deleted_at IS NULL AND path LIKE (SELECT path FROM departments WHERE id = $%d) || '%%')", len(args)))
+		}
+	}
+	limit := q.Limit
+	if limit == 0 {
+		limit = 50
+	}
+	args = append(args, limit)
+	rows := []UserOption{}
+	err := pgxscan.Select(ctx, s.db, &rows, fmt.Sprintf(`
+		SELECT u.id, u.name, u.username, d.name AS dept_name, u.phone
+		FROM users u LEFT JOIN departments d ON d.id = u.dept_id
+		WHERE u.deleted_at IS NULL AND %s
+		ORDER BY u.name LIMIT $%d`, strings.Join(where, " AND "), len(args)), args...)
+	return rows, err
+}
+
 func (s *store) get(ctx context.Context, tenantID, id uuid.UUID) (*User, error) {
 	var u User
 	err := pgxscan.Get(ctx, s.db, &u, baseSelect+` AND u.tenant_id = $1 AND u.id = $2`, tenantID, id)

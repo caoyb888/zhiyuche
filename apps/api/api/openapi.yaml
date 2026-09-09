@@ -182,6 +182,22 @@ paths:
       responses:
         '201': { $ref: '#/components/responses/User' }
         '409': { $ref: '#/components/responses/Error' }
+  /system/users/options:
+    get:
+      tags: [users]
+      summary: 用户简表（任何登录用户；用于选随行人员/驾驶员/审批人）
+      operationId: listUserOptions
+      parameters:
+        - { name: keyword, in: query, schema: { type: string }, description: 用户名/姓名/手机号 模糊 }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid }, description: 含子部门 }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+      responses:
+        '200':
+          description: 在职用户简表（按姓名排序）
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/UserBrief' } } } } ]
   /system/users/{id}:
     parameters: [ { $ref: '#/components/parameters/id' } ]
     get:

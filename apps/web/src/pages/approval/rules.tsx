@@ -159,7 +159,7 @@ function RulesForm({ rules }: { rules: ApprovalRules }) {
           <p className="mt-0.5 text-xs text-slate-400">一级审批人为申请人所在部门负责人（逐级向上，跳过本人）；找不到时回退到持有指定角色的用户</p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField name="level2_approver" label="二级审批人" hint={canSearchUsers ? '可清空；配置了触发条件时必填' : '需要「用户管理-查看」权限才能搜索用户'}>
+          <FormField name="level2_approver" label="二级审批人" hint="可清空；配置了触发条件时必填">
             {({ id, invalid }) => <Controller control={form.control} name="level2_approver" render={({ field }) => <UserPicker id={id} invalid={invalid} value={field.value} onChange={field.onChange} placeholder="搜索并指定二级审批人" />} />}
           </FormField>
           <FormField name="fallback_approver_role" label="回退审批角色" required hint={roleAsSelect ? '按角色编码匹配，取该角色下最早创建的在职用户' : '填写角色编码（如 approver）'}>

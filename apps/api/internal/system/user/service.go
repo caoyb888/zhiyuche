@@ -32,6 +32,10 @@ func (s *Service) List(ctx context.Context, tenantID uuid.UUID, q ListQuery, pg 
 	return pagination.NewPage(rows, total, pg), nil
 }
 
+func (s *Service) Options(ctx context.Context, tenantID uuid.UUID, q OptionsQuery) ([]UserOption, error) {
+	return s.store.options(ctx, tenantID, q)
+}
+
 func (s *Service) Get(ctx context.Context, tenantID, id uuid.UUID) (*User, error) {
 	u, err := s.store.get(ctx, tenantID, id)
 	if err != nil {

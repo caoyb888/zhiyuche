@@ -331,7 +331,7 @@ function StartTripForm({ a, onClose, onSuccess }: { a: Approval; onClose: () => 
   const { can } = usePermission()
   const [driver, setDriver] = useState<UserBrief | null>(a.applicant)
   const [remark, setRemark] = useState('')
-  const canPickDriver = can('system:user:view')
+  const canPickDriver = can('trip:manage')
 
   const mutation = useMutation({
     mutationFn: () => startTrip({ approval_id: a.id, driver_id: driver && driver.id !== a.applicant.id ? driver.id : undefined, remark: remark.trim() || undefined }),

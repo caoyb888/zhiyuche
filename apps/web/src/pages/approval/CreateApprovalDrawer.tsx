@@ -147,7 +147,8 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
   const profile = useAuthStore((s) => s.profile)
   const { engine, loadAMap } = useMapEngine()
   const canManage = can('approval:manage')
-  const canSearchUsers = can('system:user:view')
+  // 用户简表接口对任何登录用户开放，选人不再依赖用户管理权限
+  const canSearchUsers = can('approval:view')
   const canSeeLive = can('asset:vehicle:view')
 
   const form = useForm<ApprovalFormValues>({ resolver: zodResolver(approvalFormSchema), defaultValues: defaultApprovalForm() })

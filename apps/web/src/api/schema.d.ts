@@ -161,6 +161,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system/users/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 用户简表（任何登录用户；用于选随行人员/驾驶员/审批人） */
+        get: operations["listUserOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/system/users/{id}": {
         parameters: {
             query?: never;
@@ -1453,7 +1470,8 @@ export interface paths {
         };
         /**
          * WebSocket 实时推送
-         * @description `GET /api/v1/ws?access_token=<jwt>` 升级为 WebSocket。服务端消息为 JSON `{type, ts, data}`：
+         * @description `GET /api/v1/ws?access_token=<jwt>` 升级为 WebSocket；超级管理员可加 `&tenant_id=<uuid>` 订阅指定租户。
+         *     服务端消息为 JSON `{type, ts, data}`（`vehicle.status` 的 data 为 VehicleLive）：
          *     `vehicle.status`（租户）、`trip.started`/`trip.ended`/`trip.event`（租户）、`approval.updated`（租户）、
          *     `notification.new`（仅本人）、`device.online`（租户）。客户端可发送 `{"type":"ping"}` 得到 `{"type":"pong"}`。
          */
@@ -3186,6 +3204,34 @@ export interface operations {
         responses: {
             201: components["responses"]["User"];
             409: components["responses"]["Error"];
+        };
+    };
+    listUserOptions: {
+        parameters: {
+            query?: {
+                /** @description 用户名/姓名/手机号 模糊 */
+                keyword?: string;
+                /** @description 含子部门 */
+                dept_id?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 在职用户简表（按姓名排序） */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["UserBrief"][];
+                    };
+                };
+            };
         };
     };
     getUser: {

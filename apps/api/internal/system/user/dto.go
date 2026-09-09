@@ -43,6 +43,21 @@ type ListQuery struct {
 	RoleID  string `form:"role_id"`
 }
 
+// OptionsQuery / UserOption back GET /system/users/options (any authenticated user).
+type OptionsQuery struct {
+	Keyword string `form:"keyword" binding:"max=64"`
+	DeptID  string `form:"dept_id"`
+	Limit   int    `form:"limit" binding:"omitempty,min=1,max=200"`
+}
+
+type UserOption struct {
+	ID       uuid.UUID `json:"id" db:"id"`
+	Name     string    `json:"name" db:"name"`
+	Username string    `json:"username" db:"username"`
+	DeptName *string   `json:"dept_name" db:"dept_name"`
+	Phone    *string   `json:"phone" db:"phone"`
+}
+
 type CreateRequest struct {
 	Username   string      `json:"username" binding:"required,min=2,max=64"`
 	Name       string      `json:"name" binding:"required,min=1,max=64"`

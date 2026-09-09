@@ -98,7 +98,7 @@ export default function TripsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const canAll = can(['trip:manage', 'trip:export'])
   const canExport = can('trip:export')
-  const canPickDriver = can('system:user:view')
+  const canPickDriver = can('trip:manage') || can('trip:export')
   const canPickVehicle = can('asset:vehicle:view')
 
   const rawScope = searchParams.get('scope')

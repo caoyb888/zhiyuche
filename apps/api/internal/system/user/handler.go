@@ -16,6 +16,8 @@ const module = "system.user"
 func Register(g *gin.RouterGroup, a *app.App) {
 	h := &handler{svc: NewService(a)}
 	r := g.Group("/system/users")
+	// 简表：任何登录用户可用（选随行人员、驾驶员、审批人等），只暴露 id/姓名/用户名/部门/手机
+	r.GET("/options", h.options)
 	r.GET("", auth.Require("system:user:view"), h.list)
 	r.GET("/:id", auth.Require("system:user:view"), h.get)
 	r.POST("", auth.Require("system:user:create"), h.create)
@@ -28,6 +30,20 @@ func Register(g *gin.RouterGroup, a *app.App) {
 }
 
 type handler struct{ svc *Service }
+
+func (h *handler) options(c *gin.Context) {
+	var q OptionsQuery
+	if err := httpx.BindQuery(c, &q); err != nil {
+		httpx.Fail(c, err)
+		return
+	}
+	rows, err := h.svc.Options(c.Request.Context(), auth.TenantID(c), q)
+	if err != nil {
+		httpx.Fail(c, err)
+		return
+	}
+	httpx.OK(c, rows)
+}
 
 func (h *handler) list(c *gin.Context) {
 	var q ListQuery

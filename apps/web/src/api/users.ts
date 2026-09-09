@@ -1,5 +1,5 @@
 import { compactParams, del, download, get, post, put, type DownloadedFile } from './client'
-import type { ImportResult, Page, PageQuery, User, UserCreate, UserStatus, UserUpdate } from './types'
+import type { ImportResult, Page, PageQuery, User, UserBrief, UserCreate, UserStatus, UserUpdate } from './types'
 
 /** GET /system/users 的筛选条件（不含分页） */
 export interface UserFilter {
@@ -12,14 +12,26 @@ export interface UserFilter {
 
 export type UserListParams = UserFilter & PageQuery
 
+export interface UserOptionsParams {
+  keyword?: string
+  /** 含子部门 */
+  dept_id?: string
+  limit?: number
+}
+
 export const userKeys = {
   all: ['users'] as const,
   list: (params: UserListParams) => ['users', 'list', params] as const,
+  options: (params: UserOptionsParams) => ['users', 'options', params] as const,
   detail: (id: string) => ['users', 'detail', id] as const,
 }
 
 export const listUsers = (params: UserListParams): Promise<Page<User>> =>
   get<Page<User>>('/system/users', { params: compactParams(params) })
+
+/** GET /system/users/options：任何登录用户可用的在职用户简表（选人控件用） */
+export const listUserOptions = (params: UserOptionsParams): Promise<UserBrief[]> =>
+  get<UserBrief[]>('/system/users/options', { params: compactParams(params) })
 
 export const getUser = (id: string): Promise<User> => get<User>(`/system/users/${id}`)
 

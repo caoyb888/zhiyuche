@@ -11,11 +11,17 @@ $list = Join-Path ([System.IO.Path]::GetTempPath()) "zuche-sync-files.txt"
 
 # -c: 已跟踪  -o: 未跟踪  --exclude-standard: 尊重 .gitignore
 $files = git -C $root ls-files -co --exclude-standard
-[System.IO.File]::WriteAllLines($list, $files, (New-Object System.Text.UTF8Encoding($false)))
+# 必须写 LF 行尾：远程 comm/sort 逐行比对，CRLF 会让每一行都不匹配
+[System.IO.File]::WriteAllText($list, (($files -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
 Write-Host ("sync {0} files -> {1}:{2}" -f $files.Count, $Target, $Dir)
 
 # 用 cmd 做二进制管道，PowerShell 管道会破坏 tar 字节流
 $cmd = "tar -C `"$root`" -cf - -T `"$list`" | ssh -o BatchMode=yes $Target `"mkdir -p $Dir && tar -xf - -C $Dir`""
 cmd /c $cmd
 if ($LASTEXITCODE -ne 0) { throw "sync failed (exit $LASTEXITCODE)" }
+
+# 删除远程仍被 git 跟踪、但本地已不存在的文件（tar 只增不删，否则旧文件会让编译失败）
+scp -q -o BatchMode=yes $list "${Target}:/tmp/zuche-sync-list.txt"
+scp -q -o BatchMode=yes (Join-Path $PSScriptRoot "remote-prune.sh") "${Target}:/tmp/zuche-prune.sh"
+ssh -o BatchMode=yes $Target "sed -i 's/\r$//' /tmp/zuche-prune.sh && bash /tmp/zuche-prune.sh $Dir /tmp/zuche-sync-list.txt"
 Write-Host "done"

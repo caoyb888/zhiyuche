@@ -3,10 +3,9 @@ import clsx from 'clsx'
 import { ChevronDown, Search, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { errorMessage } from '../api/client'
-import type { User, UserBrief } from '../api/types'
-import { listUsers, userKeys } from '../api/users'
+import type { UserBrief } from '../api/types'
+import { listUserOptions, userKeys } from '../api/users'
 import { useDebounce } from '../hooks/useDebounce'
-import { usePermission } from '../hooks/usePermission'
 import Spinner from './ui/Spinner'
 import { controlClass } from './ui/styles'
 
@@ -36,28 +35,22 @@ export type UserPickerProps = SingleProps | MultipleProps
 
 const PAGE_SIZE = 20
 
-function toUserBrief(u: User): UserBrief {
-  return { id: u.id, name: u.name, username: u.username, dept_name: u.dept_name ?? null, phone: u.phone ?? null }
-}
-
 /**
- * 用户搜索选择（单选 / 多选）：关键字防抖后调用 GET /system/users（需 system:user:view）。
- * 无权限时控件禁用并提示，以免请求 403；已选值仍可显示与清除。
+ * 用户搜索选择（单选 / 多选）：关键字防抖后调用 GET /system/users/options
+ * （任何登录用户可用的在职用户简表，不需要 system:user:view）。
  */
 export default function UserPicker(props: UserPickerProps) {
   const { placeholder = '搜索姓名 / 用户名', disabled, invalid, id, className, excludeIds } = props
-  const { can } = usePermission()
-  const canSearch = can('system:user:view')
   const [open, setOpen] = useState(false)
   const [keyword, setKeyword] = useState('')
   const debounced = useDebounce(keyword.trim(), 300)
   const rootRef = useRef<HTMLDivElement>(null)
 
-  const params = { keyword: debounced || undefined, status: 'active' as const, page: 1, pageSize: PAGE_SIZE }
+  const params = { keyword: debounced || undefined, limit: PAGE_SIZE }
   const query = useQuery({
-    queryKey: userKeys.list(params),
-    queryFn: () => listUsers(params),
-    enabled: open && canSearch,
+    queryKey: userKeys.options(params),
+    queryFn: () => listUserOptions(params),
+    enabled: open,
     staleTime: 60_000,
   })
 
@@ -86,8 +79,8 @@ export default function UserPicker(props: UserPickerProps) {
   }, [open, close])
 
   const selectedIds = new Set(props.multiple ? props.value.map((u) => u.id) : props.value ? [props.value.id] : [])
-  const items = (query.data?.items ?? []).map(toUserBrief).filter((u) => !excludeIds?.has(u.id))
-  const isDisabled = disabled || !canSearch
+  const items = (query.data ?? []).filter((u) => !excludeIds?.has(u.id))
+  const isDisabled = disabled
 
   const pick = (u: UserBrief) => {
     if (props.multiple) {
@@ -117,7 +110,7 @@ export default function UserPicker(props: UserPickerProps) {
         aria-invalid={invalid || undefined}
         onClick={() => (open ? close() : setOpen(true))}
         className={controlClass(invalid, 'min-h-[2.25rem] py-1 pl-3 pr-14 text-left flex items-center')}
-        title={!canSearch ? '需要「用户管理-查看」权限才能搜索用户' : undefined}
+        title={undefined}
       >
         {props.multiple ? (
           props.value.length > 0 ? (
@@ -142,7 +135,7 @@ export default function UserPicker(props: UserPickerProps) {
               ))}
             </span>
           ) : (
-            <span className="text-slate-400">{canSearch ? placeholder : '无用户搜索权限'}</span>
+            <span className="text-slate-400">{placeholder}</span>
           )
         ) : props.value ? (
           <span className="truncate">
@@ -150,7 +143,7 @@ export default function UserPicker(props: UserPickerProps) {
             {props.value.dept_name && <span className="ml-1 text-xs text-slate-400">{props.value.dept_name}</span>}
           </span>
         ) : (
-          <span className="text-slate-400">{canSearch ? placeholder : '无用户搜索权限'}</span>
+          <span className="text-slate-400">{placeholder}</span>
         )}
       </button>
       <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5">
@@ -206,7 +199,7 @@ export default function UserPicker(props: UserPickerProps) {
                 )
               })
             )}
-            {query.data && query.data.total > PAGE_SIZE && <li className="px-3 py-1.5 text-center text-[11px] text-slate-400">仅显示前 {PAGE_SIZE} 条，请输入更精确的关键字</li>}
+            {query.data && query.data.length >= PAGE_SIZE && <li className="px-3 py-1.5 text-center text-[11px] text-slate-400">仅显示前 {PAGE_SIZE} 条，请输入更精确的关键字</li>}
           </ul>
         </div>
       )}
