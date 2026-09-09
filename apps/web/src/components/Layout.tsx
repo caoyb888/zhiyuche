@@ -6,10 +6,13 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout as apiLogout } from '../api/auth'
 import { getHealth } from '../api/system'
 import type { MenuNode } from '../api/types'
+import { useWebSocket } from '../hooks/useWebSocket'
 import { findAppRoute } from '../router/routes'
 import { useAuthStore } from '../store/auth'
 import ChangePasswordModal from './ChangePasswordModal'
+import MapProvider from './map/MapProvider'
 import MenuIcon from './MenuIcon'
+import NotificationBell from './NotificationBell'
 import TenantSwitcher from './TenantSwitcher'
 
 /** 后端连接状态 */
@@ -183,6 +186,9 @@ export default function Layout() {
   const [backend, setBackend] = useState<BackendStatus>({ kind: 'checking' })
   const [pwdOpen, setPwdOpen] = useState(false)
 
+  // 登录期间维持 WebSocket 实时推送；退出（token 清空）或 Layout 卸载时断开
+  useWebSocket()
+
   useEffect(() => {
     let cancelled = false
     const poll = async () => {
@@ -267,12 +273,15 @@ export default function Layout() {
           <div className="flex items-center gap-3 shrink-0">
             <TenantSwitcher />
             <BackendBadge status={backend} />
+            <NotificationBell />
             <UserMenu onChangePassword={() => setPwdOpen(true)} onLogout={() => logout.mutate()} loggingOut={logout.isPending} />
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <Outlet />
+          <MapProvider>
+            <Outlet />
+          </MapProvider>
         </main>
 
         {/* ── Mobile Bottom Nav：一级菜单前 5 个 ── */}

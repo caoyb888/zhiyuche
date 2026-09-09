@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
+          // /api/v1/ws 的 WebSocket 升级同样经代理转发
+          ws: true,
         },
       },
     },

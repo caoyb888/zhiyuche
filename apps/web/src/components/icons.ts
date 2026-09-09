@@ -1,8 +1,12 @@
 import {
   BarChart2,
+  Bell,
   BookOpen,
   Building2,
+  Car,
   Circle,
+  Cpu,
+  CreditCard,
   FileText,
   HeartPulse,
   KeyRound,
@@ -10,6 +14,7 @@ import {
   Map,
   MessageSquare,
   Network,
+  PlugZap,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -40,6 +45,12 @@ const menuIcons: Record<string, LucideIcon> = {
   MessageSquare,
   ScrollText,
   Building2,
+  // 资产管理 / 通知
+  Car,
+  Cpu,
+  CreditCard,
+  PlugZap,
+  Bell,
 }
 
 /** 按名称取图标，未知名称回退为 Circle */

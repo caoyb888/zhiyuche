@@ -17,6 +17,13 @@ export const appRoutes: AppRoute[] = [
   { path: '/reports', perm: 'report:view', title: '费用报表', description: '部门费用分析', component: lazy(() => import('../pages/Reports')) },
   { path: '/health', perm: 'health:view', title: '车辆健康', description: 'AI 诊断', component: lazy(() => import('../pages/Health')) },
   { path: '/charging', perm: 'charging:view', title: '充电管理', description: '充电桩状态', component: lazy(() => import('../pages/Charging')) },
+  // ---- 资产管理（path 与 registry.go 的菜单 Path 一致）----
+  { path: '/assets/vehicles', perm: 'asset:vehicle:view', title: '车辆档案', description: '车辆基础信息与实时状态', component: lazy(() => import('../pages/assets/vehicles')) },
+  { path: '/assets/devices', perm: 'asset:device:view', title: '网关设备', description: '车载网关与接入密钥', component: lazy(() => import('../pages/assets/devices')) },
+  { path: '/assets/cards', perm: 'asset:card:view', title: 'NFC 卡', description: '刷卡取车用卡片', component: lazy(() => import('../pages/assets/cards')) },
+  { path: '/assets/piles', perm: 'asset:pile:view', title: '充电桩档案', description: '桩位、功率与状态', component: lazy(() => import('../pages/assets/piles')) },
+  // ---- 个人（无需权限码）----
+  { path: '/notifications', perm: '', title: '通知中心', description: '站内通知', component: lazy(() => import('../pages/notifications')) },
   // ---- 系统管理（path 与 apps/api/internal/perm/registry.go 的菜单 Path 一致）----
   { path: '/system/users', perm: 'system:user:view', title: '用户管理', description: '账号、角色与部门归属', component: lazy(() => import('../pages/system/users')) },
   { path: '/system/depts', perm: 'system:dept:view', title: '部门管理', description: '组织架构与预算', component: lazy(() => import('../pages/system/depts')) },
