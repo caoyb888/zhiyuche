@@ -1,5 +1,6 @@
 import { useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { chargingKeys } from '../api/charging'
 import { dashboardKeys } from '../api/dashboard'
 import { deviceKeys } from '../api/devices'
 import { notificationKeys } from '../api/notifications'
@@ -121,6 +122,10 @@ function handleEvent(raw: unknown, queryClient: QueryClient, toast: ToastApi): v
     case 'trip.event':
       invalidate(TRIP_KEY, dashboardKeys.all)
       break
+    case 'charging.updated':
+      // 桩 / 连接器状态、事务进度或复核结果变化：失效 ['charging'] 前缀（桩实时视图、记录、详情、汇总）
+      invalidate(chargingKeys.all, dashboardKeys.all)
+      break
     case 'device.online': {
       invalidate(deviceKeys.all, dashboardKeys.all)
       if (isRecord(ev.data)) {
@@ -141,7 +146,7 @@ function handleEvent(raw: unknown, queryClient: QueryClient, toast: ToastApi): v
  * - 地址 `${VITE_WS_URL ?? 推导}/ws?access_token=`；每 25s 发 `{"type":"ping"}`
  * - 断线指数退避重连（1s → 30s，带抖动）；access token 变化（刷新 / 换账号）时用新 token 重连
  * - 退出登录（token 清空）或 Layout 卸载时断开
- * - 事件分发：vehicle.status 就地更新缓存；notification.new 未读 +1 并 Toast；其余失效对应 query
+ * - 事件分发：vehicle.status 就地更新缓存；notification.new 未读 +1 并 Toast；charging.updated 失效 ['charging']；其余失效对应 query
  */
 export function useWebSocket(): void {
   const queryClient = useQueryClient()
