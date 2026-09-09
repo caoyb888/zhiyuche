@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { Building2, ChevronDown, KeyRound, LogOut } from 'lucide-react'
+import { Building2, ChevronDown, KeyRound, LogOut, Wallet } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout as apiLogout } from '../api/auth'
@@ -99,7 +99,7 @@ function SidebarGroup({ node, pathname }: { node: MenuNode; pathname: string }) 
 }
 
 /** 顶栏用户下拉 */
-function UserMenu({ onChangePassword, onLogout, loggingOut }: { onChangePassword: () => void; onLogout: () => void; loggingOut: boolean }) {
+function UserMenu({ onChangePassword, onMyAccount, onLogout, loggingOut }: { onChangePassword: () => void; onMyAccount: () => void; onLogout: () => void; loggingOut: boolean }) {
   const profile = useAuthStore((s) => s.profile)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -143,6 +143,18 @@ function UserMenu({ onChangePassword, onLogout, loggingOut }: { onChangePassword
               {profile.is_super && <span className="badge-purple ml-1">平台管理员</span>}
             </div>
           </div>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false)
+              onMyAccount()
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            <Wallet size={15} className="text-slate-400" />
+            我的账户
+          </button>
           <button
             type="button"
             role="menuitem"
@@ -274,7 +286,7 @@ export default function Layout() {
             <TenantSwitcher />
             <BackendBadge status={backend} />
             <NotificationBell />
-            <UserMenu onChangePassword={() => setPwdOpen(true)} onLogout={() => logout.mutate()} loggingOut={logout.isPending} />
+            <UserMenu onChangePassword={() => setPwdOpen(true)} onMyAccount={() => navigate('/me/account')} onLogout={() => logout.mutate()} loggingOut={logout.isPending} />
           </div>
         </header>
 

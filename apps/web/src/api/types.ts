@@ -152,3 +152,34 @@ export type DashboardEvent = DashboardOverview['recent_events'][number]
 
 // ── 通知 ─────────────────────────────────────────────
 export type Notification = Schemas['Notification']
+
+// ── 计费规则 ──────────────────────────────────────────
+export type BillingRuleDoc = Schemas['BillingRuleDoc']
+export type BillingBaseRate = BillingRuleDoc['base_rate']
+export type BillingEVSpecific = NonNullable<BillingRuleDoc['ev_specific']>
+export type BillingTimeMultiplier = NonNullable<BillingRuleDoc['time_multipliers']>[number]
+export type BillingPenaltyRule = NonNullable<BillingRuleDoc['penalty_rules']>[number]
+export type BillingPenaltyType = BillingPenaltyRule['type']
+export type BillingRule = Schemas['BillingRule']
+export type BillingRuleCreate = Schemas['BillingRuleCreate']
+export type BillingRuleUpdate = Schemas['BillingRuleUpdate']
+export type BillingTripInput = Schemas['BillingTripInput']
+export type BillingLine = Schemas['BillingLine']
+export type BillingLineKind = BillingLine['kind']
+export type BillingResult = Schemas['BillingResult']
+
+// ── 账户与流水 ────────────────────────────────────────
+export type AccountLevel = Schemas['AccountLevel']
+export type TransactionType = Schemas['TransactionType']
+export type Account = Schemas['Account']
+export type AccountStatus = Account['status']
+export type AccountNode = Schemas['AccountNode']
+export type AccountTransaction = Schemas['AccountTransaction']
+/** GET /billing/accounts/me：账户 + 最近流水 */
+export type MyAccount = Account & { transactions?: AccountTransaction[] }
+
+// ── 月度结算 ──────────────────────────────────────────
+export type Settlement = Schemas['Settlement']
+export type SettlementStatus = Settlement['status']
+export type SettlementLine = Schemas['SettlementLine']
+export type SettlementLineKind = SettlementLine['kind']

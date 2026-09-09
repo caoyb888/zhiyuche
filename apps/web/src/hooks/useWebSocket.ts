@@ -30,6 +30,8 @@ const RECONNECT_MAX_MS = 30_000
 /** 审批 / 行程页面（后续任务）约定使用的 query key 前缀 */
 const APPROVAL_KEY = ['approvals'] as const
 const TRIP_KEY = ['trips'] as const
+/** 计费（规则 / 账户 / 流水 / 结算）query key 前缀，见 api/billing.ts billingKeys */
+const BILLING_KEY = ['billing'] as const
 
 /**
  * WebSocket 地址：VITE_WS_URL（完整地址）优先；否则按当前页面协议/主机 + VITE_API_BASE + /ws 推导，
@@ -120,6 +122,10 @@ function handleEvent(raw: unknown, queryClient: QueryClient, toast: ToastApi): v
     case 'trip.ended':
     case 'trip.event':
       invalidate(TRIP_KEY, dashboardKeys.all)
+      break
+    case 'account.updated':
+      // 账户余额 / 流水变化（扣费、充值、划拨、结算）：账户树、流水、我的账户、结算单整体失效
+      invalidate(BILLING_KEY)
       break
     case 'device.online': {
       invalidate(deviceKeys.all, dashboardKeys.all)

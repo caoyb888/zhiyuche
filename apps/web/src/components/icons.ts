@@ -3,6 +3,7 @@ import {
   Bell,
   BookOpen,
   Building2,
+  Calculator,
   Car,
   Circle,
   Cpu,
@@ -15,11 +16,13 @@ import {
   MessageSquare,
   Network,
   PlugZap,
+  Receipt,
   ScrollText,
   Settings,
   ShieldCheck,
   SlidersHorizontal,
   Users,
+  Wallet,
   Zap,
   type LucideIcon,
 } from 'lucide-react'
@@ -51,6 +54,10 @@ const menuIcons: Record<string, LucideIcon> = {
   CreditCard,
   PlugZap,
   Bell,
+  // 计费账户
+  Wallet,
+  Calculator,
+  Receipt,
 }
 
 /** 按名称取图标，未知名称回退为 Circle */
