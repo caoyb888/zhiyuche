@@ -183,7 +183,7 @@ export default function TripsPage() {
         </div>
       ),
     },
-    { key: 'trip_type', title: '类型', render: (t) => <Badge color={TRIP_TYPE_BADGE[t.trip_type]}>{TRIP_TYPE_LABEL[t.trip_type]}</Badge> },
+    { key: 'trip_type', title: '类型', width: 88, render: (t) => <Badge color={TRIP_TYPE_BADGE[t.trip_type]}>{TRIP_TYPE_LABEL[t.trip_type]}</Badge> },
     { key: 'start_at', title: '开始 → 结束', sortable: true, render: (t) => <span className="whitespace-nowrap text-xs">{formatTimeRange(t.start_at, t.end_at)}</span> },
     { key: 'duration_min', title: '时长', render: (t) => <span className="whitespace-nowrap text-xs">{formatMinutes(t.duration_min)}</span> },
     { key: 'distance_km', title: '里程', sortable: true, align: 'right', render: (t) => <span className="whitespace-nowrap text-xs">{formatKm(t.distance_km, 1)}</span> },

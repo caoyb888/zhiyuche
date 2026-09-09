@@ -146,7 +146,7 @@ export default function ApprovalPage() {
         </div>
       ),
     },
-    { key: 'trip_type', title: '类型', render: (a) => <Badge color={TRIP_TYPE_BADGE[a.trip_type]}>{TRIP_TYPE_LABEL[a.trip_type]}</Badge> },
+    { key: 'trip_type', title: '类型', width: 88, render: (a) => <Badge color={TRIP_TYPE_BADGE[a.trip_type]}>{TRIP_TYPE_LABEL[a.trip_type]}</Badge> },
     {
       key: 'purpose',
       title: '事由',
