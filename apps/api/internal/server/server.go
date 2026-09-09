@@ -19,6 +19,7 @@ import (
 	"github.com/caoyb888/zhiyuche/apps/api/internal/audit"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/auth"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/billing"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/booking"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/charging"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/notify"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/system/auditlog"
@@ -138,6 +139,8 @@ func (s *Server) registerRoutes() {
 	card.Register(protected, s.app)
 	pile.Register(protected, s.app)
 	approval.Register(protected, s.app)
+	// 预约派车：不走审批，与 approvals 共用车辆时段冲突检查
+	booking.Register(protected, s.app)
 	trip.Register(protected, s.app)
 	notify.Register(protected, s.app)
 

@@ -1207,6 +1207,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 预约列表
+         * @description 调度台录入的用车预约，`source=phone` 电话预约、`source=direct` 直接预约。
+         */
+        get: operations["listBookings"];
+        put?: never;
+        /**
+         * 新建预约（电话 / 直接）
+         * @description 录入即生效，不走审批流。记录人取当前登录用户。
+         *     指定了 `vehicle_id` 时校验车辆可用并与其它预约、公务申请做时段冲突检查（两端各留 15 分钟周转）；
+         *     不指定则为「待派车」，之后用 PUT 改派。
+         */
+        post: operations["createBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/available-vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 时段内可用车辆（空闲/充电中，且无冲突的预约与申请） */
+        get: operations["listBookingAvailableVehicles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        /** 预约详情 */
+        get: operations["getBooking"];
+        /**
+         * 编辑预约（仅「待出车」可改；含改派车辆）
+         * @description 只提交要修改的键；`clear_vehicle` / `clear_passenger` 用于清空对应字段。改派或改时段会重新做冲突检查。
+         */
+        put: operations["updateBooking"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/{id}/depart": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认出车（待出车 → 已出车；须已派车） */
+        post: operations["departBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 完成（已出车 → 已完成） */
+        post: operations["completeBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 取消（仅「待出车」可取消） */
+        post: operations["cancelBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/trips": {
         parameters: {
             query?: never;
@@ -2911,6 +3034,110 @@ export interface components {
              */
             urgency: "normal" | "urgent";
         };
+        /**
+         * @description phone 电话预约；direct 直接预约
+         * @enum {string}
+         */
+        BookingSource: "phone" | "direct";
+        /**
+         * @description reserved 待出车；departed 已出车；completed 已完成；cancelled 已取消
+         * @enum {string}
+         */
+        BookingStatus: "reserved" | "departed" | "completed" | "cancelled";
+        Booking: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tenant_id?: string;
+            /** @example YY-20260909-0001 */
+            booking_no: string;
+            source: components["schemas"]["BookingSource"];
+            /** @description 来电人 / 预约人姓名 */
+            contact_name: string;
+            contact_phone?: string | null;
+            /** @description 用车人（系统用户，可选） */
+            passenger?: components["schemas"]["UserBrief"] | null;
+            /** Format: uuid */
+            dept_id?: string | null;
+            dept_name?: string | null;
+            /** Format: date-time */
+            reserve_start: string;
+            /** Format: date-time */
+            reserve_end: string;
+            /** @description 为空表示待派车 */
+            vehicle?: components["schemas"]["VehicleBrief"] | null;
+            origin: string;
+            origin_lng?: number | null;
+            origin_lat?: number | null;
+            destination: string;
+            dest_lng?: number | null;
+            dest_lat?: number | null;
+            purpose?: string | null;
+            remark?: string | null;
+            status: components["schemas"]["BookingStatus"];
+            cancel_reason?: string | null;
+            /** Format: date-time */
+            departed_at?: string | null;
+            /** Format: date-time */
+            completed_at?: string | null;
+            /** @description 记录人 */
+            created_by?: components["schemas"]["UserBrief"] | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BookingCreate: {
+            source: components["schemas"]["BookingSource"];
+            contact_name: string;
+            contact_phone?: string;
+            /**
+             * Format: uuid
+             * @description 用车人（系统用户，可选）
+             */
+            passenger_id?: string;
+            /** Format: date-time */
+            reserve_start: string;
+            /** Format: date-time */
+            reserve_end: string;
+            /**
+             * Format: uuid
+             * @description 派车；不传为待派车
+             */
+            vehicle_id?: string;
+            origin: string;
+            origin_lng?: number;
+            origin_lat?: number;
+            destination: string;
+            dest_lng?: number;
+            dest_lat?: number;
+            purpose?: string;
+            remark?: string;
+        };
+        /** @description 只提交要修改的键；清空用车人 / 车辆用 clear_passenger / clear_vehicle */
+        BookingUpdate: {
+            source?: components["schemas"]["BookingSource"];
+            contact_name?: string;
+            contact_phone?: string;
+            /** Format: uuid */
+            passenger_id?: string;
+            clear_passenger?: boolean;
+            /** Format: date-time */
+            reserve_start?: string;
+            /** Format: date-time */
+            reserve_end?: string;
+            /** Format: uuid */
+            vehicle_id?: string;
+            clear_vehicle?: boolean;
+            origin?: string;
+            origin_lng?: number;
+            origin_lat?: number;
+            destination?: string;
+            dest_lng?: number;
+            dest_lat?: number;
+            purpose?: string;
+            remark?: string;
+        };
         PrecheckResult: {
             ok: boolean;
             level_required: number;
@@ -3865,6 +4092,30 @@ export interface components {
             content: {
                 "application/json": components["schemas"]["Envelope"] & {
                     data?: components["schemas"]["ApprovalRules"];
+                };
+            };
+        };
+        /** @description 预约 */
+        Booking: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Booking"];
+                };
+            };
+        };
+        /** @description 预约分页 */
+        BookingPage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["Envelope"] & {
+                    data?: components["schemas"]["Page"] & {
+                        items?: components["schemas"]["Booking"][];
+                    };
                 };
             };
         };
@@ -5849,6 +6100,180 @@ export interface operations {
         };
         responses: {
             200: components["responses"]["Approval"];
+            409: components["responses"]["Error"];
+        };
+    };
+    listBookings: {
+        parameters: {
+            query?: {
+                page?: components["parameters"]["page"];
+                pageSize?: components["parameters"]["pageSize"];
+                /** @description 排序字段，前缀 `-` 表示降序 */
+                sort?: components["parameters"]["sort"];
+                source?: components["schemas"]["BookingSource"];
+                status?: components["schemas"]["BookingStatus"];
+                vehicle_id?: string;
+                /** @description 用车人部门（含子部门） */
+                dept_id?: string;
+                /** @description reserve_start ≥ */
+                from?: string;
+                /** @description reserve_start ≤ */
+                to?: string;
+                /** @description 单号/联系人/电话/出发地/目的地/事由 */
+                keyword?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["BookingPage"];
+        };
+    };
+    createBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookingCreate"];
+            };
+        };
+        responses: {
+            201: components["responses"]["Booking"];
+            400: components["responses"]["Error"];
+            /** @description 车辆时段冲突或车辆不可用 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"];
+                };
+            };
+        };
+    };
+    listBookingAvailableVehicles: {
+        parameters: {
+            query: {
+                start: string;
+                end: string;
+                /** @description 编辑时排除自身 */
+                exclude_booking_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 可用车辆 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"] & {
+                        data?: components["schemas"]["VehicleBrief"][];
+                    };
+                };
+            };
+        };
+    };
+    getBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Booking"];
+            404: components["responses"]["Error"];
+        };
+    };
+    updateBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookingUpdate"];
+            };
+        };
+        responses: {
+            200: components["responses"]["Booking"];
+            /** @description 已出车/已完成/已取消不可修改，或车辆时段冲突 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Envelope"];
+                };
+            };
+        };
+    };
+    departBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Booking"];
+            409: components["responses"]["Error"];
+        };
+    };
+    completeBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Booking"];
+            409: components["responses"]["Error"];
+        };
+    };
+    cancelBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            200: components["responses"]["Booking"];
             409: components["responses"]["Error"];
         };
     };

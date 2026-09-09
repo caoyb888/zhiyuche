@@ -41,6 +41,12 @@ var Defs = []Def{
 	{Code: "approval:manage", Name: "管理全部申请（查看/取消/代审批/指派车辆）", Type: Action, Parent: "approval"},
 	{Code: "approval:rule", Name: "配置审批规则", Type: Action, Parent: "approval"},
 
+	{Code: "booking", Name: "预约派车", Type: Menu, Path: "/bookings", Icon: "PhoneCall", Sort: 25},
+	{Code: "booking:view", Name: "查看预约", Type: Action, Parent: "booking"},
+	{Code: "booking:create", Name: "新建预约（电话 / 直接）", Type: Action, Parent: "booking"},
+	{Code: "booking:update", Name: "编辑预约（含改派车辆、出车、完成）", Type: Action, Parent: "booking"},
+	{Code: "booking:cancel", Name: "取消预约", Type: Action, Parent: "booking"},
+
 	{Code: "trip", Name: "行程管理", Type: Menu, Path: "/trips", Icon: "Map", Sort: 30},
 	{Code: "trip:view", Name: "查看行程（本人相关）", Type: Action, Parent: "trip"},
 	{Code: "trip:manage", Name: "管理全部行程（查看全部/手动开始结束/取消）", Type: Action, Parent: "trip"},
@@ -244,6 +250,7 @@ var DefaultRoles = []DefaultRole{
 	{Code: "tenant_admin", Name: "租户管理员", Description: "拥有本租户全部权限"},
 	{Code: "fleet_manager", Name: "车队管理员", Description: "车辆调度、行程、健康、充电管理",
 		Perms: []string{"dashboard:view", "approval:view", "approval:manage", "approval:rule",
+			"booking:view", "booking:create", "booking:update", "booking:cancel",
 			"trip:view", "trip:manage", "trip:export", "health:view", "charging:view", "report:view",
 			"asset:vehicle:view", "asset:vehicle:create", "asset:vehicle:update", "asset:vehicle:delete",
 			"asset:device:view", "asset:device:create", "asset:device:update", "asset:device:delete",

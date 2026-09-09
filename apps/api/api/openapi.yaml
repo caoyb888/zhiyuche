@@ -29,6 +29,7 @@ tags:
   - { name: cards, description: NFC 卡 }
   - { name: piles, description: 充电桩档案 }
   - { name: approvals, description: 公务用车申请与审批 }
+  - { name: bookings, description: 预约派车（电话预约 / 直接预约） }
   - { name: trips, description: 行程、轨迹与事件 }
   - { name: dashboard, description: 总览 }
   - { name: notifications, description: 站内通知与实时推送 }
@@ -1231,6 +1232,111 @@ paths:
         '200': { $ref: '#/components/responses/Approval' }
         '409': { $ref: '#/components/responses/Error' }
 
+  # ------------------------------------------------------------------ bookings
+  /bookings:
+    get:
+      tags: [bookings]
+      summary: 预约列表
+      description: 调度台录入的用车预约，`source=phone` 电话预约、`source=direct` 直接预约。
+      operationId: listBookings
+      x-permission: booking:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: source, in: query, schema: { $ref: '#/components/schemas/BookingSource' } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/BookingStatus' } }
+        - { name: vehicle_id, in: query, schema: { type: string, format: uuid } }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid }, description: 用车人部门（含子部门） }
+        - { name: from, in: query, schema: { type: string, format: date-time }, description: reserve_start ≥ }
+        - { name: to, in: query, schema: { type: string, format: date-time }, description: reserve_start ≤ }
+        - { name: keyword, in: query, schema: { type: string }, description: 单号/联系人/电话/出发地/目的地/事由 }
+      responses:
+        '200': { $ref: '#/components/responses/BookingPage' }
+    post:
+      tags: [bookings]
+      summary: 新建预约（电话 / 直接）
+      description: |
+        录入即生效，不走审批流。记录人取当前登录用户。
+        指定了 `vehicle_id` 时校验车辆可用并与其它预约、公务申请做时段冲突检查（两端各留 15 分钟周转）；
+        不指定则为「待派车」，之后用 PUT 改派。
+      operationId: createBooking
+      x-permission: booking:create
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BookingCreate' } } } }
+      responses:
+        '201': { $ref: '#/components/responses/Booking' }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { description: 车辆时段冲突或车辆不可用, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+  /bookings/available-vehicles:
+    get:
+      tags: [bookings]
+      summary: 时段内可用车辆（空闲/充电中，且无冲突的预约与申请）
+      operationId: listBookingAvailableVehicles
+      x-permission: booking:create
+      parameters:
+        - { name: start, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: end, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: exclude_booking_id, in: query, schema: { type: string, format: uuid }, description: 编辑时排除自身 }
+      responses:
+        '200':
+          description: 可用车辆
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/VehicleBrief' } } } } ]
+  /bookings/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [bookings]
+      summary: 预约详情
+      operationId: getBooking
+      x-permission: booking:view
+      responses:
+        '200': { $ref: '#/components/responses/Booking' }
+        '404': { $ref: '#/components/responses/Error' }
+    put:
+      tags: [bookings]
+      summary: 编辑预约（仅「待出车」可改；含改派车辆）
+      description: 只提交要修改的键；`clear_vehicle` / `clear_passenger` 用于清空对应字段。改派或改时段会重新做冲突检查。
+      operationId: updateBooking
+      x-permission: booking:update
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/BookingUpdate' } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Booking' }
+        '409': { description: 已出车/已完成/已取消不可修改，或车辆时段冲突, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+  /bookings/{id}/depart:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [bookings]
+      summary: 确认出车（待出车 → 已出车；须已派车）
+      operationId: departBooking
+      x-permission: booking:update
+      responses:
+        '200': { $ref: '#/components/responses/Booking' }
+        '409': { $ref: '#/components/responses/Error' }
+  /bookings/{id}/complete:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [bookings]
+      summary: 完成（已出车 → 已完成）
+      operationId: completeBooking
+      x-permission: booking:update
+      responses:
+        '200': { $ref: '#/components/responses/Booking' }
+        '409': { $ref: '#/components/responses/Error' }
+  /bookings/{id}/cancel:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [bookings]
+      summary: 取消（仅「待出车」可取消）
+      operationId: cancelBooking
+      x-permission: booking:cancel
+      requestBody:
+        content: { application/json: { schema: { type: object, properties: { reason: { type: string, maxLength: 500 } } } } }
+      responses:
+        '200': { $ref: '#/components/responses/Booking' }
+        '409': { $ref: '#/components/responses/Error' }
+
   # ------------------------------------------------------------------ trips
   /trips:
     get:
@@ -2190,6 +2296,18 @@ components:
         application/json:
           schema:
             allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/ApprovalRules' } } } ]
+    Booking:
+      description: 预约
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Booking' } } } ]
+    BookingPage:
+      description: 预约分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Booking' } } } } ] } } } ]
     Trip:
       description: 行程
       content:
@@ -3031,6 +3149,85 @@ components:
         attachments: { type: array, items: { type: object, required: [name, url], properties: { name: { type: string }, url: { type: string } } } }
         vehicle_id: { type: string, format: uuid, description: 可不选，由审批人指派 }
         urgency: { type: string, enum: [normal, urgent], default: normal }
+    BookingSource:
+      type: string
+      enum: [phone, direct]
+      description: phone 电话预约；direct 直接预约
+    BookingStatus:
+      type: string
+      enum: [reserved, departed, completed, cancelled]
+      description: reserved 待出车；departed 已出车；completed 已完成；cancelled 已取消
+    Booking:
+      type: object
+      required: [id, booking_no, source, contact_name, reserve_start, reserve_end, origin, destination, status, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        booking_no: { type: string, example: YY-20260909-0001 }
+        source: { $ref: '#/components/schemas/BookingSource' }
+        contact_name: { type: string, description: 来电人 / 预约人姓名 }
+        contact_phone: { type: [string, 'null'] }
+        passenger: { anyOf: [ { $ref: '#/components/schemas/UserBrief' }, { type: 'null' } ], description: 用车人（系统用户，可选） }
+        dept_id: { type: [string, 'null'], format: uuid }
+        dept_name: { type: [string, 'null'] }
+        reserve_start: { type: string, format: date-time }
+        reserve_end: { type: string, format: date-time }
+        vehicle: { anyOf: [ { $ref: '#/components/schemas/VehicleBrief' }, { type: 'null' } ], description: 为空表示待派车 }
+        origin: { type: string }
+        origin_lng: { type: [number, 'null'] }
+        origin_lat: { type: [number, 'null'] }
+        destination: { type: string }
+        dest_lng: { type: [number, 'null'] }
+        dest_lat: { type: [number, 'null'] }
+        purpose: { type: [string, 'null'] }
+        remark: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/BookingStatus' }
+        cancel_reason: { type: [string, 'null'] }
+        departed_at: { type: [string, 'null'], format: date-time }
+        completed_at: { type: [string, 'null'], format: date-time }
+        created_by: { anyOf: [ { $ref: '#/components/schemas/UserBrief' }, { type: 'null' } ], description: 记录人 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    BookingCreate:
+      type: object
+      required: [source, contact_name, reserve_start, reserve_end, origin, destination]
+      properties:
+        source: { $ref: '#/components/schemas/BookingSource' }
+        contact_name: { type: string, minLength: 1, maxLength: 64 }
+        contact_phone: { type: string, maxLength: 32 }
+        passenger_id: { type: string, format: uuid, description: 用车人（系统用户，可选） }
+        reserve_start: { type: string, format: date-time }
+        reserve_end: { type: string, format: date-time }
+        vehicle_id: { type: string, format: uuid, description: 派车；不传为待派车 }
+        origin: { type: string, minLength: 1, maxLength: 200 }
+        origin_lng: { type: number }
+        origin_lat: { type: number }
+        destination: { type: string, minLength: 1, maxLength: 200 }
+        dest_lng: { type: number }
+        dest_lat: { type: number }
+        purpose: { type: string, maxLength: 200 }
+        remark: { type: string, maxLength: 500 }
+    BookingUpdate:
+      type: object
+      description: 只提交要修改的键；清空用车人 / 车辆用 clear_passenger / clear_vehicle
+      properties:
+        source: { $ref: '#/components/schemas/BookingSource' }
+        contact_name: { type: string, minLength: 1, maxLength: 64 }
+        contact_phone: { type: string, maxLength: 32 }
+        passenger_id: { type: string, format: uuid }
+        clear_passenger: { type: boolean }
+        reserve_start: { type: string, format: date-time }
+        reserve_end: { type: string, format: date-time }
+        vehicle_id: { type: string, format: uuid }
+        clear_vehicle: { type: boolean }
+        origin: { type: string, minLength: 1, maxLength: 200 }
+        origin_lng: { type: number }
+        origin_lat: { type: number }
+        destination: { type: string, minLength: 1, maxLength: 200 }
+        dest_lng: { type: number }
+        dest_lat: { type: number }
+        purpose: { type: string, maxLength: 200 }
+        remark: { type: string, maxLength: 500 }
     PrecheckResult:
       type: object
       required: [ok, level_required, approvers, conflicts, problems]

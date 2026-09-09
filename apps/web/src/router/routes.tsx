@@ -15,6 +15,7 @@ export const appRoutes: AppRoute[] = [
   // ---- 公务审批 / 行程（真实接口）----
   { path: '/approval', perm: 'approval:view', title: '公务审批', description: '申请与审批流', component: lazy(() => import('../pages/approval')) },
   { path: '/approval/rules', perm: 'approval:rule', title: '审批规则', description: '二级审批触发条件与审批人', component: lazy(() => import('../pages/approval/rules')) },
+  { path: '/bookings', perm: 'booking:view', title: '预约派车', description: '电话 / 直接预约与派车', component: lazy(() => import('../pages/booking')) },
   { path: '/trips', perm: 'trip:view', title: '行程管理', description: '轨迹与记录', component: lazy(() => import('../pages/trips')) },
   { path: '/charging', perm: 'charging:view', title: '充电管理', description: '桩实时状态、充电记录与复核', component: lazy(() => import('../pages/charging')) },
   { path: '/reports', perm: 'report:view', title: '费用报表', description: '部门费用分析', component: lazy(() => import('../pages/Reports')) },

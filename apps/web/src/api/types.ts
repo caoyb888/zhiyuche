@@ -131,6 +131,13 @@ export type PrecheckConflict = PrecheckResult['conflicts'][number]
 export type ApprovalRules = Schemas['ApprovalRules']
 export type ApprovalRulesUpdate = Schemas['ApprovalRulesUpdate']
 
+// ── 预约派车 ──────────────────────────────────────────
+export type Booking = Schemas['Booking']
+export type BookingSource = Schemas['BookingSource']
+export type BookingStatus = Schemas['BookingStatus']
+export type BookingCreate = Schemas['BookingCreate']
+export type BookingUpdate = Schemas['BookingUpdate']
+
 // ── 行程（轨迹 / 事件，供地图组件与总览复用）────────────
 export type PlannedRoute = Schemas['PlannedRoute']
 export type TripTrack = Schemas['TripTrack']

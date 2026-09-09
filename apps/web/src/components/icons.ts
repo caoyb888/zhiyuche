@@ -15,6 +15,7 @@ import {
   Map,
   MessageSquare,
   Network,
+  PhoneCall,
   PlugZap,
   Receipt,
   ScrollText,
@@ -34,6 +35,7 @@ import {
 const menuIcons: Record<string, LucideIcon> = {
   LayoutDashboard,
   FileText,
+  PhoneCall,
   Map,
   BarChart2,
   HeartPulse,
