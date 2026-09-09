@@ -23,3 +23,7 @@ logs/
 .DS_Store
 Thumbs.db
 *.swp
+
+# Claude Code 子代理 worktree
+.claude/worktrees/
+
