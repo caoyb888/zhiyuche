@@ -38,6 +38,19 @@ api-build: ## 编译所有服务到 bin/
 api-run: ## 前台运行 api（读取 apps/api/.env）
 	cd $(API_DIR) && go run -ldflags "$(LDFLAGS)" ./cmd/api
 
+API_PID := bin/api.pid
+API_LOG := bin/api.log
+api-start: api-build ## 后台启动 api（pid 写 bin/api.pid，日志 bin/api.log）
+	@if [ -f $(API_PID) ] && kill -0 $$(cat $(API_PID)) 2>/dev/null; then echo "api already running (pid $$(cat $(API_PID)))"; exit 0; fi
+	@cd $(API_DIR); nohup ../../bin/zhiyuche-api > ../../$(API_LOG) 2>&1 & echo $$! > ../../$(API_PID)
+	@sleep 1; echo "api started pid $$(cat $(API_PID)), log $(API_LOG)"
+
+api-stop: ## 停止后台 api
+	@if [ -f $(API_PID) ]; then kill $$(cat $(API_PID)) 2>/dev/null && echo "api stopped"; rm -f $(API_PID); else echo "no pid file"; fi
+
+api-log: ## 查看 api 日志
+	@tail -f $(API_LOG)
+
 api-migrate: ## 执行迁移：make api-migrate CMD=status
 	cd $(API_DIR) && go run ./cmd/api migrate $(or $(CMD),up)
 
