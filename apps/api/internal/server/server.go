@@ -8,55 +8,66 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog"
 
-	"github.com/caoyb888/zhiyuche/apps/api/internal/config"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/audit"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/auth"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/auditlog"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/dept"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/dict"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/param"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/role"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/template"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/tenant"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/system/user"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/httpx"
 )
 
 // Version is injected at build time via -ldflags "-X .../server.Version=x.y.z".
 var Version = "dev"
 
-// Deps are the shared infrastructure handles modules receive.
-type Deps struct {
-	Cfg   *config.Config
-	Log   zerolog.Logger
-	DB    *pgxpool.Pool
-	Redis *redis.Client
-}
-
 // Server owns the gin engine and the http.Server.
 type Server struct {
-	deps    Deps
+	app     *app.App
 	engine  *gin.Engine
 	http    *http.Server
 	started time.Time
 }
 
 // New builds the router with global middleware and registers all routes.
-func New(d Deps) *Server {
-	if d.Cfg.IsProd() {
+func New(a *app.App) *Server {
+	if a.Cfg.IsProd() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	e := gin.New()
-	e.Use(requestID(), recovery(d.Log), accessLog(d.Log), cors(d.Cfg.HTTP.CORSOrigins))
+	e.Use(requestID(), recovery(a.Log), accessLog(a.Log), cors(a.Cfg.HTTP.CORSOrigins))
+	if a.DB != nil {
+		e.Use(audit.NewWriter(a.DB, a.Log, resolveActor).Middleware())
+	}
 	e.NoRoute(func(c *gin.Context) { httpx.Fail(c, httpx.NotFound("route not found")) })
 
 	s := &Server{
-		deps:    d,
+		app:     a,
 		engine:  e,
 		started: time.Now(),
 		http: &http.Server{
-			Addr:         d.Cfg.HTTP.Addr,
+			Addr:         a.Cfg.HTTP.Addr,
 			Handler:      e,
-			ReadTimeout:  d.Cfg.HTTP.ReadTimeout,
-			WriteTimeout: d.Cfg.HTTP.WriteTimeout,
+			ReadTimeout:  a.Cfg.HTTP.ReadTimeout,
+			WriteTimeout: a.Cfg.HTTP.WriteTimeout,
 		},
 	}
 	s.registerRoutes()
 	return s
+}
+
+// resolveActor adapts the auth principal for the audit middleware.
+func resolveActor(c *gin.Context) (audit.Actor, bool) {
+	p := auth.Current(c)
+	if p == nil {
+		return audit.Actor{}, false
+	}
+	return audit.Actor{UserID: p.UserID, TenantID: auth.TenantID(c), Username: p.Username}, true
 }
 
 // Handler exposes the router (used by tests).
@@ -66,7 +77,7 @@ func (s *Server) Handler() http.Handler { return s.engine }
 func (s *Server) Run(ctx context.Context) error {
 	errCh := make(chan error, 1)
 	go func() {
-		s.deps.Log.Info().Str("addr", s.http.Addr).Str("version", Version).Msg("http server listening")
+		s.app.Log.Info().Str("addr", s.http.Addr).Str("version", Version).Msg("http server listening")
 		if err := s.http.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err
 		}
@@ -77,9 +88,9 @@ func (s *Server) Run(ctx context.Context) error {
 	case err := <-errCh:
 		return err
 	case <-ctx.Done():
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.deps.Cfg.HTTP.ShutdownTimeout)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.app.Cfg.HTTP.ShutdownTimeout)
 		defer cancel()
-		s.deps.Log.Info().Msg("http server shutting down")
+		s.app.Log.Info().Msg("http server shutting down")
 		return s.http.Shutdown(shutdownCtx)
 	}
 }
@@ -89,8 +100,25 @@ func (s *Server) registerRoutes() {
 	v1.GET("/health", s.health)
 	v1.GET("/ready", s.ready)
 
-	// 各业务模块从阶段 1 起在此注册：
-	// auth.Register(v1, s.deps) ; system.Register(v1, s.deps) ; ...
+	// Business routes need DB/Redis; tests may construct the server without them.
+	if s.app.DB == nil || s.app.Redis == nil {
+		return
+	}
+	authSvc := auth.NewService(s.app)
+	authSvc.RegisterPublic(v1)
+
+	protected := v1.Group("", authSvc.RequireAuth())
+	authSvc.RegisterProtected(protected)
+
+	// 系统管理模块
+	user.Register(protected, s.app)
+	dept.Register(protected, s.app)
+	role.Register(protected, s.app)
+	tenant.Register(protected, s.app)
+	dict.Register(protected, s.app)
+	param.Register(protected, s.app)
+	auditlog.Register(protected, s.app)
+	template.Register(protected, s.app)
 }
 
 type healthResponse struct {
@@ -105,7 +133,7 @@ func (s *Server) health(c *gin.Context) {
 	httpx.OK(c, healthResponse{
 		Status:        "ok",
 		Version:       Version,
-		Env:           s.deps.Cfg.Env,
+		Env:           s.app.Cfg.Env,
 		UptimeSeconds: int64(time.Since(s.started).Seconds()),
 	})
 }
@@ -129,13 +157,13 @@ func (s *Server) ready(c *gin.Context) {
 		}
 		resp.Checks[name] = "ok"
 	}
-	if s.deps.DB != nil {
-		check("postgres", s.deps.DB.Ping(ctx))
+	if s.app.DB != nil {
+		check("postgres", s.app.DB.Ping(ctx))
 	} else {
 		check("postgres", errors.New("not configured"))
 	}
-	if s.deps.Redis != nil {
-		check("redis", s.deps.Redis.Ping(ctx).Err())
+	if s.app.Redis != nil {
+		check("redis", s.app.Redis.Ping(ctx).Err())
 	} else {
 		check("redis", errors.New("not configured"))
 	}

@@ -39,6 +39,12 @@ type Config struct {
 		AccessTTL  time.Duration `env:"ZY_JWT_ACCESS_TTL" envDefault:"15m"`
 		RefreshTTL time.Duration `env:"ZY_JWT_REFRESH_TTL" envDefault:"168h"`
 	}
+
+	Bootstrap struct {
+		AdminUsername string `env:"ZY_BOOTSTRAP_ADMIN_USERNAME" envDefault:"admin"`
+		AdminPassword string `env:"ZY_BOOTSTRAP_ADMIN_PASSWORD" envDefault:"Admin@123456"`
+		DemoTenant    bool   `env:"ZY_BOOTSTRAP_DEMO_TENANT" envDefault:"true"`
+	}
 }
 
 func (c *Config) IsProd() bool { return c.Env == "prod" }
@@ -53,6 +59,9 @@ func Load() (*Config, error) {
 	}
 	if cfg.IsProd() && cfg.JWT.Secret == "change-me-in-production" {
 		return nil, fmt.Errorf("ZY_JWT_SECRET must be set in prod")
+	}
+	if cfg.IsProd() && cfg.Bootstrap.AdminPassword == "Admin@123456" {
+		return nil, fmt.Errorf("ZY_BOOTSTRAP_ADMIN_PASSWORD must be set in prod")
 	}
 	return &cfg, nil
 }

@@ -11,6 +11,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
+	"github.com/caoyb888/zhiyuche/apps/api/internal/bootstrap"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/config"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/migrate"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/server"
@@ -67,6 +69,11 @@ func run() error {
 	defer rdb.Close()
 	log.Info().Msg("redis connected")
 
-	srv := server.New(server.Deps{Cfg: cfg, Log: log, DB: pool, Redis: rdb})
+	if err := bootstrap.Run(ctx, pool, cfg, log); err != nil {
+		return fmt.Errorf("bootstrap: %w", err)
+	}
+	log.Info().Msg("bootstrap complete")
+
+	srv := server.New(&app.App{Cfg: cfg, Log: log, DB: pool, Redis: rdb})
 	return srv.Run(ctx)
 }

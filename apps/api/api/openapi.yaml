@@ -1,68 +1,736 @@
 openapi: 3.1.0
 info:
   title: 智御系统 API
-  version: 0.1.0
+  version: 0.2.0
   description: |
-    统一约定：前缀 /api/v1；JWT Bearer 鉴权；所有响应为信封 `{code, message, data, request_id}`，
-    code 为 0 表示成功；列表接口统一 `page`、`pageSize`、`sort`（`field` 或 `-field`）。
+    统一约定：
+    - 前缀 `/api/v1`；除 `/health`、`/ready`、`/auth/login`、`/auth/refresh` 外均需 `Authorization: Bearer <access_token>`
+    - 所有响应为信封 `{code, message, data, request_id}`，`code` 为 0 表示成功；错误时 `data` 缺省
+    - 列表接口统一 `page`（从 1 起）、`pageSize`（默认 20，最大 200）、`sort`（`field` 或 `-field` 降序），返回 `Page`
+    - 时间为 RFC3339 字符串；ID 为 UUID
+    - 多租户：普通用户只能操作自己的租户；平台超级管理员可用请求头 `X-Tenant-ID` 指定目标租户
+    - 权限：每个接口标注所需权限码（`x-permission`），超级管理员拥有全部权限
+    - 所有非 GET 请求自动写入审计日志
 servers:
   - url: /api/v1
 tags:
-  - name: system
-    description: 系统探针与基础接口
+  - { name: system, description: 探针 }
+  - { name: auth, description: 登录、令牌、当前用户 }
+  - { name: users, description: 用户管理 }
+  - { name: depts, description: 部门管理（树形） }
+  - { name: roles, description: 角色与权限 }
+  - { name: tenants, description: 租户管理（平台管理员） }
+  - { name: dicts, description: 字典 }
+  - { name: params, description: 系统参数 }
+  - { name: audit, description: 审计日志 }
+  - { name: templates, description: 通知模板 }
+
+security:
+  - bearerAuth: []
+
 paths:
+  # ------------------------------------------------------------------ probes
   /health:
     get:
       tags: [system]
+      security: []
       summary: 存活探针
       operationId: getHealth
       responses:
-        '200':
-          description: 进程存活
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/Envelope'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Health'
+        '200': { $ref: '#/components/responses/Health' }
   /ready:
     get:
       tags: [system]
+      security: []
       summary: 就绪探针（检查 PostgreSQL 与 Redis）
       operationId: getReady
       responses:
+        '200': { $ref: '#/components/responses/Ready' }
+        '503': { $ref: '#/components/responses/Ready' }
+
+  # ------------------------------------------------------------------ auth
+  /auth/login:
+    post:
+      tags: [auth]
+      security: []
+      summary: 账号密码登录
+      description: 用户名在租户内唯一。若同一用户名存在于多个租户，需传 `tenant_code`。连续失败 5 次锁定 15 分钟。
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
         '200':
-          description: 依赖全部可用
+          description: 登录成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/Envelope'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Ready'
-        '503':
-          description: 至少一个依赖不可用
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/LoginResponse' } } } ]
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /auth/refresh:
+    post:
+      tags: [auth]
+      security: []
+      summary: 刷新令牌（refresh token 一次性轮换）
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties: { refresh_token: { type: string } }
+      responses:
+        '200': { $ref: '#/components/responses/TokenPair' }
+        '401': { $ref: '#/components/responses/Error' }
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: 退出登录（吊销当前 access token，可选吊销 refresh token）
+      operationId: logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { refresh_token: { type: string } }
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: 当前用户资料、权限码与菜单树
+      operationId: getMe
+      responses:
+        '200':
+          description: 当前用户
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/Envelope'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Ready'
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Profile' } } } ]
+  /auth/menus:
+    get:
+      tags: [auth]
+      summary: 当前用户可见菜单树
+      operationId: getMenus
+      responses:
+        '200':
+          description: 菜单树
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/MenuNode' } } } } ]
+  /auth/password:
+    put:
+      tags: [auth]
+      summary: 修改本人密码（其余会话的 refresh token 失效）
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password: { type: string }
+                new_password: { type: string, description: 至少 8 位，含字母和数字 }
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+        '400': { $ref: '#/components/responses/Error' }
+
+  # ------------------------------------------------------------------ users
+  /system/users:
+    get:
+      tags: [users]
+      summary: 用户列表
+      operationId: listUsers
+      x-permission: system:user:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string }, description: 用户名/姓名/手机号/工号 模糊 }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid }, description: 含子部门 }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/UserStatus' } }
+        - { name: role_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200': { $ref: '#/components/responses/UserPage' }
+    post:
+      tags: [users]
+      summary: 新建用户
+      operationId: createUser
+      x-permission: system:user:create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreate' }
+      responses:
+        '201': { $ref: '#/components/responses/User' }
+        '409': { $ref: '#/components/responses/Error' }
+  /system/users/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [users]
+      summary: 用户详情
+      operationId: getUser
+      x-permission: system:user:view
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+        '404': { $ref: '#/components/responses/Error' }
+    put:
+      tags: [users]
+      summary: 编辑用户（只更新出现的字段）
+      operationId: updateUser
+      x-permission: system:user:update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdate' }
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+    delete:
+      tags: [users]
+      summary: 删除用户（软删除；不能删除自己或平台管理员）
+      operationId: deleteUser
+      x-permission: system:user:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /system/users/{id}/reset-password:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [users]
+      summary: 重置密码（不传则使用系统缺省密码；该用户所有会话失效）
+      operationId: resetUserPassword
+      x-permission: system:user:reset-password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { password: { type: string } }
+      responses:
+        '200':
+          description: 返回一次明文密码供管理员告知
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: object, properties: { password: { type: string } } } } } ]
+  /system/users/{id}/roles:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    put:
+      tags: [users]
+      summary: 分配角色（整体替换）
+      operationId: assignUserRoles
+      x-permission: system:user:assign-roles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role_ids]
+              properties: { role_ids: { type: array, items: { type: string, format: uuid } } }
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+  /system/users/import-template:
+    get:
+      tags: [users]
+      summary: 下载导入模板（xlsx）
+      operationId: getUserImportTemplate
+      x-permission: system:user:import
+      responses:
+        '200': { description: xlsx 文件, content: { application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } } } }
+  /system/users/import:
+    post:
+      tags: [users]
+      summary: Excel 批量导入用户
+      description: 列：用户名*、姓名*、手机号、邮箱、工号、部门名称、角色代码（多个用逗号）。逐行校验，返回成功数与失败明细；密码为系统缺省密码。
+      operationId: importUsers
+      x-permission: system:user:import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties: { file: { type: string, format: binary } }
+      responses:
+        '200':
+          description: 导入结果
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/ImportResult' } } } ]
+  /system/users/export:
+    get:
+      tags: [users]
+      summary: 导出用户（xlsx，支持与列表相同的筛选）
+      operationId: exportUsers
+      x-permission: system:user:export
+      parameters:
+        - { name: keyword, in: query, schema: { type: string } }
+        - { name: dept_id, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/UserStatus' } }
+      responses:
+        '200': { description: xlsx 文件, content: { application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: { schema: { type: string, format: binary } } } }
+
+  # ------------------------------------------------------------------ depts
+  /system/depts/tree:
+    get:
+      tags: [depts]
+      summary: 部门树（整棵，含人数）
+      operationId: getDeptTree
+      x-permission: system:dept:view
+      responses:
+        '200':
+          description: 部门树
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/DeptNode' } } } } ]
+  /system/depts:
+    get:
+      tags: [depts]
+      summary: 部门平铺列表
+      operationId: listDepts
+      x-permission: system:dept:view
+      parameters:
+        - { name: keyword, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [active, disabled] } }
+      responses:
+        '200':
+          description: 列表（不分页）
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Dept' } } } } ]
+    post:
+      tags: [depts]
+      summary: 新建部门
+      operationId: createDept
+      x-permission: system:dept:create
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DeptCreate' } } }
+      responses:
+        '201': { $ref: '#/components/responses/Dept' }
+  /system/depts/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [depts]
+      summary: 部门详情
+      operationId: getDept
+      x-permission: system:dept:view
+      responses:
+        '200': { $ref: '#/components/responses/Dept' }
+    put:
+      tags: [depts]
+      summary: 编辑部门（可改 parent_id 实现移动；不能移到自己的子树下）
+      operationId: updateDept
+      x-permission: system:dept:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DeptUpdate' } } }
+      responses:
+        '200': { $ref: '#/components/responses/Dept' }
+    delete:
+      tags: [depts]
+      summary: 删除部门（有子部门或在职用户时拒绝）
+      operationId: deleteDept
+      x-permission: system:dept:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+        '409': { $ref: '#/components/responses/Error' }
+
+  # ------------------------------------------------------------------ roles & permissions
+  /system/roles:
+    get:
+      tags: [roles]
+      summary: 角色列表（分页）
+      operationId: listRoles
+      x-permission: system:role:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string } }
+      responses:
+        '200': { $ref: '#/components/responses/RolePage' }
+    post:
+      tags: [roles]
+      summary: 新建角色
+      operationId: createRole
+      x-permission: system:role:create
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RoleCreate' } } }
+      responses:
+        '201': { $ref: '#/components/responses/Role' }
+  /system/roles/options:
+    get:
+      tags: [roles]
+      summary: 角色简表（下拉用，本租户全部）
+      operationId: listRoleOptions
+      x-permission: system:user:view
+      responses:
+        '200':
+          description: 角色简表
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/RoleBrief' } } } } ]
+  /system/roles/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [roles]
+      summary: 角色详情（含权限码）
+      operationId: getRole
+      x-permission: system:role:view
+      responses:
+        '200': { $ref: '#/components/responses/Role' }
+    put:
+      tags: [roles]
+      summary: 编辑角色（内置角色只能改名称/描述）
+      operationId: updateRole
+      x-permission: system:role:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RoleUpdate' } } }
+      responses:
+        '200': { $ref: '#/components/responses/Role' }
+    delete:
+      tags: [roles]
+      summary: 删除角色（内置角色或仍有用户持有时拒绝）
+      operationId: deleteRole
+      x-permission: system:role:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+        '409': { $ref: '#/components/responses/Error' }
+  /system/roles/{id}/permissions:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    put:
+      tags: [roles]
+      summary: 设置角色权限（整体替换；非平台租户不能包含平台专属权限；持有者权限缓存立即失效）
+      operationId: setRolePermissions
+      x-permission: system:role:assign-perms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permissions]
+              properties: { permissions: { type: array, items: { type: string } } }
+      responses:
+        '200': { $ref: '#/components/responses/Role' }
+  /system/permissions/tree:
+    get:
+      tags: [roles]
+      summary: 权限点树（菜单为父节点，动作为叶子；非平台租户不返回平台专属权限）
+      operationId: getPermissionTree
+      x-permission: system:permission:view
+      responses:
+        '200':
+          description: 权限树
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/PermissionNode' } } } } ]
+
+  # ------------------------------------------------------------------ tenants
+  /system/tenants:
+    get:
+      tags: [tenants]
+      summary: 租户列表（平台管理员）
+      operationId: listTenants
+      x-permission: system:tenant:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/sort'
+        - { name: keyword, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [active, disabled] } }
+      responses:
+        '200': { $ref: '#/components/responses/TenantPage' }
+    post:
+      tags: [tenants]
+      summary: 新建租户（自动创建内置角色与租户管理员账号）
+      operationId: createTenant
+      x-permission: system:tenant:create
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TenantCreate' } } }
+      responses:
+        '201': { $ref: '#/components/responses/Tenant' }
+  /system/tenants/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [tenants]
+      summary: 租户详情（含用户数/部门数）
+      operationId: getTenant
+      x-permission: system:tenant:view
+      responses:
+        '200': { $ref: '#/components/responses/Tenant' }
+    put:
+      tags: [tenants]
+      summary: 编辑租户（停用时该租户所有用户会话失效）
+      operationId: updateTenant
+      x-permission: system:tenant:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TenantUpdate' } } }
+      responses:
+        '200': { $ref: '#/components/responses/Tenant' }
+    delete:
+      tags: [tenants]
+      summary: 停用租户（不物理删除；平台租户不可停用）
+      operationId: disableTenant
+      x-permission: system:tenant:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+
+  # ------------------------------------------------------------------ dicts
+  /system/dict-types:
+    get:
+      tags: [dicts]
+      summary: 字典类型列表（全局 + 本租户）
+      operationId: listDictTypes
+      x-permission: system:dict:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - { name: keyword, in: query, schema: { type: string } }
+      responses:
+        '200': { $ref: '#/components/responses/DictTypePage' }
+    post:
+      tags: [dicts]
+      summary: 新建字典类型（超级管理员未指定租户时创建全局字典）
+      operationId: createDictType
+      x-permission: system:dict:create
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DictTypeCreate' } } }
+      responses:
+        '201': { $ref: '#/components/responses/DictType' }
+  /system/dict-types/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [dicts]
+      summary: 字典类型详情（含条目）
+      operationId: getDictType
+      x-permission: system:dict:view
+      responses:
+        '200': { $ref: '#/components/responses/DictType' }
+    put:
+      tags: [dicts]
+      summary: 编辑字典类型（系统字典只能改名称/描述；全局字典仅超级管理员可改）
+      operationId: updateDictType
+      x-permission: system:dict:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DictTypeUpdate' } } }
+      responses:
+        '200': { $ref: '#/components/responses/DictType' }
+    delete:
+      tags: [dicts]
+      summary: 删除字典类型及其条目（系统字典拒绝）
+      operationId: deleteDictType
+      x-permission: system:dict:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /system/dict-types/{id}/items:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    post:
+      tags: [dicts]
+      summary: 新增字典条目
+      operationId: createDictItem
+      x-permission: system:dict:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DictItemCreate' } } }
+      responses:
+        '201': { $ref: '#/components/responses/DictItem' }
+  /system/dict-items/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    put:
+      tags: [dicts]
+      summary: 编辑字典条目
+      operationId: updateDictItem
+      x-permission: system:dict:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DictItemUpdate' } } }
+      responses:
+        '200': { $ref: '#/components/responses/DictItem' }
+    delete:
+      tags: [dicts]
+      summary: 删除字典条目
+      operationId: deleteDictItem
+      x-permission: system:dict:update
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+  /system/dicts/{code}:
+    get:
+      tags: [dicts]
+      summary: 按类型代码取启用条目（任意登录用户；租户字典覆盖同名全局字典）
+      operationId: getDictByCode
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 条目列表（按 sort 升序）
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/DictItem' } } } } ]
+
+  # ------------------------------------------------------------------ params
+  /system/params:
+    get:
+      tags: [params]
+      summary: 参数列表（本租户生效值：租户覆盖优先，否则全局缺省）
+      operationId: listParams
+      x-permission: system:param:view
+      parameters:
+        - { name: keyword, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: 参数列表（不分页）
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/Param' } } } } ]
+  /system/params/{key}:
+    parameters:
+      - { name: key, in: path, required: true, schema: { type: string } }
+    put:
+      tags: [params]
+      summary: 设置参数值（普通租户写租户覆盖；超级管理员未指定 X-Tenant-ID 时写全局缺省）
+      operationId: setParam
+      x-permission: system:param:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ParamUpdate' } } }
+      responses:
+        '200':
+          description: 更新后的参数
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Param' } } } ]
+    delete:
+      tags: [params]
+      summary: 删除租户覆盖值，恢复全局缺省（全局缺省不可删除）
+      operationId: resetParam
+      x-permission: system:param:update
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+
+  # ------------------------------------------------------------------ audit logs
+  /system/audit-logs:
+    get:
+      tags: [audit]
+      summary: 审计日志查询（只读）
+      operationId: listAuditLogs
+      x-permission: system:audit:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - { name: user_id, in: query, schema: { type: string, format: uuid } }
+        - { name: username, in: query, schema: { type: string } }
+        - { name: module, in: query, schema: { type: string } }
+        - { name: action, in: query, schema: { type: string } }
+        - { name: target_id, in: query, schema: { type: string } }
+        - { name: keyword, in: query, schema: { type: string }, description: summary/path 模糊 }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200': { $ref: '#/components/responses/AuditLogPage' }
+  /system/audit-logs/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer, format: int64 } }
+    get:
+      tags: [audit]
+      summary: 审计日志详情（含 before/after）
+      operationId: getAuditLog
+      x-permission: system:audit:view
+      responses:
+        '200':
+          description: 详情
+          content:
+            application/json:
+              schema:
+                allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/AuditLog' } } } ]
+
+  # ------------------------------------------------------------------ notification templates
+  /system/notification-templates:
+    get:
+      tags: [templates]
+      summary: 通知模板列表（全局 + 本租户）
+      operationId: listTemplates
+      x-permission: system:template:view
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+        - { name: keyword, in: query, schema: { type: string } }
+        - { name: channel, in: query, schema: { $ref: '#/components/schemas/NotifyChannel' } }
+      responses:
+        '200': { $ref: '#/components/responses/TemplatePage' }
+    post:
+      tags: [templates]
+      summary: 新建通知模板
+      operationId: createTemplate
+      x-permission: system:template:create
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TemplateCreate' } } }
+      responses:
+        '201': { $ref: '#/components/responses/Template' }
+  /system/notification-templates/{id}:
+    parameters: [ { $ref: '#/components/parameters/id' } ]
+    get:
+      tags: [templates]
+      summary: 模板详情
+      operationId: getTemplate
+      x-permission: system:template:view
+      responses:
+        '200': { $ref: '#/components/responses/Template' }
+    put:
+      tags: [templates]
+      summary: 编辑模板
+      operationId: updateTemplate
+      x-permission: system:template:update
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TemplateUpdate' } } }
+      responses:
+        '200': { $ref: '#/components/responses/Template' }
+    delete:
+      tags: [templates]
+      summary: 删除模板
+      operationId: deleteTemplate
+      x-permission: system:template:delete
+      responses:
+        '200': { $ref: '#/components/responses/OK' }
+
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+
   parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
     page:
       name: page
       in: query
@@ -76,6 +744,115 @@ components:
       in: query
       description: 排序字段，前缀 `-` 表示降序
       schema: { type: string }
+
+  responses:
+    OK:
+      description: 成功（data 为简单对象或缺省）
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+    Error:
+      description: 错误信封
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Envelope' }
+    Health:
+      description: 存活
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Health' } } } ]
+    Ready:
+      description: 就绪状态
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Ready' } } } ]
+    TokenPair:
+      description: 令牌对
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/TokenPair' } } } ]
+    User:
+      description: 用户
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/User' } } } ]
+    UserPage:
+      description: 用户分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/User' } } } } ] } } } ]
+    Dept:
+      description: 部门
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Dept' } } } ]
+    Role:
+      description: 角色
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Role' } } } ]
+    RolePage:
+      description: 角色分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Role' } } } } ] } } } ]
+    Tenant:
+      description: 租户
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Tenant' } } } ]
+    TenantPage:
+      description: 租户分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Tenant' } } } } ] } } } ]
+    DictType:
+      description: 字典类型
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/DictType' } } } ]
+    DictTypePage:
+      description: 字典类型分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/DictType' } } } } ] } } } ]
+    DictItem:
+      description: 字典条目
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/DictItem' } } } ]
+    AuditLogPage:
+      description: 审计日志分页（列表项不含 before/after）
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/AuditLog' } } } } ] } } } ]
+    Template:
+      description: 通知模板
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { $ref: '#/components/schemas/Template' } } } ]
+    TemplatePage:
+      description: 通知模板分页
+      content:
+        application/json:
+          schema:
+            allOf: [ { $ref: '#/components/schemas/Envelope' }, { type: object, properties: { data: { allOf: [ { $ref: '#/components/schemas/Page' }, { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/Template' } } } } ] } } } ]
+
   schemas:
     Envelope:
       type: object
@@ -107,6 +884,404 @@ components:
       required: [status, checks]
       properties:
         status: { type: string, enum: [ok, degraded] }
-        checks:
-          type: object
-          additionalProperties: { type: string }
+        checks: { type: object, additionalProperties: { type: string } }
+
+    # ---- auth
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+        tenant_code: { type: string, description: 同名用户存在于多个租户时必填 }
+    TokenPair:
+      type: object
+      required: [access_token, expires_at, refresh_token]
+      properties:
+        access_token: { type: string }
+        expires_at: { type: string, format: date-time }
+        refresh_token: { type: string }
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/TokenPair'
+        - type: object
+          required: [user]
+          properties:
+            user: { $ref: '#/components/schemas/Profile' }
+    TenantBrief:
+      type: object
+      required: [id, code, name]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+    RoleBrief:
+      type: object
+      required: [id, code, name]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+    MenuNode:
+      type: object
+      required: [code, name, path]
+      properties:
+        code: { type: string, example: system.user }
+        name: { type: string }
+        path: { type: string, example: /system/users }
+        icon: { type: string, description: lucide 图标名 }
+        children: { type: array, items: { $ref: '#/components/schemas/MenuNode' } }
+    Profile:
+      type: object
+      required: [id, username, name, is_super, tenant, roles, permissions, menus]
+      properties:
+        id: { type: string, format: uuid }
+        username: { type: string }
+        name: { type: string }
+        phone: { type: [string, 'null'] }
+        email: { type: [string, 'null'] }
+        avatar_url: { type: [string, 'null'] }
+        is_super: { type: boolean }
+        dept_id: { type: [string, 'null'], format: uuid }
+        dept_name: { type: [string, 'null'] }
+        tenant: { $ref: '#/components/schemas/TenantBrief' }
+        roles: { type: array, items: { $ref: '#/components/schemas/RoleBrief' } }
+        permissions: { type: array, items: { type: string }, description: 权限码集合，前端据此控制按钮 }
+        menus: { type: array, items: { $ref: '#/components/schemas/MenuNode' } }
+        last_login_at: { type: [string, 'null'], format: date-time }
+
+    # ---- users
+    UserStatus:
+      type: string
+      enum: [active, disabled, locked]
+    User:
+      type: object
+      required: [id, tenant_id, username, name, status, is_super, roles, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        dept_id: { type: [string, 'null'], format: uuid }
+        dept_name: { type: [string, 'null'] }
+        username: { type: string }
+        name: { type: string }
+        phone: { type: [string, 'null'] }
+        email: { type: [string, 'null'] }
+        employee_no: { type: [string, 'null'] }
+        avatar_url: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/UserStatus' }
+        is_super: { type: boolean }
+        last_login_at: { type: [string, 'null'], format: date-time }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        roles: { type: array, items: { $ref: '#/components/schemas/RoleBrief' } }
+    UserCreate:
+      type: object
+      required: [username, name]
+      properties:
+        username: { type: string, minLength: 2, maxLength: 64 }
+        name: { type: string, minLength: 1, maxLength: 64 }
+        password: { type: string, description: 留空使用系统缺省密码 }
+        phone: { type: string }
+        email: { type: string, format: email }
+        employee_no: { type: string }
+        dept_id: { type: string, format: uuid }
+        role_ids: { type: array, items: { type: string, format: uuid } }
+        status: { type: string, enum: [active, disabled], default: active }
+    UserUpdate:
+      type: object
+      description: 只更新出现的字段；`clear_dept=true` 清空部门
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        employee_no: { type: string }
+        avatar_url: { type: string }
+        dept_id: { type: string, format: uuid }
+        clear_dept: { type: boolean }
+        status: { $ref: '#/components/schemas/UserStatus' }
+    ImportResult:
+      type: object
+      required: [total, success, failed, errors]
+      properties:
+        total: { type: integer }
+        success: { type: integer }
+        failed: { type: integer }
+        errors:
+          type: array
+          items:
+            type: object
+            required: [row, message]
+            properties:
+              row: { type: integer, description: Excel 行号（从 2 起） }
+              username: { type: string }
+              message: { type: string }
+
+    # ---- depts
+    Dept:
+      type: object
+      required: [id, tenant_id, name, path, sort, monthly_budget, status, user_count, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        parent_id: { type: [string, 'null'], format: uuid }
+        name: { type: string }
+        code: { type: [string, 'null'] }
+        path: { type: string, description: 祖先链 /id1/id2/ }
+        sort: { type: integer }
+        leader_user_id: { type: [string, 'null'], format: uuid }
+        leader_name: { type: [string, 'null'] }
+        monthly_budget: { type: number }
+        status: { type: string, enum: [active, disabled] }
+        user_count: { type: integer, description: 直属在职用户数 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    DeptNode:
+      allOf:
+        - $ref: '#/components/schemas/Dept'
+        - type: object
+          properties:
+            children: { type: array, items: { $ref: '#/components/schemas/DeptNode' } }
+    DeptCreate:
+      type: object
+      required: [name]
+      properties:
+        parent_id: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 64 }
+        code: { type: string }
+        sort: { type: integer }
+        leader_user_id: { type: string, format: uuid }
+        monthly_budget: { type: number }
+        status: { type: string, enum: [active, disabled], default: active }
+    DeptUpdate:
+      type: object
+      properties:
+        parent_id: { type: string, format: uuid }
+        clear_parent: { type: boolean, description: 置为根部门 }
+        name: { type: string }
+        code: { type: string }
+        sort: { type: integer }
+        leader_user_id: { type: string, format: uuid }
+        clear_leader: { type: boolean }
+        monthly_budget: { type: number }
+        status: { type: string, enum: [active, disabled] }
+
+    # ---- roles
+    Role:
+      type: object
+      required: [id, code, name, is_system, permissions, user_count, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: [string, 'null'], format: uuid, description: null 为平台级角色 }
+        code: { type: string }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        is_system: { type: boolean }
+        permissions: { type: array, items: { type: string } }
+        user_count: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    RoleCreate:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string, pattern: '^[a-z][a-z0-9_]{1,31}$' }
+        name: { type: string }
+        description: { type: string }
+        permissions: { type: array, items: { type: string } }
+    RoleUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+    PermissionNode:
+      type: object
+      required: [code, name, type]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [menu, action] }
+        path: { type: string }
+        icon: { type: string }
+        children: { type: array, items: { $ref: '#/components/schemas/PermissionNode' } }
+
+    # ---- tenants
+    Tenant:
+      type: object
+      required: [id, code, name, status, is_platform, user_count, dept_count, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        license_no: { type: [string, 'null'] }
+        contact_name: { type: [string, 'null'] }
+        contact_phone: { type: [string, 'null'] }
+        status: { type: string, enum: [active, disabled] }
+        is_platform: { type: boolean }
+        expires_at: { type: [string, 'null'], format: date-time }
+        user_count: { type: integer }
+        dept_count: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    TenantCreate:
+      type: object
+      required: [code, name, admin_username]
+      properties:
+        code: { type: string, pattern: '^[a-z][a-z0-9-]{1,31}$' }
+        name: { type: string }
+        license_no: { type: string }
+        contact_name: { type: string }
+        contact_phone: { type: string }
+        expires_at: { type: string, format: date-time }
+        admin_username: { type: string, description: 租户管理员用户名 }
+        admin_password: { type: string, description: 留空使用系统缺省密码 }
+        admin_name: { type: string, default: 管理员 }
+    TenantUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        license_no: { type: string }
+        contact_name: { type: string }
+        contact_phone: { type: string }
+        status: { type: string, enum: [active, disabled] }
+        expires_at: { type: string, format: date-time }
+        clear_expires: { type: boolean }
+
+    # ---- dicts
+    DictType:
+      type: object
+      required: [id, code, name, is_system, is_global, items, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: [string, 'null'], format: uuid }
+        is_global: { type: boolean }
+        code: { type: string }
+        name: { type: string }
+        description: { type: [string, 'null'] }
+        is_system: { type: boolean }
+        items: { type: array, items: { $ref: '#/components/schemas/DictItem' }, description: 列表接口不返回 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    DictTypeCreate:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string, pattern: '^[a-z][a-z0-9_]{1,63}$' }
+        name: { type: string }
+        description: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/DictItemCreate' } }
+    DictTypeUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+    DictItem:
+      type: object
+      required: [id, dict_type_id, label, value, sort, status, extra, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        dict_type_id: { type: string, format: uuid }
+        label: { type: string }
+        value: { type: string }
+        sort: { type: integer }
+        color: { type: [string, 'null'] }
+        status: { type: string, enum: [active, disabled] }
+        extra: { type: object, additionalProperties: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    DictItemCreate:
+      type: object
+      required: [label, value]
+      properties:
+        label: { type: string }
+        value: { type: string }
+        sort: { type: integer }
+        color: { type: string }
+        status: { type: string, enum: [active, disabled], default: active }
+        extra: { type: object, additionalProperties: true }
+    DictItemUpdate:
+      type: object
+      properties:
+        label: { type: string }
+        value: { type: string }
+        sort: { type: integer }
+        color: { type: string }
+        status: { type: string, enum: [active, disabled] }
+        extra: { type: object, additionalProperties: true }
+
+    # ---- params
+    Param:
+      type: object
+      required: [key, value, value_type, is_public, source, updated_at]
+      properties:
+        key: { type: string }
+        value: { type: string }
+        value_type: { type: string, enum: [string, int, float, bool, json] }
+        description: { type: [string, 'null'] }
+        is_public: { type: boolean }
+        source: { type: string, enum: [global, tenant], description: 当前生效值来源 }
+        global_value: { type: [string, 'null'], description: 全局缺省值（source=tenant 时有意义） }
+        updated_at: { type: string, format: date-time }
+    ParamUpdate:
+      type: object
+      required: [value]
+      properties:
+        value: { type: string, description: 按 value_type 校验 }
+        description: { type: string }
+
+    # ---- audit
+    AuditLog:
+      type: object
+      required: [id, action, module, method, path, status, created_at]
+      properties:
+        id: { type: integer, format: int64 }
+        tenant_id: { type: [string, 'null'], format: uuid }
+        user_id: { type: [string, 'null'], format: uuid }
+        username: { type: [string, 'null'] }
+        action: { type: string }
+        module: { type: string }
+        target_type: { type: [string, 'null'] }
+        target_id: { type: [string, 'null'] }
+        summary: { type: [string, 'null'] }
+        before: { description: 详情接口返回, type: [object, array, 'null'] }
+        after: { description: 详情接口返回, type: [object, array, 'null'] }
+        method: { type: string }
+        path: { type: string }
+        status: { type: integer }
+        ip: { type: [string, 'null'] }
+        user_agent: { type: [string, 'null'] }
+        request_id: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+
+    # ---- templates
+    NotifyChannel:
+      type: string
+      enum: [inapp, wechat, sms]
+    Template:
+      type: object
+      required: [id, is_global, code, channel, title, content, enabled, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: [string, 'null'], format: uuid }
+        is_global: { type: boolean }
+        code: { type: string, example: approval.submitted }
+        channel: { $ref: '#/components/schemas/NotifyChannel' }
+        title: { type: string }
+        content: { type: string, description: 支持 {{变量}} 占位 }
+        enabled: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    TemplateCreate:
+      type: object
+      required: [code, channel, title, content]
+      properties:
+        code: { type: string, pattern: '^[a-z][a-z0-9_.]{1,63}$' }
+        channel: { $ref: '#/components/schemas/NotifyChannel' }
+        title: { type: string }
+        content: { type: string }
+        enabled: { type: boolean, default: true }
+    TemplateUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        content: { type: string }
+        enabled: { type: boolean }

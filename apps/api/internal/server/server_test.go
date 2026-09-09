@@ -8,6 +8,7 @@ import (
 
 	"github.com/rs/zerolog"
 
+	"github.com/caoyb888/zhiyuche/apps/api/internal/app"
 	"github.com/caoyb888/zhiyuche/apps/api/internal/config"
 	"github.com/caoyb888/zhiyuche/apps/api/pkg/httpx"
 )
@@ -17,7 +18,7 @@ func newTestServer(t *testing.T) *Server {
 	cfg := &config.Config{Env: "test"}
 	cfg.HTTP.Addr = ":0"
 	cfg.HTTP.CORSOrigins = []string{"http://localhost:20173"}
-	return New(Deps{Cfg: cfg, Log: zerolog.Nop()})
+	return New(&app.App{Cfg: cfg, Log: zerolog.Nop()})
 }
 
 func TestHealth(t *testing.T) {
