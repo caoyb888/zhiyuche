@@ -170,3 +170,65 @@ func (s *Store) publish(ctx context.Context, vehicleID uuid.UUID) (*VehicleStatu
 	s.app.Hub.Publish(v.TenantID, ws.Event{Type: ws.EvVehicleStatus, Data: v})
 	return v, nil
 }
+
+// VehicleLive is the snapshot joined with the vehicle summary and the driver
+// name (contract schema VehicleLive). Soft-deleted vehicles are excluded.
+type VehicleLive struct {
+	VehicleStatus
+	PlateNo    string  `json:"plate_no" db:"plate_no"`
+	Brand      *string `json:"brand" db:"brand"`
+	Model      *string `json:"model" db:"model"`
+	DriverName *string `json:"driver_name" db:"driver_name"`
+}
+
+const liveSelect = `
+	SELECT vs.*, v.plate_no, v.brand, v.model, u.name AS driver_name
+	FROM vehicle_status vs
+	JOIN vehicles v ON v.id = vs.vehicle_id AND v.deleted_at IS NULL
+	LEFT JOIN users u ON u.id = vs.driver_id`
+
+// GetLive returns the live view of one vehicle (nil if unknown or deleted).
+func (s *Store) GetLive(ctx context.Context, vehicleID uuid.UUID) (*VehicleLive, error) {
+	var v VehicleLive
+	err := pgxscan.Get(ctx, s.app.DB, &v, liveSelect+` WHERE vs.vehicle_id = $1`, vehicleID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	v.computeOnline()
+	return &v, nil
+}
+
+// ListLiveByTenant returns the live view of every vehicle of a tenant, ordered by plate.
+func (s *Store) ListLiveByTenant(ctx context.Context, tenantID uuid.UUID) ([]VehicleLive, error) {
+	var rows []VehicleLive
+	if err := pgxscan.Select(ctx, s.app.DB, &rows, liveSelect+` WHERE vs.tenant_id = $1 ORDER BY v.plate_no`, tenantID); err != nil {
+		return nil, err
+	}
+	for i := range rows {
+		rows[i].computeOnline()
+	}
+	if rows == nil {
+		rows = []VehicleLive{}
+	}
+	return rows, nil
+}
+
+// LiveByIDs loads the live view of the given vehicles keyed by id (unknown ids are absent).
+func (s *Store) LiveByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]*VehicleLive, error) {
+	out := map[uuid.UUID]*VehicleLive{}
+	if len(ids) == 0 {
+		return out, nil
+	}
+	var rows []VehicleLive
+	if err := pgxscan.Select(ctx, s.app.DB, &rows, liveSelect+` WHERE vs.vehicle_id = ANY($1)`, ids); err != nil {
+		return nil, err
+	}
+	for i := range rows {
+		rows[i].computeOnline()
+		out[rows[i].VehicleID] = &rows[i]
+	}
+	return out, nil
+}

@@ -31,6 +31,9 @@ type Device struct {
 	VehicleID *uuid.UUID `db:"vehicle_id"`
 	Status    string     `db:"status"`
 	KeyHash   string     `db:"api_key_hash"`
+	// LastOnlineAt is the value before this request's presence update, so the
+	// ingest handler can detect an offline→online transition.
+	LastOnlineAt *time.Time `db:"last_online_at"`
 }
 
 const (
@@ -59,7 +62,7 @@ func HashAPIKey(key string) string {
 func LookupDevice(ctx context.Context, db *pgxpool.Pool, serial string) (*Device, error) {
 	var d Device
 	err := pgxscan.Get(ctx, db, &d, `
-		SELECT id, tenant_id, serial_no, vehicle_id, status, api_key_hash
+		SELECT id, tenant_id, serial_no, vehicle_id, status, api_key_hash, last_online_at
 		FROM devices WHERE serial_no = $1 AND deleted_at IS NULL`, serial)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
