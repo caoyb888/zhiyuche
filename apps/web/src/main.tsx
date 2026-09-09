@@ -1,14 +1,27 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
-import Layout    from './components/Layout'
-import Dashboard from './pages/Dashboard'
-import Approval  from './pages/Approval'
-import Trips     from './pages/Trips'
-import Reports   from './pages/Reports'
-import Health    from './pages/Health'
-import Charging  from './pages/Charging'
+import { ErrorCode, isApiError } from './api/client'
+import { ToastProvider } from './components/ui/Toast'
+import AppRouter from './router'
+
+const NO_RETRY_CODES = new Set<number>([ErrorCode.BadRequest, ErrorCode.Unauthorized, ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict])
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      // 业务错误（参数/权限/不存在/冲突）不重试，网络抖动最多重试 1 次
+      retry: (failureCount, error) => {
+        if (isApiError(error) && NO_RETRY_CODES.has(error.code)) return false
+        return failureCount < 1
+      },
+    },
+    mutations: { retry: false },
+  },
+})
 
 const container = document.getElementById('root')
 if (!container) {
@@ -17,17 +30,10 @@ if (!container) {
 
 createRoot(container).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout/>}>
-          <Route index          element={<Dashboard/>}/>
-          <Route path="approval" element={<Approval/>}/>
-          <Route path="trips"    element={<Trips/>}/>
-          <Route path="reports"  element={<Reports/>}/>
-          <Route path="health"   element={<Health/>}/>
-          <Route path="charging" element={<Charging/>}/>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AppRouter />
+      </ToastProvider>
+    </QueryClientProvider>
   </StrictMode>,
 )

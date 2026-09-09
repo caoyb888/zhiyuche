@@ -80,3 +80,21 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 .slide-up { animation: slide-up 0.35s ease forwards; }
+
+/* Drawer slide from right */
+@keyframes drawer-in {
+  from { transform: translateX(24px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+.drawer-in { animation: drawer-in 0.25s ease forwards; }
+
+/* Sidebar group (二级菜单) */
+.sidebar-group-btn {
+  @apply w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer;
+}
+.sidebar-sublink {
+  @apply flex items-center gap-2 pl-11 pr-3 py-2 rounded-lg text-[13px] text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer;
+}
+.sidebar-sublink.active {
+  @apply text-white bg-white/15;
+}
