@@ -2,13 +2,17 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"math"
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/caoyb888/zhiyuche/apps/api/internal/ocpp"
 )
 
 const (
@@ -25,6 +29,7 @@ const (
 	phaseIdle phase = iota
 	phaseDriving
 	phaseToCharger
+	phaseWaiting // parked at a pile, waiting for a free connector (or for a remote start to kick in)
 	phaseCharging
 )
 
@@ -36,6 +41,8 @@ func (p phase) String() string {
 		return "driving"
 	case phaseToCharger:
 		return "to_charger"
+	case phaseWaiting:
+		return "waiting"
 	case phaseCharging:
 		return "charging"
 	}
@@ -71,9 +78,14 @@ type simVehicle struct {
 
 	lastIdleSent time.Time
 	nextTripAt   time.Time
+
+	// charging through OCPP: the pile the vehicle is parked at and the gun it uses
+	pile *simPile
+	conn *simConnector
 }
 
-// Sim drives all vehicles one tick at a time.
+// Sim drives all vehicles one tick at a time. mu serialises the tick loop and
+// the OCPP callbacks (RemoteStart/RemoteStop arrive on the piles' reader goroutines).
 type Sim struct {
 	cfg      *Config
 	c        *client
@@ -82,20 +94,43 @@ type Sim struct {
 	rng      *rand.Rand
 	purposes []string
 
+	mu        sync.Mutex
 	vehicles  []*simVehicle
+	piles     []*simPile
 	driverIdx int
+	legacyWarned bool
 }
 
 func newSim(cfg *Config, c *client, st *State, log *slog.Logger, rng *rand.Rand, purposes []string) *Sim {
 	s := &Sim{cfg: cfg, c: c, st: st, log: log, rng: rng, purposes: purposes}
 	now := time.Now()
-	for _, va := range st.Vehicles {
+	for i, va := range st.Vehicles {
 		v := &simVehicle{asset: va, pos: LngLat{va.Lng, va.Lat}, soc: va.SOC, odo: va.OdometerKm, heading: rng.Float64() * 360}
+		if i < cfg.LowSOC {
+			v.soc = round(15+rng.Float64()*10, 1) // forced to need a charge right away (demo / e2e)
+		}
 		v.nextTripAt = now.Add(s.idleDelay())
 		s.vehicles = append(s.vehicles, v)
 	}
+	for _, pa := range st.Piles {
+		s.piles = append(s.piles, newSimPile(pa, log))
+	}
 	return s
 }
+
+// startOCPP connects every pile to the central system (background goroutines).
+func (s *Sim) startOCPP(ctx context.Context, base string) {
+	for _, p := range s.piles {
+		p := p
+		p.client = newOCPPClient(base, p.asset.Code, s.log)
+		p.client.handle = func(action string, payload json.RawMessage) (any, *ocpp.CallErr) { return s.handleCall(p, action, payload) }
+		p.client.onConnected = p.sendStatuses
+		go p.client.run(ctx)
+	}
+}
+
+// ocppEnabled reports whether piles talk OCPP at all (--no-ocpp disables it).
+func (s *Sim) ocppEnabled() bool { return !s.cfg.NoOCPP && len(s.piles) > 0 && s.piles[0].client != nil }
 
 // idleDelay is how long a parked vehicle waits before the next trip (real time, shortened by speedup).
 func (s *Sim) idleDelay() time.Duration {
@@ -105,15 +140,22 @@ func (s *Sim) idleDelay() time.Duration {
 
 // persist copies the volatile state back into the state file structs.
 func (s *Sim) persist() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for _, v := range s.vehicles {
 		v.asset.Lng, v.asset.Lat = round(v.pos.Lng, 6), round(v.pos.Lat, 6)
 		v.asset.SOC, v.asset.OdometerKm = round(v.soc, 1), round(v.odo, 1)
+	}
+	for _, p := range s.piles {
+		p.persist()
 	}
 }
 
 // tick advances every vehicle by one reporting interval (scaled by speedup).
 // force makes idle vehicles report immediately (used by --once).
 func (s *Sim) tick(ctx context.Context, force bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	now := time.Now()
 	dt := time.Duration(float64(s.cfg.Interval) * s.cfg.Speedup)
 	for _, v := range s.vehicles {
@@ -128,7 +170,7 @@ func (s *Sim) step(ctx context.Context, v *simVehicle, now time.Time, dt time.Du
 	hours := dt.Hours()
 	switch v.phase {
 	case phaseIdle:
-		if !force && v.soc < lowSOC && len(s.st.Piles) > 0 {
+		if !force && v.soc < lowSOC && len(s.piles) > 0 {
 			s.goCharge(v)
 			return
 		}
@@ -147,20 +189,81 @@ func (s *Sim) step(ctx context.Context, v *simVehicle, now time.Time, dt time.Du
 			if v.phase == phaseDriving {
 				s.endTrip(ctx, v, now)
 			} else {
-				v.phase = phaseCharging
-				s.log.Info("arrived at charger", "plate", v.asset.PlateNo, "soc", round(v.soc, 1))
+				s.arriveAtPile(ctx, v, now)
 			}
 		}
+	case phaseWaiting:
+		s.tryStart(ctx, v, now)
+		if v.phase == phaseWaiting && now.Sub(v.lastIdleSent) >= idleReportGap {
+			s.send(ctx, v, s.point(v, now, false, false))
+			v.lastIdleSent = now
+		}
 	case phaseCharging:
+		if v.conn != nil {
+			s.chargeTick(ctx, v, now, hours)
+			return
+		}
+		// legacy path: no OCPP, the vehicle only reports charging=true until full
 		v.soc = math.Min(100, v.soc+chargeGainPct(chargePowerKw, hours, batteryKwh))
 		charging := v.soc < fullSOC
 		s.send(ctx, v, s.point(v, now, false, charging))
 		if !charging {
 			v.phase = phaseIdle
+			v.pile = nil
 			v.lastIdleSent = now
 			v.nextTripAt = now.Add(s.idleDelay())
-			s.log.Info("charging finished", "plate", v.asset.PlateNo, "soc", round(v.soc, 1))
+			s.log.Info("charging finished (telemetry only)", "plate", v.asset.PlateNo, "soc", round(v.soc, 1))
 		}
+	}
+}
+
+// arriveAtPile parks the vehicle and starts (or queues for) a session.
+func (s *Sim) arriveAtPile(ctx context.Context, v *simVehicle, now time.Time) {
+	s.log.Info("arrived at charger", "plate", v.asset.PlateNo, "pile", v.pile.asset.Code, "soc", round(v.soc, 1))
+	v.phase = phaseWaiting
+	v.lastIdleSent = now
+	s.tryStart(ctx, v, now)
+}
+
+// tryStart starts an OCPP session when the pile is online and a gun is free;
+// without OCPP it falls back to the telemetry-only charge.
+func (s *Sim) tryStart(ctx context.Context, v *simVehicle, now time.Time) {
+	p := v.pile
+	if !s.ocppEnabled() || p == nil || !p.online() {
+		if !s.legacyWarned {
+			s.log.Warn("OCPP unavailable, charging with telemetry only", "plate", v.asset.PlateNo)
+			s.legacyWarned = true
+		}
+		if v.conn != nil {
+			v.conn.vehicle, v.conn.pendingIDTag = nil, ""
+			v.conn = nil
+		}
+		v.phase = phaseCharging
+		return
+	}
+	conn, idTag := v.conn, ""
+	if conn != nil && conn.pendingIDTag != "" { // reserved by RemoteStartTransaction
+		idTag = conn.pendingIDTag
+	} else {
+		conn = p.freeConnector()
+		if conn == nil {
+			if now.Sub(v.lastIdleSent) >= idleReportGap {
+				s.log.Info("all connectors busy, waiting", "plate", v.asset.PlateNo, "pile", p.asset.Code)
+			}
+			return
+		}
+		if d := s.nextDriver(); d != nil {
+			idTag = d.CardUID
+		}
+	}
+	if idTag == "" {
+		s.log.Warn("no driver card for charging; telemetry only", "plate", v.asset.PlateNo)
+		v.phase = phaseCharging
+		return
+	}
+	if !s.startSession(ctx, v, p, conn, idTag, now) {
+		v.conn = nil
+		v.phase = phaseCharging // central system refused: charge without a session
 	}
 }
 
@@ -173,19 +276,32 @@ func (s *Sim) nextDriver() *DriverAsset {
 	return d
 }
 
+// goCharge heads for the nearest pile with a free gun (any pile when all are busy).
 func (s *Sim) goCharge(v *simVehicle) {
-	best := s.st.Piles[0]
+	var best *simPile
 	bestD := math.Inf(1)
-	for _, p := range s.st.Piles {
-		if d := haversineKm(v.pos, LngLat{p.Lng, p.Lat}); d < bestD {
-			best, bestD = p, d
+	pick := func(onlyFree bool) {
+		for _, p := range s.piles {
+			if onlyFree && (!p.online() || p.freeConnector() == nil) {
+				continue
+			}
+			if d := haversineKm(v.pos, LngLat{p.asset.Lng, p.asset.Lat}); d < bestD {
+				best, bestD = p, d
+			}
 		}
 	}
-	v.route = buildRoute(s.rng, v.pos, LngLat{best.Lng, best.Lat}, 2, 0.4)
+	if s.ocppEnabled() {
+		pick(true)
+	}
+	if best == nil {
+		pick(false)
+	}
+	v.pile, v.conn = best, nil
+	v.route = buildRoute(s.rng, v.pos, LngLat{best.asset.Lng, best.asset.Lat}, 2, 0.4)
 	v.travelled, v.speed, v.cruise = 0, 0, 30+s.rng.Float64()*20
 	v.signOn, v.driver = false, nil
 	v.phase = phaseToCharger
-	s.log.Info("low battery, heading to charger", "plate", v.asset.PlateNo, "soc", round(v.soc, 1), "pile", best.Code, "km", round(v.route.TotalKm(), 1))
+	s.log.Info("low battery, heading to charger", "plate", v.asset.PlateNo, "soc", round(v.soc, 1), "pile", best.asset.Code, "km", round(v.route.TotalKm(), 1))
 }
 
 func (s *Sim) startTrip(ctx context.Context, v *simVehicle, now time.Time) {

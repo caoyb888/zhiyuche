@@ -37,11 +37,14 @@ type DriverAsset struct {
 }
 
 type PileAsset struct {
-	Code string  `json:"pile_code"`
-	Name string  `json:"name"`
-	ID   string  `json:"id"`
-	Lng  float64 `json:"lng"`
-	Lat  float64 `json:"lat"`
+	Code           string    `json:"pile_code"`
+	Name           string    `json:"name"`
+	ID             string    `json:"id"`
+	Lng            float64   `json:"lng"`
+	Lat            float64   `json:"lat"`
+	PowerKw        float64   `json:"power_kw"`
+	ConnectorCount int       `json:"connector_count"`
+	MeterWh        []float64 `json:"meter_wh"` // cumulative energy register per connector (1..n)
 }
 
 // loadState reads the file; a missing file yields an empty state.

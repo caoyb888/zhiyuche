@@ -20,6 +20,7 @@ type client struct {
 	base     string
 	username string
 	password string
+	tenant   string // tenant_code sent with the login (usernames are unique per tenant only)
 	http     *http.Client
 	log      *slog.Logger
 
@@ -51,9 +52,9 @@ type envelope struct {
 	Data    json.RawMessage `json:"data"`
 }
 
-func newClient(base, username, password string, log *slog.Logger) *client {
+func newClient(base, username, password, tenant string, log *slog.Logger) *client {
 	return &client{
-		base: strings.TrimRight(base, "/"), username: username, password: password, log: log,
+		base: strings.TrimRight(base, "/"), username: username, password: password, tenant: tenant, log: log,
 		http: &http.Client{Timeout: 20 * time.Second},
 	}
 }
@@ -63,6 +64,9 @@ func (c *client) login(ctx context.Context) error {
 		AccessToken string `json:"access_token"`
 	}
 	body := map[string]string{"username": c.username, "password": c.password}
+	if c.tenant != "" {
+		body["tenant_code"] = c.tenant
+	}
 	if err := c.call(ctx, http.MethodPost, "/auth/login", body, nil, &out); err != nil {
 		return err
 	}
