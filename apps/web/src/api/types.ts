@@ -116,6 +116,21 @@ export type PileUpdate = Schemas['PileUpdate']
 /** 手动可设置的桩状态（PileUpdate.status） */
 export type PileManualStatus = NonNullable<PileUpdate['status']>
 
+// ── 公务审批 ──────────────────────────────────────────
+export type UserBrief = Schemas['UserBrief']
+export type TripType = Schemas['TripType']
+export type ApprovalStatus = Schemas['ApprovalStatus']
+export type ApprovalStep = Schemas['ApprovalStep']
+export type ApprovalStepAction = ApprovalStep['action']
+export type Approval = Schemas['Approval']
+export type ApprovalUrgency = Approval['urgency']
+export type ApprovalAttachment = NonNullable<Approval['attachments']>[number]
+export type ApprovalCreate = Schemas['ApprovalCreate']
+export type PrecheckResult = Schemas['PrecheckResult']
+export type PrecheckConflict = PrecheckResult['conflicts'][number]
+export type ApprovalRules = Schemas['ApprovalRules']
+export type ApprovalRulesUpdate = Schemas['ApprovalRulesUpdate']
+
 // ── 行程（轨迹 / 事件，供地图组件与总览复用）────────────
 export type PlannedRoute = Schemas['PlannedRoute']
 export type TripTrack = Schemas['TripTrack']
@@ -123,6 +138,13 @@ export type TrackPoint = TripTrack['points'][number]
 export type TripEvent = Schemas['TripEvent']
 export type TripEventType = TripEvent['type']
 export type TripSummary = Schemas['TripSummary']
+export type TripStatus = Schemas['TripStatus']
+export type TripBrief = Schemas['TripBrief']
+export type Trip = Schemas['Trip']
+export type TripSource = Trip['source']
+export type RoofSignStatus = Trip['roof_sign_status']
+/** 行程详情里的关联申请摘要 */
+export type TripApprovalBrief = NonNullable<Trip['approval']>
 
 // ── 总览 ─────────────────────────────────────────────
 export type DashboardOverview = Schemas['DashboardOverview']
