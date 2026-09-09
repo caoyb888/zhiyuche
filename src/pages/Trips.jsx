@@ -3,21 +3,6 @@ import { trips } from '../data/mock'
 import { MapPin, Clock, Zap, DollarSign, ChevronRight, Navigation, ShieldCheck } from 'lucide-react'
 
 function TripDetail({ trip, onClose }) {
-  const [playing, setPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-
-  const play = () => {
-    if (playing) { setPlaying(false); return }
-    setPlaying(true)
-    setProgress(0)
-    let p = 0
-    const iv = setInterval(() => {
-      p += 2
-      setProgress(p)
-      if (p >= 100) { clearInterval(iv); setPlaying(false) }
-    }, 60)
-  }
-
   const scoreColor = s => s >= 85 ? 'text-emerald-600' : s >= 70 ? 'text-amber-500' : 'text-red-500'
   const scoreLabel = s => s >= 85 ? '优秀' : s >= 70 ? '良好' : '较差'
   const score = Math.max(60, 100 - trip.brake * 3 - trip.accel * 2)
@@ -57,28 +42,6 @@ function TripDetail({ trip, onClose }) {
               <div className="text-xs text-slate-400">行驶时长</div>
               <div className="text-sm font-semibold text-slate-800">{trip.duration}</div>
             </div>
-          </div>
-
-          {/* Route map mock */}
-          <div className="bg-slate-800 rounded-xl overflow-hidden relative" style={{height:160}}>
-            <svg width="100%" height="100%" viewBox="0 0 400 160" preserveAspectRatio="none" className="opacity-30">
-              <line x1="0" y1="80" x2="400" y2="80" stroke="#475569" strokeWidth="2"/>
-              <line x1="200" y1="0" x2="200" y2="160" stroke="#475569" strokeWidth="2"/>
-            </svg>
-            {/* Route line */}
-            <svg width="100%" height="100%" viewBox="0 0 400 160" className="absolute inset-0">
-              <polyline points="40,120 100,90 160,70 250,60 320,50 370,40"
-                fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="300" strokeDashoffset={300 - progress*3} style={{transition:'stroke-dashoffset 0.1s'}}/>
-              {progress > 0 && (
-                <circle cx={40 + progress*3.3} cy={120 - progress*0.8} r="5" fill="#3b82f6" className="pulse-dot"/>
-              )}
-              <circle cx="40" cy="120" r="5" fill="#10b981"/>
-              <circle cx="370" cy="40" r="5" fill="#f59e0b"/>
-            </svg>
-            <div className="absolute bottom-3 left-3 text-white/60 text-[10px]">{trip.route}</div>
-            <button onClick={play} className={`absolute top-3 right-3 text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${playing ? 'bg-amber-500 text-white' : 'bg-white/20 text-white hover:bg-white/30'}`}>
-              {playing ? '▶ 回放中…' : '▶ 轨迹回放'}
-            </button>
           </div>
 
           {/* Stats grid */}

@@ -41,8 +41,8 @@ export default function Layout() {
 
         {/* Bottom info */}
         <div className="px-4 py-4 border-t border-white/10">
-          <div className="text-xs text-slate-500">演示版 V1.0</div>
-          <div className="text-xs text-slate-500 mt-0.5">公司A · 车队管理</div>
+          <div className="text-xs text-slate-500">测试版 V2.0</div>
+          <div className="text-xs text-slate-500 mt-0.5">山东宸华 · 车队管理</div>
         </div>
       </aside>
 
