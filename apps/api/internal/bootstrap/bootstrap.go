@@ -26,8 +26,15 @@ const (
 )
 
 func Run(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log zerolog.Logger) error {
-	if err := SyncPermissions(ctx, db); err != nil {
+	newCodes, err := SyncPermissions(ctx, db)
+	if err != nil {
 		return fmt.Errorf("sync permissions: %w", err)
+	}
+	if len(newCodes) > 0 {
+		log.Info().Strs("codes", newCodes).Msg("new permission codes registered, granting to tenant admins")
+		if err := propagateNewPerms(ctx, db, newCodes); err != nil {
+			return fmt.Errorf("propagate permissions: %w", err)
+		}
 	}
 	if err := seedParams(ctx, db); err != nil {
 		return fmt.Errorf("seed params: %w", err)
@@ -58,14 +65,16 @@ func Run(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log zerolog.
 }
 
 // SyncPermissions upserts the registry and removes rows no longer registered.
-func SyncPermissions(ctx context.Context, db *pgxpool.Pool) error {
+// It returns the action codes that did not exist before this run.
+func SyncPermissions(ctx context.Context, db *pgxpool.Pool) ([]string, error) {
 	tx, err := db.Begin(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Rollback(ctx)
 
 	codes := make([]string, 0, len(perm.Defs))
+	var newActions []string
 	// parents first: Defs is ordered so parents precede children
 	for _, d := range perm.Defs {
 		codes = append(codes, d.Code)
@@ -74,24 +83,61 @@ func SyncPermissions(ctx context.Context, db *pgxpool.Pool) error {
 			p := d.Parent
 			parent = &p
 		}
-		_, err := tx.Exec(ctx, `
+		var inserted bool
+		err := tx.QueryRow(ctx, `
 			INSERT INTO permissions (code, name, type, parent_code, path, icon, sort, updated_at)
 			VALUES ($1,$2,$3,$4,NULLIF($5,''),NULLIF($6,''),$7, now())
 			ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, type = EXCLUDED.type, parent_code = EXCLUDED.parent_code,
-			  path = EXCLUDED.path, icon = EXCLUDED.icon, sort = EXCLUDED.sort, updated_at = now()`,
-			d.Code, d.Name, string(d.Type), parent, d.Path, d.Icon, d.Sort)
+			  path = EXCLUDED.path, icon = EXCLUDED.icon, sort = EXCLUDED.sort, updated_at = now()
+			RETURNING (xmax = 0) AS inserted`,
+			d.Code, d.Name, string(d.Type), parent, d.Path, d.Icon, d.Sort).Scan(&inserted)
 		if err != nil {
-			return fmt.Errorf("upsert %s: %w", d.Code, err)
+			return nil, fmt.Errorf("upsert %s: %w", d.Code, err)
+		}
+		if inserted && d.Type == perm.Action {
+			newActions = append(newActions, d.Code)
 		}
 	}
 	// delete children before parents (FK) — rows not in registry
 	if _, err := tx.Exec(ctx, `DELETE FROM permissions WHERE code <> ALL($1) AND type = 'action'`, codes); err != nil {
-		return err
+		return nil, err
 	}
 	if _, err := tx.Exec(ctx, `DELETE FROM permissions WHERE code <> ALL($1)`, codes); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return newActions, nil
+}
+
+// propagateNewPerms grants freshly registered action codes to every existing
+// tenant_admin role (platform-only codes only to the platform tenant) and to
+// super_admin. Codes an administrator deliberately removed are never re-added,
+// because only codes that were absent from the table are passed in.
+func propagateNewPerms(ctx context.Context, db *pgxpool.Pool, codes []string) error {
+	var platformOnly []string
+	for c := range perm.PlatformOnly {
+		platformOnly = append(platformOnly, c)
+	}
+	_, err := db.Exec(ctx, `
+		INSERT INTO role_permissions (role_id, permission_code)
+		SELECT r.id, c
+		FROM roles r
+		JOIN tenants t ON t.id = r.tenant_id
+		CROSS JOIN unnest($1::text[]) AS c
+		WHERE r.code = 'tenant_admin' AND r.deleted_at IS NULL
+		  AND (t.is_platform OR c <> ALL($2::text[]))
+		ON CONFLICT DO NOTHING`, codes, platformOnly)
+	if err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	_, err = db.Exec(ctx, `
+		INSERT INTO role_permissions (role_id, permission_code)
+		SELECT r.id, c FROM roles r CROSS JOIN unnest($1::text[]) AS c
+		WHERE r.code = 'super_admin' AND r.tenant_id IS NULL AND r.deleted_at IS NULL
+		ON CONFLICT DO NOTHING`, codes)
+	return err
 }
 
 func seedParams(ctx context.Context, db *pgxpool.Pool) error {
@@ -138,20 +184,23 @@ func EnsureTenantDefaults(ctx context.Context, db *pgxpool.Pool, tenantID uuid.U
 		if r.Perms == nil {
 			perms = perm.ActionCodes(isPlatform)
 		}
-		// tenant_admin always synced (so new permissions propagate); others only on creation
-		if r.Perms == nil || created {
+		// 只在角色刚创建时写入默认权限集；已有角色的权限由管理员维护，
+		// 注册表新增的权限码由 propagateNewPerms 定向补给 tenant_admin
+		if created {
 			if err := setRolePerms(ctx, db, roleID, perms); err != nil {
 				return err
 			}
 		}
 	}
 	if isPlatform {
-		roleID, _, err := ensureRole(ctx, db, nil, perm.SuperAdminRole)
+		roleID, created, err := ensureRole(ctx, db, nil, perm.SuperAdminRole)
 		if err != nil {
 			return err
 		}
-		if err := setRolePerms(ctx, db, roleID, perm.ActionCodes(true)); err != nil {
-			return err
+		if created {
+			if err := setRolePerms(ctx, db, roleID, perm.ActionCodes(true)); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

@@ -178,13 +178,24 @@ func nullableJSON(b []byte) any {
 	return b
 }
 
-// moduleFromPath turns "/api/v1/system/users/:id/roles" into "system.users".
+// resourceAliases maps URL resource segments to the module names handlers use,
+// so failed requests (which never reach audit.Record) land under the same module.
+var resourceAliases = map[string]string{
+	"users": "user", "depts": "dept", "roles": "role", "permissions": "permission", "tenants": "tenant",
+	"dict-types": "dict", "dict-items": "dict", "dicts": "dict", "params": "param",
+	"audit-logs": "audit", "notification-templates": "template",
+}
+
+// moduleFromPath turns "/api/v1/system/users/:id/roles" into "system.user".
 func moduleFromPath(full string) string {
 	full = strings.TrimPrefix(full, "/api/v1/")
 	var parts []string
 	for _, seg := range strings.Split(full, "/") {
 		if seg == "" || strings.HasPrefix(seg, ":") {
 			continue
+		}
+		if alias, ok := resourceAliases[seg]; ok {
+			seg = alias
 		}
 		parts = append(parts, seg)
 		if len(parts) == 2 {
@@ -193,6 +204,9 @@ func moduleFromPath(full string) string {
 	}
 	if len(parts) == 0 {
 		return "unknown"
+	}
+	if parts[0] == "auth" {
+		return "auth"
 	}
 	return strings.Join(parts, ".")
 }
