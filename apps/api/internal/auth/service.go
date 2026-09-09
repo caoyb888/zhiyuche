@@ -143,6 +143,38 @@ func (s *Service) RevokeUser(ctx context.Context, uid uuid.UUID) error {
 	return s.tokens.invalidatePerms(ctx, uid)
 }
 
+// tenantUserIDs lists every user (deleted included — a stale session must not survive) of a tenant.
+func (s *Service) tenantUserIDs(ctx context.Context, tenantID uuid.UUID) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
+	err := pgxscan.Select(ctx, s.app.DB, &ids, `SELECT id FROM users WHERE tenant_id = $1`, tenantID)
+	return ids, err
+}
+
+// InvalidateTenant drops the cached snapshot of every user in the tenant
+// (call after the tenant's status changes so the middleware re-reads it).
+func (s *Service) InvalidateTenant(ctx context.Context, tenantID uuid.UUID) error {
+	ids, err := s.tenantUserIDs(ctx, tenantID)
+	if err != nil {
+		return err
+	}
+	return s.tokens.invalidatePerms(ctx, ids...)
+}
+
+// RevokeTenant logs every user of the tenant out everywhere: refresh tokens
+// gone, snapshots dropped (used when a tenant is disabled).
+func (s *Service) RevokeTenant(ctx context.Context, tenantID uuid.UUID) error {
+	ids, err := s.tenantUserIDs(ctx, tenantID)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := s.tokens.revokeAllRefresh(ctx, id); err != nil {
+			return err
+		}
+	}
+	return s.tokens.invalidatePerms(ctx, ids...)
+}
+
 // ---- token pair ----
 
 type TokenPair struct {

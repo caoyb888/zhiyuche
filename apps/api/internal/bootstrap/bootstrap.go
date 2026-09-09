@@ -50,7 +50,7 @@ func Run(ctx context.Context, db *pgxpool.Pool, cfg *config.Config, log zerolog.
 		if err := EnsureTenantDefaults(ctx, db, demoID); err != nil {
 			return err
 		}
-		if err := ensureTenantAdmin(ctx, db, demoID, "chenhua_admin", "宸华管理员", cfg.Bootstrap.AdminPassword, log); err != nil {
+		if err := EnsureTenantAdmin(ctx, db, demoID, "chenhua_admin", "宸华管理员", cfg.Bootstrap.AdminPassword, log); err != nil {
 			return fmt.Errorf("demo admin: %w", err)
 		}
 	}
@@ -222,7 +222,10 @@ func ensureSuperAdmin(ctx context.Context, db *pgxpool.Pool, platformID uuid.UUI
 	return nil
 }
 
-func ensureTenantAdmin(ctx context.Context, db *pgxpool.Pool, tenantID uuid.UUID, username, name, password string, log zerolog.Logger) error {
+// EnsureTenantAdmin creates the tenant administrator account (bound to the
+// tenant's tenant_admin role) when no user of that name exists yet. Idempotent;
+// also used by the tenant module when a tenant is created.
+func EnsureTenantAdmin(ctx context.Context, db *pgxpool.Pool, tenantID uuid.UUID, username, name, password string, log zerolog.Logger) error {
 	var n int
 	if err := db.QueryRow(ctx, `SELECT count(*) FROM users WHERE tenant_id = $1 AND username = $2 AND deleted_at IS NULL`, tenantID, username).Scan(&n); err != nil {
 		return err
@@ -248,6 +251,6 @@ func ensureTenantAdmin(ctx context.Context, db *pgxpool.Pool, tenantID uuid.UUID
 	if _, err := db.Exec(ctx, `INSERT INTO user_roles (user_id, role_id) VALUES ($1,$2) ON CONFLICT DO NOTHING`, uid, roleID); err != nil {
 		return err
 	}
-	log.Info().Str("username", username).Msg("demo tenant admin created")
+	log.Info().Str("username", username).Str("tenant_id", tenantID.String()).Msg("tenant admin created")
 	return nil
 }
