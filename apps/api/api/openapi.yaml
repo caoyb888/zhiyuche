@@ -1266,7 +1266,7 @@ components:
         code: { type: string, example: approval.submitted }
         channel: { $ref: '#/components/schemas/NotifyChannel' }
         title: { type: string }
-        content: { type: string, description: 支持 {{变量}} 占位 }
+        content: { type: string, description: '支持 {{变量}} 占位' }
         enabled: { type: boolean }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
