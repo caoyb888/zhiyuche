@@ -133,6 +133,9 @@ type Telemetry struct {
 // moves an idle vehicle to charging and back; in_use/maintenance/disabled are
 // never overridden by telemetry. Returns the new snapshot (already pushed).
 func (s *Store) ApplyTelemetry(ctx context.Context, vehicleID uuid.UUID, rangeKmFull float64, t Telemetry) (*VehicleStatus, error) {
+	if t.TS.IsZero() {
+		t.TS = time.Now()
+	}
 	var rangeKm *float64
 	if t.SOC != nil && rangeKmFull > 0 {
 		r := *t.SOC / 100 * rangeKmFull

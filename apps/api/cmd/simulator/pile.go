@@ -350,13 +350,19 @@ func (s *Sim) releaseConnector(ctx context.Context, p *simPile, conn *simConnect
 	p.status(ctx, conn.id, "Available")
 }
 
-// shutdownSessions closes every running session before the simulator exits.
+// shutdownSessions closes every running charging session and ends every
+// ongoing trip before the simulator exits, so the next run does not hit
+// "vehicle in use" / time-window conflicts.
 func (s *Sim) shutdownSessions(ctx context.Context) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	now := time.Now()
 	for _, v := range s.vehicles {
 		if v.conn != nil && v.conn.txID != 0 {
-			s.stopSession(ctx, v, time.Now(), "Other")
+			s.stopSession(ctx, v, now, "Other")
+		}
+		if v.tripStarted {
+			s.endTrip(ctx, v, now)
 		}
 	}
 	for _, p := range s.piles {
