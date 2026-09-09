@@ -19,7 +19,8 @@ git -C $root bundle create $bundle "origin/$Branch..$Branch" | Out-Null
 scp -o BatchMode=yes $bundle "${Target}:/tmp/zuche-push.bundle"
 if ($LASTEXITCODE -ne 0) { throw "scp failed" }
 
-$remoteCmd = "cd $Dir && git fetch -q /tmp/zuche-push.bundle $Branch && git merge -q --ff-only FETCH_HEAD && git push origin $Branch && rm -f /tmp/zuche-push.bundle && git log --oneline -1"
+# push 不依赖远程工作区；随后 reset --hard 让远程工作区与该提交一致（sync 过去的文件与提交内容相同，忽略文件保留）
+$remoteCmd = "cd $Dir && git fetch -q /tmp/zuche-push.bundle $Branch && git push origin FETCH_HEAD:refs/heads/$Branch && git reset -q --hard FETCH_HEAD && git clean -fdq && rm -f /tmp/zuche-push.bundle && git log --oneline -1"
 ssh -o BatchMode=yes $Target $remoteCmd
 if ($LASTEXITCODE -ne 0) { throw "remote push failed" }
 
