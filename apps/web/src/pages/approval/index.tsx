@@ -70,7 +70,10 @@ export default function ApprovalPage() {
     return s
   }, [canApprove, canManage])
   const rawScope = searchParams.get('scope')
-  const scope: ApprovalScope = rawScope && (allowedScopes as string[]).includes(rawScope) ? (rawScope as ApprovalScope) : 'mine'
+  // 车队管理员默认"全部"（掌握全局，待办常为 0），纯审批人默认"待我审批"，
+  // 普通员工才是"我的申请"：他们很少自己发起申请，停在"我的申请"会让页面看起来没有数据
+  const defaultScope: ApprovalScope = canManage ? 'all' : canApprove ? 'todo' : 'mine'
+  const scope: ApprovalScope = rawScope && (allowedScopes as string[]).includes(rawScope) ? (rawScope as ApprovalScope) : defaultScope
   const detailId = searchParams.get('id')
 
   const setParam = (key: string, value: string | null) => {
@@ -89,7 +92,7 @@ export default function ApprovalPage() {
   const [quick, setQuick] = useState<{ action: 'approve' | 'reject'; approval: Approval } | null>(null)
 
   const changeScope = (k: ApprovalScope) => {
-    setParam('scope', k === 'mine' ? null : k)
+    setParam('scope', k === defaultScope ? null : k)
     setPage(1)
   }
 

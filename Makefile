@@ -14,9 +14,14 @@ LDFLAGS := -X github.com/caoyb888/zhiyuche/apps/api/internal/server.Version=$(VE
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n",$$1,$$2}'
 
-env: ## 生成缺省的 .env 文件（已存在则跳过；无 .env.example 的目录忽略）
+env: ## 生成缺省的 .env（已存在则跳过），并提示已有 .env 里缺失的新键
 	@for d in deploy $(API_DIR) $(WEB_DIR); do \
-	  if [ -f $$d/.env.example ] && [ ! -f $$d/.env ]; then cp $$d/.env.example $$d/.env && echo "created $$d/.env"; fi; \
+	  if [ -f $$d/.env.example ] && [ ! -f $$d/.env ]; then cp $$d/.env.example $$d/.env && echo "created $$d/.env"; \
+	  elif [ -f $$d/.env.example ]; then \
+	    miss=$$(grep -oE '^[A-Z_][A-Z0-9_]*=' $$d/.env.example | sed 's/=$$//' | while read k; do \
+	              grep -qE "^$$k=" $$d/.env || printf '%s ' "$$k"; done); \
+	    [ -n "$$miss" ] && echo "warning: $$d/.env 缺少新键: $$miss（对照 .env.example 补齐，或删掉 .env 重新生成）" || true; \
+	  fi; \
 	done
 
 # ---- backend ----

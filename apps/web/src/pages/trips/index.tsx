@@ -102,7 +102,9 @@ export default function TripsPage() {
   const canPickVehicle = can('asset:vehicle:view')
 
   const rawScope = searchParams.get('scope')
-  const scope: TripScope = rawScope === 'all' && canAll ? 'all' : 'mine'
+  // 车队管理员/财务默认看"全部"：他们通常不亲自驾驶，落在"我的行程"会是一片空白
+  const defaultScope: TripScope = canAll ? 'all' : 'mine'
+  const scope: TripScope = rawScope === 'all' && canAll ? 'all' : rawScope === 'mine' ? 'mine' : defaultScope
   const detailId = searchParams.get('id')
   const setParam = (key: string, value: string | null) => {
     const next = new URLSearchParams(searchParams)
@@ -118,7 +120,7 @@ export default function TripsPage() {
   const [sort, setSort] = useState<string | undefined>(DEFAULT_SORT)
 
   const changeScope = (k: TripScope) => {
-    setParam('scope', k === 'mine' ? null : k)
+    setParam('scope', k === defaultScope ? null : k)
     setPage(1)
   }
 
