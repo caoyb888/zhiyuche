@@ -69,25 +69,25 @@ function SummaryBar() {
   const s = summary.data
   const items: Array<{ label: string; value: string; cls?: string }> = [
     { label: '今日行程', value: s ? String(s.trips) : '—' },
-    { label: '进行中', value: s ? String(s.ongoing) : '—', cls: s && s.ongoing > 0 ? 'text-blue-600' : undefined },
+    { label: '进行中', value: s ? String(s.ongoing) : '—', cls: s && s.ongoing > 0 ? 'text-tech-200' : undefined },
     { label: '总里程', value: s ? `${s.distance_km.toFixed(1)} km` : '—' },
-    { label: '总耗电', value: s ? `${s.energy_kwh.toFixed(1)} kWh` : '—', cls: 'text-amber-600' },
+    { label: '总耗电', value: s ? `${s.energy_kwh.toFixed(1)} kWh` : '—', cls: 'text-warn-200' },
     { label: '公务行程', value: s && typeof s.official_trips === 'number' ? String(s.official_trips) : '—' },
-    { label: '偏离行程', value: s && typeof s.deviation_trips === 'number' ? String(s.deviation_trips) : '—', cls: s && (s.deviation_trips ?? 0) > 0 ? 'text-red-600' : undefined },
+    { label: '偏离行程', value: s && typeof s.deviation_trips === 'number' ? String(s.deviation_trips) : '—', cls: s && (s.deviation_trips ?? 0) > 0 ? 'text-danger-200' : undefined },
   ]
   return (
     <div className="card flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted">
         <Route size={14} className="text-brand-600" />
         {s ? `${s.date} 汇总` : '当日汇总'}
       </span>
       {items.map((it) => (
         <div key={it.label} className="flex items-baseline gap-1.5">
-          <span className={clsx('text-lg font-semibold', it.cls ?? 'text-slate-800')}>{it.value}</span>
-          <span className="text-xs text-slate-400">{it.label}</span>
+          <span className={clsx('text-lg font-semibold', it.cls ?? 'text-ink-strong')}>{it.value}</span>
+          <span className="text-xs text-ink-faint">{it.label}</span>
         </div>
       ))}
-      {summary.isError && <span className="text-xs text-amber-600">汇总暂不可用：{errorMessage(summary.error)}</span>}
+      {summary.isError && <span className="text-xs text-warn-200">汇总暂不可用：{errorMessage(summary.error)}</span>}
     </div>
   )
 }
@@ -157,8 +157,8 @@ export default function TripsPage() {
       key: 'trip_no',
       title: '行程号',
       render: (t) => (
-        <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-slate-800">
-          {t.status === 'ongoing' && <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-500 pulse-dot" aria-label="进行中" />}
+        <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-ink-strong">
+          {t.status === 'ongoing' && <span className="inline-block h-1.5 w-1.5 rounded-full bg-tech-400 pulse-dot" aria-label="进行中" />}
           {t.trip_no}
         </span>
       ),
@@ -168,8 +168,8 @@ export default function TripsPage() {
       title: '车辆',
       render: (t) => (
         <div>
-          <div className="text-slate-800">{t.vehicle.plate_no}</div>
-          <div className="text-xs text-slate-400">{text(t.vehicle.model)}</div>
+          <div className="text-ink-strong">{t.vehicle.plate_no}</div>
+          <div className="text-xs text-ink-faint">{text(t.vehicle.model)}</div>
         </div>
       ),
     },
@@ -178,8 +178,8 @@ export default function TripsPage() {
       title: '驾驶员',
       render: (t) => (
         <div>
-          <div className="text-slate-800">{t.driver?.name ?? <span className="text-slate-400">未识别</span>}</div>
-          <div className="text-xs text-slate-400">{text(t.driver?.dept_name)}</div>
+          <div className="text-ink-strong">{t.driver?.name ?? <span className="text-ink-faint">未识别</span>}</div>
+          <div className="text-xs text-ink-faint">{text(t.driver?.dept_name)}</div>
         </div>
       ),
     },
@@ -195,17 +195,17 @@ export default function TripsPage() {
       render: (t) => (
         <div className="whitespace-nowrap text-right text-xs">
           <div>{formatNumber(t.energy_kwh, 1, 'kWh')}</div>
-          {typeof t.energy_per_100km === 'number' && <div className="text-[11px] text-slate-400">{t.energy_per_100km.toFixed(1)} /100km</div>}
+          {typeof t.energy_per_100km === 'number' && <div className="text-[11px] text-ink-faint">{t.energy_per_100km.toFixed(1)} /100km</div>}
         </div>
       ),
     },
-    { key: 'max_speed', title: '最高速', sortable: true, align: 'right', render: (t) => <span className={clsx('whitespace-nowrap text-xs', typeof t.max_speed === 'number' && t.max_speed > 100 && 'font-medium text-red-600')}>{formatSpeed(t.max_speed)}</span> },
+    { key: 'max_speed', title: '最高速', sortable: true, align: 'right', render: (t) => <span className={clsx('whitespace-nowrap text-xs', typeof t.max_speed === 'number' && t.max_speed > 100 && 'font-medium text-danger-200')}>{formatSpeed(t.max_speed)}</span> },
     {
       key: 'harsh',
       title: '急加/减速',
       align: 'center',
       render: (t) => (
-        <span className={clsx('text-xs', t.harsh_accel + t.harsh_brake > 8 ? 'text-red-600' : 'text-slate-600')}>
+        <span className={clsx('text-xs', t.harsh_accel + t.harsh_brake > 8 ? 'text-danger-200' : 'text-ink')}>
           {t.harsh_accel} / {t.harsh_brake}
         </span>
       ),
@@ -225,11 +225,11 @@ export default function TripsPage() {
       align: 'center',
       render: (t) =>
         t.deviation_flag ? (
-          <span className="inline-flex items-center gap-0.5 text-xs font-medium text-red-600" title={typeof t.deviation_max_m === 'number' ? `最大偏离 ${Math.round(t.deviation_max_m)} m` : undefined}>
+          <span className="inline-flex items-center gap-0.5 text-xs font-medium text-danger-200" title={typeof t.deviation_max_m === 'number' ? `最大偏离 ${Math.round(t.deviation_max_m)} m` : undefined}>
             <AlertTriangle size={12} /> 偏离
           </span>
         ) : (
-          <span className="text-xs text-slate-300">—</span>
+          <span className="text-xs text-ink-disabled">—</span>
         ),
     },
     { key: 'status', title: '状态', render: (t) => <Badge color={TRIP_STATUS_BADGE[t.status]}>{TRIP_STATUS_LABEL[t.status]}</Badge> },
@@ -297,7 +297,7 @@ export default function TripsPage() {
         </div>
         <div className="flex w-full items-center gap-1 sm:w-auto">
           <DateTimeInput value={draft.from} onChange={(v) => setDraft((d) => ({ ...d, from: v }))} aria-label="开始时间起" className="sm:w-44" />
-          <span className="text-xs text-slate-400">至</span>
+          <span className="text-xs text-ink-faint">至</span>
           <DateTimeInput value={draft.to} onChange={(v) => setDraft((d) => ({ ...d, to: v }))} aria-label="开始时间止" className="sm:w-44" />
         </div>
         <div className="w-full sm:w-32">

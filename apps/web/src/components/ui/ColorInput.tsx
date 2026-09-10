@@ -22,7 +22,7 @@ export default function ColorInput({ value, onChange, placeholder = '#10b981', d
     <div className={clsx('flex items-center gap-2', className)}>
       <label
         className={clsx(
-          'relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-slate-200',
+          'relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-line-strong',
           disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
         )}
         title="取色"
@@ -50,7 +50,7 @@ export default function ColorInput({ value, onChange, placeholder = '#10b981', d
         className="font-mono"
         suffix={
           value && !disabled ? (
-            <button type="button" aria-label="清空颜色" onClick={() => onChange('')} className="rounded p-0.5 text-slate-400 hover:text-slate-600">
+            <button type="button" aria-label="清空颜色" onClick={() => onChange('')} className="rounded p-0.5 text-ink-faint hover:text-ink-strong">
               <X size={14} />
             </button>
           ) : undefined

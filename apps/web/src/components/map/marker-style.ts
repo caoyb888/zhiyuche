@@ -24,7 +24,7 @@ export const MARKER_GLYPH: Partial<Record<MarkerIcon, string>> = {
 export function markerColor(m: MapMarker): string {
   if (m.color) return m.color
   if (m.icon === 'start') return '#10b981'
-  if (m.icon === 'end') return '#ef4444'
+  if (m.icon === 'end') return '#ef4b3c'
   return DEFAULT_MARKER_COLOR
 }
 
@@ -49,7 +49,7 @@ export function markerHtml(m: MapMarker): string {
       ? ''
       : `<div style="position:absolute;left:50%;top:50%;width:0;height:0;transform:translate(-50%,-50%) rotate(${heading}deg) translateY(-${r + 7}px);border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid ${color};"></div>`
   const label = m.label
-    ? `<div style="position:absolute;left:50%;top:${r + 3}px;transform:translateX(-50%);white-space:nowrap;font:600 11px/1.2 system-ui,sans-serif;color:#1e293b;background:rgba(255,255,255,.92);border:1px solid #e2e8f0;border-radius:4px;padding:1px 4px;pointer-events:none;">${escapeHtml(m.label)}</div>`
+    ? `<div style="position:absolute;left:50%;top:${r + 3}px;transform:translateX(-50%);white-space:nowrap;font:600 11px/1.2 system-ui,sans-serif;color:#dce7f2;background:rgba(13,30,51,.92);border:1px solid #23456b;border-radius:4px;padding:1px 4px;pointer-events:none;">${escapeHtml(m.label)}</div>`
     : ''
   const glyphHtml = glyph
     ? `<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 ${r + 1}px/1 system-ui,sans-serif;color:#fff;">${glyph}</span>`

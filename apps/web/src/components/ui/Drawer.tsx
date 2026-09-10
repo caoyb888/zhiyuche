@@ -30,19 +30,22 @@ export default function Drawer({ open, onClose, title, description, children, fo
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-slate-900/40" onClick={closeOnBackdrop ? onClose : undefined} />
-      <div className={clsx('relative h-full w-full bg-white shadow-2xl flex flex-col drawer-in', widthClass[width])}>
-        <div className="flex items-start justify-between px-5 py-4 border-b border-slate-100">
+      <div className="absolute inset-0 bg-[#03080F]/70 backdrop-blur-[2px]" onClick={closeOnBackdrop ? onClose : undefined} />
+      <div className={clsx('relative h-full w-full bg-surface-2 border-l border-line shadow-float flex flex-col drawer-in', widthClass[width])}>
+        <div
+          className="flex items-start justify-between px-5 py-4 border-b border-line bg-surface-1"
+          style={{ backgroundImage: 'radial-gradient(rgba(60,207,224,.07) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
+        >
           <div className="min-w-0">
-            <h3 className="text-base font-semibold text-slate-800">{title}</h3>
-            {description && <p className="mt-0.5 text-xs text-slate-400">{description}</p>}
+            <h3 className="text-base font-semibold text-ink-strong tracking-[0.02em]">{title}</h3>
+            {description && <p className="mt-0.5 text-xs text-ink-faint">{description}</p>}
           </div>
-          <button type="button" onClick={onClose} className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100" aria-label="关闭">
+          <button type="button" onClick={onClose} className="p-1 rounded-md text-ink-faint hover:text-ink-strong hover:bg-white/[0.06]" aria-label="关闭">
             <X size={18} />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-end gap-2 bg-white">{footer}</div>}
+        {footer && <div className="px-5 py-3 border-t border-line-soft flex items-center justify-end gap-2 bg-surface-2">{footer}</div>}
       </div>
     </div>,
     document.body,

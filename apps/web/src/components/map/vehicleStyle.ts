@@ -10,13 +10,16 @@ export const VEHICLE_STATUS_LABEL: Record<VehicleStatus, string> = {
   disabled: '停用',
 }
 
-/** 地图标记颜色：空闲绿 / 在途蓝 / 充电琥珀 / 维保红 / 停用灰 */
+/**
+ * 深色底图上的标记颜色：空闲绿 / 在途电光青 / 充电琥珀 / 维保红 / 停用灰。
+ * 在途改用电光青而非品牌蓝——深蓝底图上蓝色标记辨不出来，青色同时承担「实时」语义。
+ */
 export const VEHICLE_STATUS_COLOR: Record<VehicleStatus, string> = {
   idle: '#10b981',
-  in_use: '#2563eb',
-  charging: '#f59e0b',
-  maintenance: '#ef4444',
-  disabled: '#94a3b8',
+  in_use: '#3ccfe0',
+  charging: '#f0a32b',
+  maintenance: '#ef4b3c',
+  disabled: '#7089a8',
 }
 
 export const VEHICLE_STATUS_BADGE: Record<VehicleStatus, BadgeColor> = {
@@ -37,11 +40,11 @@ export function isVehicleStatus(v: string): v is VehicleStatus {
 export const OFFLINE_OPACITY = 0.45
 
 export function socBarClass(soc: number): string {
-  return soc > 60 ? 'bg-emerald-400' : soc > 25 ? 'bg-amber-400' : 'bg-red-400'
+  return soc > 60 ? 'bg-ev-500' : soc > 25 ? 'bg-warn-500' : 'bg-danger-500'
 }
 
 export function socTextClass(soc: number): string {
-  return soc > 60 ? 'text-emerald-600' : soc > 25 ? 'text-amber-500' : 'text-red-500'
+  return soc > 60 ? 'text-ev-200' : soc > 25 ? 'text-warn-200' : 'text-danger-200'
 }
 
 export function formatPercent(v: number | null | undefined, digits = 0): string {

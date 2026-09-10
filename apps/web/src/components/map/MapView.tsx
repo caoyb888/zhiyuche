@@ -17,7 +17,7 @@ export interface MapViewExtraProps {
 export default function MapView({ height = 320, className, overlay, spanDeg, ...rest }: MapViewProps & MapViewExtraProps) {
   const { engine } = useMapEngine()
   return (
-    <div className={clsx('relative w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50', className)} style={{ height }}>
+    <div className={clsx('relative w-full overflow-hidden rounded-xl border border-line bg-surface-2', className)} style={{ height }}>
       {engine === 'amap' ? <AMapView {...rest} /> : <SchematicMap {...rest} spanDeg={spanDeg} />}
       {overlay && <div className="pointer-events-none absolute inset-0 z-10 [&>*]:pointer-events-auto">{overlay}</div>}
     </div>

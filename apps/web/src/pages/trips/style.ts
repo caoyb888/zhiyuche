@@ -59,10 +59,10 @@ export const EVENT_META: Record<TripEventType, EventMeta> = {
 }
 
 export const EVENT_LEVEL_CLASS: Record<EventLevel, { dot: string; text: string; bg: string }> = {
-  red: { dot: 'bg-red-100 text-red-600', text: 'text-red-700', bg: 'bg-red-50' },
-  amber: { dot: 'bg-amber-100 text-amber-600', text: 'text-amber-700', bg: 'bg-amber-50' },
-  blue: { dot: 'bg-blue-100 text-blue-600', text: 'text-slate-700', bg: 'bg-slate-50' },
-  gray: { dot: 'bg-slate-100 text-slate-500', text: 'text-slate-600', bg: 'bg-slate-50' },
+  red: { dot: 'bg-danger-500/20 text-danger-200', text: 'text-danger-200', bg: 'bg-danger-500/10' },
+  amber: { dot: 'bg-warn-500/20 text-warn-200', text: 'text-warn-200', bg: 'bg-warn-500/10' },
+  blue: { dot: 'bg-tech-400/20 text-brand-300', text: 'text-ink', bg: 'bg-surface-3' },
+  gray: { dot: 'bg-surface-4 text-ink-muted', text: 'text-ink', bg: 'bg-surface-3' },
 }
 
 export function eventMeta(type: string): EventMeta {

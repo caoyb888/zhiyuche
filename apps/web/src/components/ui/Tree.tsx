@@ -49,8 +49,8 @@ function TreeItem({ node, depth, expanded, toggle, selectedKey, onSelect, disabl
         className={clsx(
           'group flex items-center gap-1 rounded-md pr-2 transition-colors',
           size === 'sm' ? 'py-1 text-xs' : 'py-1.5 text-sm',
-          disabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer',
-          !disabled && (selected ? 'bg-brand-50 text-brand-700 font-medium' : 'text-slate-700 hover:bg-slate-50'),
+          disabled ? 'cursor-not-allowed text-ink-disabled' : 'cursor-pointer',
+          !disabled && (selected ? 'bg-brand-600/15 text-brand-200 font-medium' : 'text-ink hover:bg-surface-3'),
         )}
       >
         <button
@@ -62,15 +62,15 @@ function TreeItem({ node, depth, expanded, toggle, selectedKey, onSelect, disabl
             if (hasChildren) toggle(node.key)
           }}
           className={clsx(
-            'flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400',
-            hasChildren ? 'hover:bg-slate-200/70 hover:text-slate-600' : 'invisible',
+            'flex h-5 w-5 shrink-0 items-center justify-center rounded text-ink-faint',
+            hasChildren ? 'hover:bg-surface-4 hover:text-ink-strong' : 'invisible',
           )}
         >
           <ChevronRight size={14} className={clsx('transition-transform', open && 'rotate-90')} />
         </button>
-        {Icon && <Icon size={14} className="shrink-0 text-slate-400" />}
+        {Icon && <Icon size={14} className="shrink-0 text-ink-faint" />}
         <span className="truncate flex-1">{node.title ?? node.label}</span>
-        {node.extra !== undefined && <span className="shrink-0 text-xs text-slate-400">{node.extra}</span>}
+        {node.extra !== undefined && <span className="shrink-0 text-xs text-ink-faint">{node.extra}</span>}
       </div>
       {open && node.children && (
         <ul role="group">

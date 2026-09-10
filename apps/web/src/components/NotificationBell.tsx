@@ -101,7 +101,7 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+        className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-line-strong bg-surface-3 text-ink-muted transition-colors hover:border-brand-600/50 hover:text-ink-strong"
         aria-label={unread > 0 ? `通知，${unread} 条未读` : '通知'}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -109,22 +109,22 @@ export default function NotificationBell() {
       >
         <Bell size={18} />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-danger-500 ring-2 ring-surface-1 px-1 font-mono text-[10px] font-semibold leading-none text-white">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div role="menu" className="absolute right-0 z-40 mt-1.5 w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg slide-up">
-          <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+        <div role="menu" className="absolute right-0 z-40 mt-1.5 w-[22rem] max-w-[calc(100vw-2rem)] rounded-card border border-line bg-surface-2 py-1.5 shadow-float slide-up">
+          <div className="flex items-center justify-between border-b border-line-soft px-3 py-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-800">通知</span>
+              <span className="text-sm font-semibold text-ink-strong">通知</span>
               <span
-                className={clsx('inline-flex items-center gap-1 text-[10px]', wsStatus === 'open' ? 'text-emerald-600' : 'text-slate-400')}
+                className={clsx('inline-flex items-center gap-1 text-[10px]', wsStatus === 'open' ? 'text-tech-200' : 'text-ink-faint')}
                 title={wsStatus === 'open' ? '实时推送已连接' : wsStatus === 'reconnecting' ? '实时推送重连中' : '实时推送未连接'}
               >
-                <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', wsStatus === 'open' ? 'bg-emerald-500 pulse-dot' : wsStatus === 'reconnecting' ? 'bg-amber-400' : 'bg-slate-300')} />
+                <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', wsStatus === 'open' ? 'bg-tech-400 pulse-dot' : wsStatus === 'reconnecting' ? 'bg-warn-400' : 'bg-ink-disabled')} />
                 {wsStatus === 'open' ? '实时' : wsStatus === 'reconnecting' ? '重连中' : '离线'}
               </span>
             </div>
@@ -132,7 +132,7 @@ export default function NotificationBell() {
               type="button"
               onClick={() => readAll.mutate()}
               disabled={readAll.isPending || unread === 0}
-              className="inline-flex items-center gap-1 text-xs text-brand-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-300 disabled:no-underline"
+              className="inline-flex items-center gap-1 text-xs text-brand-300 hover:underline disabled:cursor-not-allowed disabled:text-ink-disabled disabled:no-underline"
             >
               <CheckCheck size={13} />
               全部已读
@@ -159,18 +159,18 @@ export default function NotificationBell() {
                         type="button"
                         role="menuitem"
                         onClick={() => onItemClick(n)}
-                        className={clsx('flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-slate-50', isUnread && 'bg-brand-50/40')}
+                        className={clsx('flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-3', isUnread && 'bg-brand-600/10')}
                       >
                         <span className={clsx('mt-1.5 h-2 w-2 shrink-0 rounded-full', isUnread ? 'bg-brand-600' : 'bg-transparent')} />
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5">
-                            <span className={clsx('truncate text-sm', isUnread ? 'font-medium text-slate-800' : 'text-slate-600')}>{n.title}</span>
+                            <span className={clsx('truncate text-sm', isUnread ? 'font-medium text-ink-strong' : 'text-ink-muted')}>{n.title}</span>
                             <Badge color={meta.color} className="shrink-0 !px-1.5 !text-[10px]">
                               {meta.label}
                             </Badge>
                           </span>
-                          {n.content && <span className="mt-0.5 line-clamp-2 block text-xs text-slate-500">{n.content}</span>}
-                          <span className="mt-1 block text-[11px] text-slate-400">{formatDateTime(n.created_at)}</span>
+                          {n.content && <span className="mt-0.5 line-clamp-2 block text-xs text-ink-muted">{n.content}</span>}
+                          <span className="mt-1 block font-mono text-[11px] text-ink-faint">{formatDateTime(n.created_at)}</span>
                         </span>
                       </button>
                     </li>
@@ -180,8 +180,8 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <div className="border-t border-slate-100 px-3 py-2 text-center">
-            <Link to="/notifications" onClick={() => setOpen(false)} className="text-xs text-brand-700 hover:underline">
+          <div className="border-t border-line-soft px-3 py-2 text-center">
+            <Link to="/notifications" onClick={() => setOpen(false)} className="text-xs text-brand-300 hover:underline">
               查看全部通知
             </Link>
           </div>

@@ -113,10 +113,10 @@ export default function Table<T>({
                     <button
                       type="button"
                       onClick={() => toggleSort(col.key)}
-                      className={clsx('inline-flex items-center gap-1 uppercase tracking-wide hover:text-slate-700', active && 'text-brand-700')}
+                      className={clsx('inline-flex items-center gap-1 uppercase tracking-wide hover:text-ink-strong', active && 'text-brand-300')}
                     >
                       {col.title}
-                      {active ? (sortDesc ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : <ChevronsUpDown size={12} className="text-slate-300" />}
+                      {active ? (sortDesc ? <ArrowDown size={12} /> : <ArrowUp size={12} />) : <ChevronsUpDown size={12} className="text-ink-disabled" />}
                     </button>
                   ) : (
                     col.title
@@ -137,7 +137,7 @@ export default function Table<T>({
               <tr key={`sk-${i}`}>
                 {Array.from({ length: colCount }).map((_, j) => (
                   <td key={j} className="pr-3">
-                    <div className="h-3.5 rounded bg-slate-100 animate-pulse" style={{ width: `${55 + ((i * 7 + j * 13) % 40)}%` }} />
+                    <div className="h-3.5 rounded bg-surface-3 animate-pulse" style={{ width: `${55 + ((i * 7 + j * 13) % 40)}%` }} />
                   </td>
                 ))}
               </tr>

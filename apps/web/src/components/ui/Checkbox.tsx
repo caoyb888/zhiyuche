@@ -22,13 +22,13 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
         id={inputId}
         type="checkbox"
         disabled={disabled}
-        className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-300 accent-brand-600 cursor-pointer disabled:cursor-not-allowed"
+        className="mt-0.5 h-4 w-4 shrink-0 rounded border-line-strong bg-surface-3 text-brand-600 focus:ring-brand-600/30 accent-brand-600 cursor-pointer disabled:cursor-not-allowed"
         {...rest}
       />
       {(label || description) && (
         <span className="flex flex-col">
-          {label && <span className="text-slate-700">{label}</span>}
-          {description && <span className="text-xs text-slate-400">{description}</span>}
+          {label && <span className="text-ink">{label}</span>}
+          {description && <span className="text-xs text-ink-faint">{description}</span>}
         </span>
       )}
     </label>

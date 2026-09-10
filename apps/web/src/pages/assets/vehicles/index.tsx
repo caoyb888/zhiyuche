@@ -47,10 +47,10 @@ function toFilter(f: Filters): VehicleFilter {
 }
 
 function OnlineDot({ online }: { online: boolean | undefined }) {
-  if (online === undefined) return <span className="text-slate-300">—</span>
+  if (online === undefined) return <span className="text-ink-disabled">—</span>
   return (
-    <span className={clsx('inline-flex items-center gap-1 text-xs', online ? 'text-emerald-600' : 'text-slate-400')}>
-      <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', online ? 'bg-emerald-500' : 'bg-slate-300')} />
+    <span className={clsx('inline-flex items-center gap-1 text-xs', online ? 'text-ev-200' : 'text-ink-faint')}>
+      <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', online ? 'bg-ev-500' : 'bg-ink-disabled')} />
       {online ? '在线' : '离线'}
     </span>
   )
@@ -121,8 +121,8 @@ export default function VehiclesPage() {
       sortable: true,
       render: (v) => (
         <div>
-          <div className="font-medium text-slate-800">{v.plate_no}</div>
-          <div className="text-xs text-slate-400">{[v.brand, v.model].filter(Boolean).join(' ') || '—'}</div>
+          <div className="font-medium text-ink-strong">{v.plate_no}</div>
+          <div className="text-xs text-ink-faint">{[v.brand, v.model].filter(Boolean).join(' ') || '—'}</div>
         </div>
       ),
     },
@@ -142,10 +142,10 @@ export default function VehiclesPage() {
       width: 140,
       render: (v) => {
         const soc = v.live?.soc ?? v.soc ?? null
-        if (soc === null) return <span className="text-slate-300">—</span>
+        if (soc === null) return <span className="text-ink-disabled">—</span>
         return (
           <div className="flex items-center gap-2">
-            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-4">
               <div className={clsx('h-full rounded-full transition-all', socBarClass(soc))} style={{ width: `${Math.max(0, Math.min(100, soc))}%` }} />
             </div>
             <span className={clsx('font-mono text-xs', socTextClass(soc))}>{formatPercent(soc)}</span>
@@ -159,7 +159,7 @@ export default function VehiclesPage() {
     {
       key: 'device_serial',
       title: '设备',
-      render: (v) => (v.device_serial ? <span className="font-mono text-xs">{v.device_serial}</span> : <span className="text-xs text-slate-400">未绑定</span>),
+      render: (v) => (v.device_serial ? <span className="font-mono text-xs">{v.device_serial}</span> : <span className="text-xs text-ink-faint">未绑定</span>),
     },
   ]
 
@@ -172,7 +172,7 @@ export default function VehiclesPage() {
           variant="ghost"
           size="sm"
           icon={Trash2}
-          className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+          className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200"
           title="删除"
           aria-label="删除"
           onClick={() => setDeleteTarget(v)}

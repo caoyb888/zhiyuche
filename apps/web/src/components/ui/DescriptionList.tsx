@@ -33,8 +33,8 @@ export default function DescriptionList({ items, columns = 2, className }: Descr
     <dl className={clsx('grid grid-cols-1 gap-x-6 gap-y-4', colClass[columns], className)}>
       {items.map((it, i) => (
         <div key={i} className={clsx('min-w-0', it.span && spanClass[it.span])}>
-          <dt className="text-xs text-slate-400 mb-1">{it.label}</dt>
-          <dd className="text-sm text-slate-800 break-words">
+          <dt className="text-xs text-ink-faint mb-1">{it.label}</dt>
+          <dd className="text-sm text-ink break-words">
             {it.value === null || it.value === undefined || it.value === '' ? EMPTY : it.value}
           </dd>
         </div>

@@ -42,8 +42,8 @@ export default function TenantSwitcher() {
   return (
     <div
       className={clsx(
-        'relative hidden sm:flex items-center gap-1.5 rounded-full border pl-2.5 pr-7 h-7 text-xs transition-colors',
-        viewing ? 'border-purple-200 bg-purple-50 text-purple-800' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300',
+        'relative hidden sm:flex items-center gap-1.5 rounded-md border pl-2.5 pr-7 h-7 text-xs transition-colors',
+        viewing ? 'border-violet-500/40 bg-violet-500/15 text-violet-200' : 'border-line-strong bg-surface-3 text-ink hover:border-brand-600/50',
       )}
       title={viewing ? `正在以平台管理员身份查看租户「${viewTenant?.name ?? ''}」` : '切换查看其他租户的数据'}
     >

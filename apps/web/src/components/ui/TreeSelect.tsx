@@ -85,7 +85,7 @@ export default function TreeSelect({
         onClick={() => (open ? close() : setOpen(true))}
         className={controlClass(invalid, 'h-9 pl-3 pr-14 text-left flex items-center')}
       >
-        <span className={clsx('truncate', !selected && 'text-slate-400')}>
+        <span className={clsx('truncate', !selected && 'text-ink-disabled')}>
           {selected ? selected.label : value && !loading ? '（未知节点）' : placeholder}
         </span>
       </button>
@@ -99,25 +99,25 @@ export default function TreeSelect({
               e.stopPropagation()
               onChange(null)
             }}
-            className="rounded p-0.5 text-slate-400 hover:text-slate-600"
+            className="rounded p-0.5 text-ink-faint hover:text-ink-strong"
           >
             <X size={14} />
           </button>
         )}
-        <ChevronDown size={16} className={clsx('text-slate-400 pointer-events-none transition-transform', open && 'rotate-180')} />
+        <ChevronDown size={16} className={clsx('text-ink-faint pointer-events-none transition-transform', open && 'rotate-180')} />
       </div>
 
       {open && (
-        <div className="absolute z-40 mt-1 w-full min-w-[16rem] rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="absolute z-40 mt-1 w-full min-w-[16rem] rounded-card border border-line bg-surface-2 shadow-float">
           {searchable && (
-            <div className="relative border-b border-slate-100 p-2">
-              <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="relative border-b border-line-soft p-2">
+              <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-faint" />
               <input
                 autoFocus
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 placeholder="搜索"
-                className="h-8 w-full rounded-md border border-slate-200 pl-7 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="h-8 w-full rounded-md border border-line-strong bg-surface-3 text-ink placeholder:text-ink-disabled pl-7 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-600/25"
               />
             </div>
           )}
@@ -127,7 +127,7 @@ export default function TreeSelect({
                 <Spinner size="sm" label="加载中" />
               </div>
             ) : visible.length === 0 ? (
-              <div className="py-4 text-center text-xs text-slate-400">{keyword ? '无匹配结果' : emptyText}</div>
+              <div className="py-4 text-center text-xs text-ink-faint">{keyword ? '无匹配结果' : emptyText}</div>
             ) : (
               <Tree
                 nodes={visible}

@@ -21,8 +21,8 @@ export interface RoutePreviewProps {
   hideSummary?: boolean
 }
 
-const ROUTE_COLOR = '#1d6fd8'
-const STRAIGHT_COLOR = '#94a3b8'
+const ROUTE_COLOR = '#3ccfe0'
+const STRAIGHT_COLOR = '#7089a8'
 
 function formatMinutes(min: number | null | undefined): string {
   if (min === null || min === undefined || !Number.isFinite(min)) return '—'
@@ -60,12 +60,12 @@ export default function RoutePreview({ origin, originLabel = '起点', destinati
     <div className={clsx('space-y-2', className)}>
       <MapView height={height} markers={markers} polylines={polylines} fitKey={`${pts.length}:${o?.join(',') ?? ''}:${d?.join(',') ?? ''}`} hint={!hasAny ? '暂无路线信息' : undefined} />
       {!hideSummary && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-muted">
           <span>
-            距离 <span className="font-medium text-slate-800">{distanceKm !== null ? `${distanceKm.toFixed(1)} km` : straight !== null ? `${formatDistance(straight)}（直线）` : '—'}</span>
+            距离 <span className="font-medium text-ink-strong">{distanceKm !== null ? `${distanceKm.toFixed(1)} km` : straight !== null ? `${formatDistance(straight)}（直线）` : '—'}</span>
           </span>
           <span>
-            预计时长 <span className="font-medium text-slate-800">{formatMinutes(route?.duration_min)}</span>
+            预计时长 <span className="font-medium text-ink-strong">{formatMinutes(route?.duration_min)}</span>
           </span>
           {route?.summary && <span className="truncate">路线：{route.summary}</span>}
         </div>

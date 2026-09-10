@@ -113,9 +113,9 @@ function AMapSearch({ onPick, disabled, placeholder }: { onPick: (p: PickedPoint
           搜索
         </Button>
       </div>
-      {error && <div className="text-xs text-red-500">{error}</div>}
+      {error && <div className="text-xs text-danger-200">{error}</div>}
       {hits.length > 0 && (
-        <ul className="max-h-40 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 bg-white text-sm">
+        <ul className="max-h-40 divide-y divide-line-soft overflow-y-auto rounded-lg border border-line-strong bg-surface-2 text-sm">
           {hits.map((h) => (
             <li key={h.key}>
               <button
@@ -125,12 +125,12 @@ function AMapSearch({ onPick, disabled, placeholder }: { onPick: (p: PickedPoint
                   onPick({ lng: h.lnglat[0], lat: h.lnglat[1], address: h.address ? `${h.name}（${h.address}）` : h.name })
                   setHits([])
                 }}
-                className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-slate-50"
+                className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-surface-3"
               >
                 <MapPin size={14} className="mt-0.5 shrink-0 text-brand-600" />
                 <span className="min-w-0">
-                  <span className="block truncate font-medium text-slate-800">{h.name}</span>
-                  {h.address && <span className="block truncate text-xs text-slate-400">{h.address}</span>}
+                  <span className="block truncate font-medium text-ink-strong">{h.name}</span>
+                  {h.address && <span className="block truncate text-xs text-ink-faint">{h.address}</span>}
                 </span>
               </button>
             </li>
@@ -270,12 +270,12 @@ export default function MapPicker({ value, onChange, origin, originLabel = '起�
         fitKey={o ? o.join(',') : 'none'}
         onClick={pick}
         hint="点击地图选点"
-        className={clsx(invalid && 'border-red-300', disabled && 'opacity-70')}
+        className={clsx(invalid && 'border-danger-400', disabled && 'opacity-70')}
       />
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
         {value ? (
           <>
-            <span className="inline-flex items-center gap-1 text-slate-700">
+            <span className="inline-flex items-center gap-1 text-ink">
               <MapPin size={12} className="text-brand-600" />
               <span className="font-mono">
                 {value.lng.toFixed(6)}, {value.lat.toFixed(6)}
@@ -284,11 +284,11 @@ export default function MapPicker({ value, onChange, origin, originLabel = '起�
             {value.address && <span className="truncate">{value.address}</span>}
             {distance !== null && (
               <span>
-                距{originLabel} <span className="font-medium text-slate-700">{formatDistance(distance)}</span>
+                距{originLabel} <span className="font-medium text-ink">{formatDistance(distance)}</span>
               </span>
             )}
             {!disabled && (
-              <button type="button" onClick={() => onChange(null)} className="inline-flex items-center gap-0.5 text-slate-400 hover:text-red-500">
+              <button type="button" onClick={() => onChange(null)} className="inline-flex items-center gap-0.5 text-ink-faint hover:text-danger-200">
                 <X size={12} />
                 清除
               </button>

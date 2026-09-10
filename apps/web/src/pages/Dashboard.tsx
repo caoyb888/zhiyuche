@@ -40,9 +40,9 @@ const EVENT_META: Record<TripEventType, { label: string; level: EventLevel }> = 
 }
 
 const LEVEL_CLASS: Record<EventLevel, { bg: string; icon: string; text: string }> = {
-  red: { bg: 'bg-red-50', icon: 'text-red-500', text: 'text-red-700' },
-  amber: { bg: 'bg-amber-50', icon: 'text-amber-500', text: 'text-amber-700' },
-  gray: { bg: 'bg-slate-50', icon: 'text-slate-400', text: 'text-slate-600' },
+  red: { bg: 'bg-danger-500/10 border border-danger-500/30', icon: 'text-danger-400', text: 'text-danger-200' },
+  amber: { bg: 'bg-warn-500/10 border border-warn-500/30', icon: 'text-warn-400', text: 'text-warn-200' },
+  gray: { bg: 'bg-surface-3 border border-line', icon: 'text-ink-faint', text: 'text-ink-muted' },
 }
 
 function num(v: unknown): number | null {
@@ -90,31 +90,31 @@ function ChargingCard() {
   const body = (
     <>
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-700">充电</h2>
-        {enabled ? <ChevronRight size={16} className="text-slate-300" /> : <Zap size={15} className="text-slate-300" />}
+        <h2 className="text-sm font-semibold text-ink">充电</h2>
+        {enabled ? <ChevronRight size={16} className="text-ink-disabled" /> : <Zap size={15} className="text-ink-disabled" />}
       </div>
       {!enabled ? (
-        <div className="py-4 text-center text-xs text-slate-400">无充电管理权限</div>
+        <div className="py-4 text-center text-xs text-ink-faint">无充电管理权限</div>
       ) : s ? (
         <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
           <div>
-            <div className={clsx('text-xl font-semibold', s.ongoing > 0 ? 'text-amber-600' : 'text-slate-800')}>{s.ongoing}</div>
-            <div className="text-xs text-slate-400">充电中</div>
+            <div className={clsx('font-mono text-xl font-semibold', s.ongoing > 0 ? 'text-warn-200' : 'text-ink-strong')}>{s.ongoing}</div>
+            <div className="text-xs text-ink-faint">充电中</div>
           </div>
           <div>
-            <div className="text-xl font-semibold text-slate-800">{(s.today?.kwh ?? 0).toFixed(1)}</div>
-            <div className="text-xs text-slate-400">今日充电 kWh（{s.today?.sessions ?? 0} 次）</div>
+            <div className="font-mono text-xl font-semibold text-ink-strong">{(s.today?.kwh ?? 0).toFixed(1)}</div>
+            <div className="text-xs text-ink-faint">今日充电 kWh（{s.today?.sessions ?? 0} 次）</div>
           </div>
           <div>
-            <div className="text-xl font-semibold text-slate-800">
+            <div className="font-mono text-xl font-semibold text-ink-strong">
               {s.piles?.online ?? 0}
-              <span className="text-sm font-normal text-slate-400"> / {s.piles?.total ?? 0}</span>
+              <span className="text-sm font-normal text-ink-faint"> / {s.piles?.total ?? 0}</span>
             </div>
-            <div className="text-xs text-slate-400">桩在线{(s.piles?.faulted ?? 0) > 0 && <span className="ml-1 text-red-500">故障 {s.piles?.faulted}</span>}</div>
+            <div className="text-xs text-ink-faint">桩在线{(s.piles?.faulted ?? 0) > 0 && <span className="ml-1 text-danger-200">故障 {s.piles?.faulted}</span>}</div>
           </div>
           <div>
-            <div className={clsx('text-xl font-semibold', s.pending_review > 0 ? 'text-red-600' : 'text-slate-800')}>{s.pending_review}</div>
-            <div className="text-xs text-slate-400">待复核</div>
+            <div className={clsx('font-mono text-xl font-semibold', s.pending_review > 0 ? 'text-danger-200' : 'text-ink-strong')}>{s.pending_review}</div>
+            <div className="text-xs text-ink-faint">待复核</div>
           </div>
         </div>
       ) : summary.isPending ? (
@@ -122,13 +122,13 @@ function ChargingCard() {
           <Spinner size="sm" />
         </div>
       ) : (
-        <div className="py-4 text-center text-xs text-slate-400">{summary.isError ? '充电汇总暂不可用' : '暂无数据'}</div>
+        <div className="py-4 text-center text-xs text-ink-faint">{summary.isError ? '充电汇总暂不可用' : '暂无数据'}</div>
       )}
     </>
   )
   if (!enabled) return <div className="card p-4">{body}</div>
   return (
-    <Link to="/charging" className="card block p-4 transition-colors hover:border-brand-200">
+    <Link to="/charging" className="card block p-4 transition-colors hover:border-brand-600/60">
       {body}
     </Link>
   )
@@ -141,15 +141,15 @@ function StatTile({ s }: { s: StatCard }) {
         <s.icon size={18} className={s.color} />
       </div>
       <div className="min-w-0">
-        <div className={clsx('text-2xl font-semibold', s.color)}>{s.value === null ? '—' : s.value}</div>
-        <div className="mt-0.5 text-xs text-slate-400">{s.label}</div>
+        <div className={clsx('font-mono text-2xl font-semibold tracking-tight', s.color)}>{s.value === null ? '—' : s.value}</div>
+        <div className="mt-0.5 text-xs text-ink-faint">{s.label}</div>
       </div>
-      {s.href && <ChevronRight size={16} className="ml-auto text-slate-300" />}
+      {s.href && <ChevronRight size={16} className="ml-auto text-ink-disabled" />}
     </>
   )
   if (s.href) {
     return (
-      <Link to={s.href} className="stat-card flex items-center gap-3 transition-colors hover:border-brand-200 hover:bg-brand-50/30">
+      <Link to={s.href} className="stat-card flex items-center gap-3 transition-colors hover:border-brand-600/60 hover:bg-surface-3">
         {body}
       </Link>
     )
@@ -173,12 +173,12 @@ export default function Dashboard() {
   const counts = ov?.vehicles ?? (status.data ? countsFromLive(vehicles) : null)
 
   const stats: StatCard[] = [
-    { key: 'in_use', label: '在途车辆', value: counts?.in_use ?? null, icon: Car, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { key: 'idle', label: '空闲车辆', value: counts?.idle ?? null, icon: Car, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { key: 'charging', label: '充电中', value: counts?.charging ?? null, icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { key: 'maintenance', label: '维保中', value: counts?.maintenance ?? null, icon: Wrench, color: 'text-red-500', bg: 'bg-red-50' },
-    { key: 'offline', label: '离线', value: counts?.offline ?? null, icon: WifiOff, color: 'text-slate-500', bg: 'bg-slate-100' },
-    { key: 'todo', label: '待我审批', value: ov?.approvals_todo ?? null, icon: ClipboardCheck, color: 'text-purple-600', bg: 'bg-purple-50', href: '/approval?scope=todo' },
+    { key: 'in_use', label: '在途车辆', value: counts?.in_use ?? null, icon: Car, color: 'text-brand-300', bg: 'bg-brand-600/15' },
+    { key: 'idle', label: '空闲车辆', value: counts?.idle ?? null, icon: Car, color: 'text-ev-200', bg: 'bg-ev-500/15' },
+    { key: 'charging', label: '充电中', value: counts?.charging ?? null, icon: Zap, color: 'text-warn-200', bg: 'bg-warn-500/15' },
+    { key: 'maintenance', label: '维保中', value: counts?.maintenance ?? null, icon: Wrench, color: 'text-danger-200', bg: 'bg-danger-500/15' },
+    { key: 'offline', label: '离线', value: counts?.offline ?? null, icon: WifiOff, color: 'text-ink-muted', bg: 'bg-white/[0.06]' },
+    { key: 'todo', label: '待我审批', value: ov?.approvals_todo ?? null, icon: ClipboardCheck, color: 'text-violet-200', bg: 'bg-violet-500/15', href: '/approval?scope=todo' },
   ]
 
   const today = ov?.today
@@ -214,10 +214,10 @@ export default function Dashboard() {
         {/* Map */}
         <div className="card p-4 lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">车辆实时位置</h2>
-            <div className="flex items-center gap-3 text-xs text-slate-400">
-              <span className={clsx('inline-flex items-center gap-1', wsStatus === 'open' && 'text-emerald-600')}>
-                <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', wsStatus === 'open' ? 'bg-emerald-500 pulse-dot' : wsStatus === 'reconnecting' ? 'bg-amber-400' : 'bg-slate-300')} />
+            <h2 className="text-sm font-semibold text-ink">车辆实时位置</h2>
+            <div className="flex items-center gap-3 text-xs text-ink-faint">
+              <span className={clsx('inline-flex items-center gap-1', wsStatus === 'open' && 'text-tech-200')}>
+                <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', wsStatus === 'open' ? 'bg-tech-400 pulse-dot' : wsStatus === 'reconnecting' ? 'bg-warn-400' : 'bg-ink-disabled')} />
                 {wsStatus === 'open' ? '实时推送' : wsStatus === 'reconnecting' ? '重连中' : '轮询刷新'}
               </span>
               {status.data && <span>{vehicles.length} 辆</span>}
@@ -226,7 +226,7 @@ export default function Dashboard() {
           {status.isError ? (
             <ErrorState message={errorMessage(status.error)} onRetry={() => void status.refetch()} />
           ) : status.isPending ? (
-            <div className="flex h-[420px] items-center justify-center rounded-xl bg-slate-50">
+            <div className="flex h-[420px] items-center justify-center rounded-xl bg-surface-3">
               <Spinner label="加载车辆状态…" />
             </div>
           ) : (
@@ -235,7 +235,7 @@ export default function Dashboard() {
               height={420}
               fitKey={vehicles.length}
               renderActions={(v) => (
-                <Link to={`/assets/vehicles?id=${encodeURIComponent(v.vehicle_id)}`} className="inline-flex items-center gap-1 text-xs text-brand-700 hover:underline">
+                <Link to={`/assets/vehicles?id=${encodeURIComponent(v.vehicle_id)}`} className="inline-flex items-center gap-1 text-xs text-brand-300 hover:underline">
                   查看车辆详情
                   <ChevronRight size={12} />
                 </Link>
@@ -246,44 +246,44 @@ export default function Dashboard() {
 
         {/* Right column */}
         <div className="space-y-5">
-          <Link to="/approval?scope=todo" className="card block p-4 transition-colors hover:border-brand-200">
+          <Link to="/approval?scope=todo" className="card block p-4 transition-colors hover:border-brand-600/60">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-700">待办审批</h2>
-              <ChevronRight size={16} className="text-slate-300" />
+              <h2 className="text-sm font-semibold text-ink">待办审批</h2>
+              <ChevronRight size={16} className="text-ink-disabled" />
             </div>
             <div className="mt-2 flex items-end gap-2">
-              <span className="text-3xl font-semibold text-purple-600">{ov ? ov.approvals_todo : overview.isPending ? '…' : '—'}</span>
-              <span className="mb-1 text-xs text-slate-400">条待我处理</span>
+              <span className="font-mono text-3xl font-semibold tracking-tight text-violet-200">{ov ? ov.approvals_todo : overview.isPending ? '…' : '—'}</span>
+              <span className="mb-1 text-xs text-ink-faint">条待我处理</span>
             </div>
-            {typeof ov?.approvals_pending === 'number' && <div className="mt-1 text-xs text-slate-400">租户内待审批共 {ov.approvals_pending} 条</div>}
-            {overview.isError && <div className="mt-2 text-xs text-amber-600">总览数据暂不可用</div>}
+            {typeof ov?.approvals_pending === 'number' && <div className="mt-1 text-xs text-ink-faint">租户内待审批共 {ov.approvals_pending} 条</div>}
+            {overview.isError && <div className="mt-2 text-xs text-warn-200">总览数据暂不可用</div>}
           </Link>
 
           <div className="card p-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-700">今日行程</h2>
-              <Route size={15} className="text-slate-300" />
+              <h2 className="text-sm font-semibold text-ink">今日行程</h2>
+              <Route size={15} className="text-ink-disabled" />
             </div>
             {today ? (
               <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
                 <div>
-                  <div className="text-xl font-semibold text-slate-800">{today.trips}</div>
-                  <div className="text-xs text-slate-400">行程数（进行中 {today.ongoing}）</div>
+                  <div className="font-mono text-xl font-semibold text-ink-strong">{today.trips}</div>
+                  <div className="text-xs text-ink-faint">行程数（进行中 {today.ongoing}）</div>
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-slate-800">{today.distance_km.toFixed(1)}</div>
-                  <div className="text-xs text-slate-400">总里程 km</div>
+                  <div className="font-mono text-xl font-semibold text-ink-strong">{today.distance_km.toFixed(1)}</div>
+                  <div className="text-xs text-ink-faint">总里程 km</div>
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-slate-800">{today.energy_kwh.toFixed(1)}</div>
-                  <div className="text-xs text-slate-400">耗电 kWh</div>
+                  <div className="font-mono text-xl font-semibold text-ink-strong">{today.energy_kwh.toFixed(1)}</div>
+                  <div className="text-xs text-ink-faint">耗电 kWh</div>
                 </div>
                 <div>
-                  <div className="text-xl font-semibold text-slate-800">
+                  <div className="font-mono text-xl font-semibold text-ink-strong">
                     {today.official_trips ?? '—'}
-                    {typeof today.deviation_trips === 'number' && today.deviation_trips > 0 && <span className="ml-1 text-sm font-medium text-red-500">/ 偏离 {today.deviation_trips}</span>}
+                    {typeof today.deviation_trips === 'number' && today.deviation_trips > 0 && <span className="ml-1 text-sm font-medium text-danger-200">/ 偏离 {today.deviation_trips}</span>}
                   </div>
-                  <div className="text-xs text-slate-400">公务行程</div>
+                  <div className="text-xs text-ink-faint">公务行程</div>
                 </div>
               </div>
             ) : overview.isPending ? (
@@ -291,7 +291,7 @@ export default function Dashboard() {
                 <Spinner size="sm" />
               </div>
             ) : (
-              <div className="py-4 text-center text-xs text-slate-400">暂无数据</div>
+              <div className="py-4 text-center text-xs text-ink-faint">暂无数据</div>
             )}
           </div>
 
@@ -299,21 +299,21 @@ export default function Dashboard() {
 
           <div className="card p-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-700">设备在线率</h2>
-              <Cpu size={15} className="text-slate-300" />
+              <h2 className="text-sm font-semibold text-ink">设备在线率</h2>
+              <Cpu size={15} className="text-ink-disabled" />
             </div>
             {devices ? (
               <>
                 <div className="mt-2 flex items-end gap-2">
-                  <span className={clsx('text-3xl font-semibold', onlineRate === null ? 'text-slate-400' : onlineRate >= 90 ? 'text-emerald-600' : onlineRate >= 70 ? 'text-amber-500' : 'text-red-500')}>
+                  <span className={clsx('font-mono text-3xl font-semibold tracking-tight', onlineRate === null ? 'text-ink-faint' : onlineRate >= 90 ? 'text-ev-200' : onlineRate >= 70 ? 'text-warn-200' : 'text-danger-200')}>
                     {onlineRate === null ? '—' : `${onlineRate}%`}
                   </span>
-                  <span className="mb-1 text-xs text-slate-400">
+                  <span className="mb-1 text-xs text-ink-faint">
                     {deviceOnline} / {deviceTotal} 台在线
                   </span>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className={clsx('h-full rounded-full transition-all', onlineRate === null ? 'bg-slate-200' : onlineRate >= 90 ? 'bg-emerald-400' : onlineRate >= 70 ? 'bg-amber-400' : 'bg-red-400')} style={{ width: `${onlineRate ?? 0}%` }} />
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-4">
+                  <div className={clsx('h-full rounded-full transition-all', onlineRate === null ? 'bg-line-strong' : onlineRate >= 90 ? 'bg-ev-500' : onlineRate >= 70 ? 'bg-warn-500' : 'bg-danger-500')} style={{ width: `${onlineRate ?? 0}%` }} />
                 </div>
               </>
             ) : overview.isPending ? (
@@ -321,7 +321,7 @@ export default function Dashboard() {
                 <Spinner size="sm" />
               </div>
             ) : (
-              <div className="py-4 text-center text-xs text-slate-400">暂无数据</div>
+              <div className="py-4 text-center text-xs text-ink-faint">暂无数据</div>
             )}
           </div>
         </div>
@@ -330,8 +330,8 @@ export default function Dashboard() {
       {/* Recent events */}
       <div className="card p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">最近异常事件</h2>
-          <Link to="/trips" className="text-xs text-brand-700 hover:underline">
+          <h2 className="text-sm font-semibold text-ink">最近异常事件</h2>
+          <Link to="/trips" className="text-xs text-brand-300 hover:underline">
             查看行程
           </Link>
         </div>
@@ -354,10 +354,10 @@ export default function Dashboard() {
                   <div className="min-w-0 flex-1">
                     <p className={clsx('text-sm', cls.text)}>
                       <span className="font-medium">{text(e.plate_no)}</span>
-                      {e.driver_name && <span className="text-slate-500">（{e.driver_name}）</span>} {meta.label}：{describeEvent(e)}
+                      {e.driver_name && <span className="text-ink-muted">（{e.driver_name}）</span>} {meta.label}：{describeEvent(e)}
                     </p>
                   </div>
-                  <Link to={`/trips?id=${encodeURIComponent(e.trip_id)}`} className="shrink-0 text-xs text-slate-400 hover:text-brand-700">
+                  <Link to={`/trips?id=${encodeURIComponent(e.trip_id)}`} className="shrink-0 text-xs text-ink-faint hover:text-brand-300">
                     {formatDateTime(e.ts)}
                   </Link>
                 </div>

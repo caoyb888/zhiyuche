@@ -31,9 +31,10 @@ export interface TrackPlayerProps {
 }
 
 const RATES: PlaybackRate[] = [1, 4, 16]
-const TRACK_COLOR = '#1d6fd8'
-const TRACK_REMAINING_COLOR = '#93c5fd'
-const PLANNED_COLOR = '#94a3b8'
+// 深色底图：已走轨迹用电光青（同时是「实时」语义色），未走与计划线退到暗蓝灰
+const TRACK_COLOR = '#3ccfe0'
+const TRACK_REMAINING_COLOR = '#1f4b78'
+const PLANNED_COLOR = '#7089a8'
 /** 抽稀容差（度），约 3 m */
 const SIMPLIFY_TOLERANCE = 0.00003
 
@@ -171,21 +172,21 @@ export default function TrackPlayer({ points, plannedRoute, height = 380, classN
         hint={n === 0 ? '暂无轨迹点' : undefined}
         overlay={
           current && (
-            <div className="absolute bottom-2 left-2 flex items-center gap-3 rounded-lg bg-white/90 px-3 py-1.5 text-xs shadow-sm">
-              <span className="font-mono text-slate-700">{dayjs(current.ts).format('MM-DD HH:mm:ss')}</span>
-              <span className="text-slate-400">|</span>
-              <span className="text-slate-600">
-                速度 <span className="font-medium text-slate-800">{formatSpeed(current.speed)}</span>
+            <div className="absolute bottom-2 left-2 flex items-center gap-3 rounded-lg bg-surface-2/90 px-3 py-1.5 text-xs shadow-sm">
+              <span className="font-mono text-ink">{dayjs(current.ts).format('MM-DD HH:mm:ss')}</span>
+              <span className="text-ink-faint">|</span>
+              <span className="text-ink">
+                速度 <span className="font-medium text-ink-strong">{formatSpeed(current.speed)}</span>
               </span>
-              <span className="text-slate-600">
-                SOC <span className="font-medium text-slate-800">{formatPercent(current.soc)}</span>
+              <span className="text-ink">
+                SOC <span className="font-medium text-ink-strong">{formatPercent(current.soc)}</span>
               </span>
             </div>
           )
         }
       />
 
-      <div className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-white p-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-2 p-3 sm:flex-row sm:items-center">
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -193,7 +194,7 @@ export default function TrackPlayer({ points, plannedRoute, height = 380, classN
             disabled={n < 2}
             aria-label="回到起点"
             title="回到起点"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line-strong text-ink hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <SkipBack size={14} />
           </button>
@@ -207,14 +208,14 @@ export default function TrackPlayer({ points, plannedRoute, height = 380, classN
           >
             {playing ? <Pause size={14} /> : <Play size={14} />}
           </button>
-          <div className="ml-1 flex overflow-hidden rounded-lg border border-slate-200 text-xs">
+          <div className="ml-1 flex overflow-hidden rounded-lg border border-line-strong text-xs">
             {RATES.map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => setRate(r)}
                 aria-pressed={rate === r}
-                className={clsx('px-2 py-1.5 transition-colors', rate === r ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-50')}
+                className={clsx('px-2 py-1.5 transition-colors', rate === r ? 'bg-brand-600 text-white' : 'text-ink hover:bg-surface-3')}
               >
                 {r}x
               </button>
@@ -232,11 +233,11 @@ export default function TrackPlayer({ points, plannedRoute, height = 380, classN
             aria-label="时间轴"
             className="w-full accent-brand-600"
           />
-          <span className="shrink-0 font-mono text-[11px] text-slate-500">
+          <span className="shrink-0 font-mono text-[11px] text-ink-muted">
             {formatDuration(elapsedMs)} / {formatDuration(totalMs)}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-3 text-[11px] text-slate-500">
+        <div className="flex shrink-0 items-center gap-3 text-[11px] text-ink-muted">
           <span>
             {n} 点 · {formatDistance(distance)}
           </span>

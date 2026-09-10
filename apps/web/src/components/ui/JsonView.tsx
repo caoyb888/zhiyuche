@@ -43,23 +43,23 @@ function tokenize(text: string): Token[] {
 }
 
 const classByKind: Record<TokenKind, string> = {
-  key: 'text-purple-700',
-  string: 'text-emerald-700',
-  number: 'text-blue-700',
-  boolean: 'text-amber-700',
-  null: 'text-slate-400 italic',
-  punct: 'text-slate-500',
+  key: 'text-violet-200',
+  string: 'text-ev-200',
+  number: 'text-brand-300',
+  boolean: 'text-warn-200',
+  null: 'text-ink-disabled italic',
+  punct: 'text-ink-muted',
 }
 
 /** 只读 JSON 展示：缩进 + 轻量语法高亮 */
 export default function JsonView({ value, emptyText = '—', maxHeight = '24rem', className }: JsonViewProps) {
   const tokens = useMemo(() => (value === null || value === undefined ? null : tokenize(stringifyJson(value))), [value])
   if (!tokens) {
-    return <div className={clsx('rounded-lg bg-slate-50 px-3 py-6 text-center text-xs text-slate-400', className)}>{emptyText}</div>
+    return <div className={clsx('rounded-lg bg-surface-3 border border-line px-3 py-6 text-center text-xs text-ink-faint', className)}>{emptyText}</div>
   }
   return (
     <pre
-      className={clsx('overflow-auto rounded-lg bg-slate-50 border border-slate-100 px-3 py-2 font-mono text-xs leading-5 text-slate-700 whitespace-pre-wrap break-all', className)}
+      className={clsx('overflow-auto rounded-lg bg-surface-3 border border-line px-3 py-2 font-mono text-xs leading-5 text-ink whitespace-pre-wrap break-all', className)}
       style={{ maxHeight }}
     >
       {tokens.map((t, i) => (

@@ -27,23 +27,23 @@ const MOBILE_NAV_MAX = 5
 function BackendBadge({ status }: { status: BackendStatus }) {
   if (status.kind === 'ok') {
     return (
-      <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot inline-block" />
+      <div className="hidden sm:flex items-center gap-1.5 font-mono text-[11px] text-tech-200 bg-tech-500/10 border border-tech-500/30 px-2.5 py-1 rounded-md">
+        <span className="w-1.5 h-1.5 rounded-full bg-tech-400 pulse-dot inline-block" />
         服务正常 · v{status.version}
       </div>
     )
   }
   if (status.kind === 'down') {
     return (
-      <div className="hidden sm:flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+      <div className="hidden sm:flex items-center gap-1.5 font-mono text-[11px] text-warn-200 bg-warn-500/10 border border-warn-500/30 px-2.5 py-1 rounded-md">
+        <span className="w-1.5 h-1.5 rounded-full bg-warn-400 inline-block" />
         后端未连接
       </div>
     )
   }
   return (
-    <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 pulse-dot inline-block" />
+    <div className="hidden sm:flex items-center gap-1.5 font-mono text-[11px] text-ink-muted bg-white/[0.04] border border-line px-2.5 py-1 rounded-md">
+      <span className="w-1.5 h-1.5 rounded-full bg-ink-faint pulse-dot inline-block" />
       连接中…
     </div>
   )
@@ -121,23 +121,23 @@ function UserMenu({ onChangePassword, onMyAccount, onLogout, loggingOut }: { onC
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full pl-1 pr-2 py-0.5 hover:bg-slate-100 transition-colors"
+        className="flex items-center gap-2 rounded-lg pl-1 pr-2 py-0.5 hover:bg-white/[0.05] transition-colors"
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <div className="w-7 h-7 rounded-full bg-brand-700 text-white text-xs flex items-center justify-center font-medium">{initial}</div>
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-800 to-surface-1 ring-1 ring-brand-600/40 text-brand-100 text-xs flex items-center justify-center font-semibold">{initial}</div>
         <div className="hidden sm:flex flex-col items-start leading-tight">
-          <span className="text-xs font-medium text-slate-700 max-w-[8rem] truncate">{profile.name}</span>
-          <span className="text-[10px] text-slate-400 max-w-[8rem] truncate">{profile.tenant.name}</span>
+          <span className="text-xs font-medium text-ink max-w-[8rem] truncate">{profile.name}</span>
+          <span className="text-[10px] text-ink-faint max-w-[8rem] truncate">{profile.tenant.name}</span>
         </div>
-        <ChevronDown size={14} className={clsx('text-slate-400 transition-transform', open && 'rotate-180')} />
+        <ChevronDown size={14} className={clsx('text-ink-faint transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 mt-1.5 w-56 rounded-xl border border-slate-100 bg-white shadow-lg py-1.5 z-40 slide-up">
-          <div className="px-3 py-2 border-b border-slate-100">
-            <div className="text-sm font-medium text-slate-800 truncate">{profile.name}</div>
-            <div className="text-xs text-slate-400 truncate">@{profile.username}</div>
-            <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 truncate">
+        <div role="menu" className="absolute right-0 mt-1.5 w-56 rounded-card border border-line bg-surface-2 shadow-float py-1.5 z-40 slide-up">
+          <div className="px-3 py-2 border-b border-line-soft">
+            <div className="text-sm font-medium text-ink-strong truncate">{profile.name}</div>
+            <div className="font-mono text-xs text-ink-faint truncate">@{profile.username}</div>
+            <div className="mt-1 flex items-center gap-1 text-xs text-ink-muted truncate">
               <Building2 size={12} />
               <span className="truncate">{profile.tenant.name}</span>
               {profile.is_super && <span className="badge-purple ml-1">平台管理员</span>}
@@ -150,9 +150,9 @@ function UserMenu({ onChangePassword, onMyAccount, onLogout, loggingOut }: { onC
               setOpen(false)
               onMyAccount()
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-ink hover:bg-surface-3"
           >
-            <Wallet size={15} className="text-slate-400" />
+            <Wallet size={15} className="text-ink-faint" />
             我的账户
           </button>
           <button
@@ -162,9 +162,9 @@ function UserMenu({ onChangePassword, onMyAccount, onLogout, loggingOut }: { onC
               setOpen(false)
               onChangePassword()
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-ink hover:bg-surface-3"
           >
-            <KeyRound size={15} className="text-slate-400" />
+            <KeyRound size={15} className="text-ink-faint" />
             修改密码
           </button>
           <button
@@ -175,7 +175,7 @@ function UserMenu({ onChangePassword, onMyAccount, onLogout, loggingOut }: { onC
               setOpen(false)
               onLogout()
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger-200 hover:bg-danger-500/10 disabled:opacity-50"
           >
             <LogOut size={15} />
             退出登录
@@ -239,21 +239,24 @@ export default function Layout() {
   const mobileItems = menus.slice(0, MOBILE_NAV_MAX)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-surface-0">
       {/* ── Desktop Sidebar ── */}
-      <aside className="hidden md:flex flex-col w-60 shrink-0 bg-brand-900 text-white">
-        <div className="px-5 py-5 border-b border-white/10">
+      <aside
+        className="hidden md:flex flex-col w-60 shrink-0 bg-surface-1 border-r border-line-soft text-ink"
+        style={{ backgroundImage: 'radial-gradient(rgba(60,207,224,.06) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
+      >
+        <div className="px-5 py-4 border-b border-line-soft">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm">智</div>
+            <div className="w-9 h-9 rounded-[9px] bg-gradient-to-br from-brand-500 to-brand-700 ring-1 ring-tech-400/30 shadow-[0_8px_18px_-8px_rgba(29,111,216,.95)] flex items-center justify-center text-white font-semibold text-sm">智</div>
             <div>
-              <div className="text-sm font-semibold tracking-wide">智御系统</div>
-              <div className="text-[10px] text-slate-400 mt-0.5">边缘控车 · 智慧驾驭</div>
+              <div className="text-sm font-semibold tracking-[0.1em] text-ink-strong">智御系统</div>
+              <div className="text-[10px] text-ink-faint mt-0.5 tracking-wide">边缘控车 · 智慧驾驭</div>
             </div>
           </div>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {menus.length === 0 && <div className="px-3 py-2 text-xs text-slate-500">暂无可用菜单</div>}
+          {menus.length === 0 && <div className="px-3 py-2 text-xs text-ink-disabled">暂无可用菜单</div>}
           {menus.map((m) => {
             if (m.children && m.children.length > 0) {
               return <SidebarGroup key={m.code} node={m} pathname={loc.pathname} />
@@ -267,9 +270,12 @@ export default function Layout() {
           })}
         </nav>
 
-        <div className="px-4 py-4 border-t border-white/10">
-          <div className="text-xs text-slate-500">测试版 V2.0</div>
-          <div className="text-xs text-slate-500 mt-0.5 truncate">
+        <div className="px-4 py-4 border-t border-line-soft">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-tech-400 shadow-glow inline-block" />
+            <span className="font-mono text-[10px] tracking-[0.09em] text-ink-muted">测试版 V2.0</span>
+          </div>
+          <div className="text-[11px] text-ink-disabled mt-1 truncate">
             {viewTenant ? `查看：${viewTenant.name}` : (profile?.tenant.name ?? '—')} · 车队管理
           </div>
         </div>
@@ -277,10 +283,10 @@ export default function Layout() {
 
       {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="shrink-0 h-14 bg-white border-b border-slate-100 flex items-center px-4 md:px-5 gap-3">
+        <header className="shrink-0 h-14 bg-surface-1 border-b border-line flex items-center px-4 md:px-5 gap-3">
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm font-semibold text-slate-800 truncate">{title}</h1>
-            {subtitle && <p className="text-xs text-slate-400 hidden sm:block truncate">{subtitle}</p>}
+            <h1 className="text-sm font-semibold text-ink-strong truncate tracking-[0.02em]">{title}</h1>
+            {subtitle && <p className="text-xs text-ink-faint hidden sm:block truncate">{subtitle}</p>}
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <TenantSwitcher />
@@ -298,7 +304,7 @@ export default function Layout() {
 
         {/* ── Mobile Bottom Nav：一级菜单前 5 个 ── */}
         {mobileItems.length > 0 && (
-          <nav className="md:hidden shrink-0 bg-white border-t border-slate-100 flex justify-around">
+          <nav className="md:hidden shrink-0 bg-surface-1 border-t border-line flex justify-around">
             {mobileItems.map((m) => {
               const isGroup = Boolean(m.children && m.children.length > 0)
               const groupActive = isGroup && (loc.pathname === m.path || loc.pathname.startsWith(`${m.path}/`))

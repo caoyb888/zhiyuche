@@ -17,10 +17,10 @@ const iconByType: Record<ToastType, LucideIcon> = {
 }
 
 const styleByType: Record<ToastType, string> = {
-  success: 'border-emerald-200 text-emerald-600',
-  error: 'border-red-200 text-red-600',
-  info: 'border-brand-200 text-brand-600',
-  warning: 'border-amber-200 text-amber-600',
+  success: 'border-ev-500/40 text-ev-200',
+  error: 'border-danger-500/40 text-danger-200',
+  info: 'border-brand-600/45 text-brand-300',
+  warning: 'border-warn-500/40 text-warn-200',
 }
 
 const MAX_VISIBLE = 5
@@ -81,14 +81,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <div
                 key={it.id}
                 role={it.type === 'error' ? 'alert' : 'status'}
-                className={clsx('pointer-events-auto flex items-start gap-2.5 rounded-xl border bg-white px-4 py-3 shadow-lg slide-up', styleByType[it.type])}
+                className={clsx('pointer-events-auto flex items-start gap-2.5 rounded-card border bg-surface-2 px-4 py-3 shadow-float slide-up', styleByType[it.type])}
               >
                 <Icon size={18} className="mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-slate-800 break-words">{it.title}</div>
-                  {it.description && <div className="mt-0.5 text-xs text-slate-500 break-words">{it.description}</div>}
+                  <div className="text-sm font-medium text-ink-strong break-words">{it.title}</div>
+                  {it.description && <div className="mt-0.5 text-xs text-ink-muted break-words">{it.description}</div>}
                 </div>
-                <button type="button" onClick={() => dismiss(it.id)} className="shrink-0 rounded p-0.5 text-slate-400 hover:text-slate-600" aria-label="关闭提示">
+                <button type="button" onClick={() => dismiss(it.id)} className="shrink-0 rounded p-0.5 text-ink-faint hover:text-ink-strong" aria-label="关闭提示">
                   <X size={14} />
                 </button>
               </div>

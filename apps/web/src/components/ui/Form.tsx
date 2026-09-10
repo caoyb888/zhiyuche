@@ -83,18 +83,18 @@ export function FormField({ name, label, required, hint, children, className }: 
   return (
     <div className={clsx('space-y-1.5', className)}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="block text-sm font-medium text-ink">
           {label}
-          {required && <span className="ml-0.5 text-red-500">*</span>}
+          {required && <span className="ml-0.5 text-danger-400">*</span>}
         </label>
       )}
       {control}
       {error ? (
-        <p className="text-xs text-red-500" role="alert">
+        <p className="text-xs text-danger-200" role="alert">
           {error}
         </p>
       ) : hint ? (
-        <p className="text-xs text-slate-400">{hint}</p>
+        <p className="text-xs text-ink-faint">{hint}</p>
       ) : null}
     </div>
   )

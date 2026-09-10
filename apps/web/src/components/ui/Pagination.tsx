@@ -41,14 +41,14 @@ export default function Pagination({ page, pageSize, total, onChange, pageSizeOp
 
   return (
     <div className={clsx('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
-      <div className="text-xs text-slate-400">
-        共 <span className="text-slate-600 font-medium">{total}</span> 条{total > 0 && <>，当前 {from}–{to}</>}
+      <div className="font-mono text-xs text-ink-faint">
+        共 <span className="text-ink font-medium">{total}</span> 条{total > 0 && <>，当前 {from}–{to}</>}
       </div>
       <div className="flex items-center gap-3">
         <select
           value={pageSize}
           onChange={(e) => onChange(1, Number(e.target.value))}
-          className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
+          className="h-8 rounded-md border border-line-strong bg-surface-3 px-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-brand-600/25"
           aria-label="每页条数"
         >
           {pageSizeOptions.map((n) => (
@@ -58,12 +58,12 @@ export default function Pagination({ page, pageSize, total, onChange, pageSizeOp
           ))}
         </select>
         <nav className="flex items-center gap-1" aria-label="分页">
-          <button type="button" className={clsx(btn, 'text-slate-500 hover:bg-slate-100')} disabled={current <= 1} onClick={() => go(current - 1)} aria-label="上一页">
+          <button type="button" className={clsx(btn, 'text-ink-muted hover:bg-surface-3')} disabled={current <= 1} onClick={() => go(current - 1)} aria-label="上一页">
             <ChevronLeft size={16} />
           </button>
           {pageItems(current, pages).map((it, i) =>
             it === 'gap' ? (
-              <span key={`gap-${i}`} className="px-1 text-slate-400">
+              <span key={`gap-${i}`} className="px-1 text-ink-disabled">
                 …
               </span>
             ) : (
@@ -72,13 +72,13 @@ export default function Pagination({ page, pageSize, total, onChange, pageSizeOp
                 type="button"
                 aria-current={it === current ? 'page' : undefined}
                 onClick={() => go(it)}
-                className={clsx(btn, it === current ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-100')}
+                className={clsx(btn, 'font-mono', it === current ? 'bg-brand-600 text-white shadow-[0_6px_14px_-8px_rgba(29,111,216,.95)]' : 'text-ink hover:bg-surface-3')}
               >
                 {it}
               </button>
             ),
           )}
-          <button type="button" className={clsx(btn, 'text-slate-500 hover:bg-slate-100')} disabled={current >= pages} onClick={() => go(current + 1)} aria-label="下一页">
+          <button type="button" className={clsx(btn, 'text-ink-muted hover:bg-surface-3')} disabled={current >= pages} onClick={() => go(current + 1)} aria-label="下一页">
             <ChevronRight size={16} />
           </button>
         </nav>

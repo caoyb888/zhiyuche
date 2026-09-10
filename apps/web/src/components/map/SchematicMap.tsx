@@ -211,7 +211,11 @@ function SchematicCanvas({ bounds, markers, polylines, onClick, empty }: CanvasP
   )
 
   return (
-    <div ref={wrapRef} className="absolute inset-0 bg-slate-50 select-none touch-none">
+    <div
+      ref={wrapRef}
+      className="absolute inset-0 bg-surface-2 select-none touch-none"
+      style={{ backgroundImage: 'radial-gradient(rgba(60,207,224,.05) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
+    >
       {ready && (
         <svg
           width={size.w}
@@ -228,16 +232,16 @@ function SchematicCanvas({ bounds, markers, polylines, onClick, empty }: CanvasP
           {/* 网格 */}
           {grid?.vlines.map((l) => (
             <g key={`v${l.label}`}>
-              <line x1={l.x} x2={l.x} y1={0} y2={size.h} stroke="#e2e8f0" strokeWidth={1} />
-              <text x={l.x} y={size.h - 6} textAnchor="middle" fontSize={10} fill="#94a3b8" className="font-mono">
+              <line x1={l.x} x2={l.x} y1={0} y2={size.h} stroke="#12253c" strokeWidth={1} />
+              <text x={l.x} y={size.h - 6} textAnchor="middle" fontSize={10} fill="#5f7896" className="font-mono">
                 {l.label}
               </text>
             </g>
           ))}
           {grid?.hlines.map((l) => (
             <g key={`h${l.label}`}>
-              <line x1={0} x2={size.w} y1={l.y} y2={l.y} stroke="#e2e8f0" strokeWidth={1} />
-              <text x={4} y={l.y - 3} fontSize={10} fill="#94a3b8" className="font-mono">
+              <line x1={0} x2={size.w} y1={l.y} y2={l.y} stroke="#12253c" strokeWidth={1} />
+              <text x={4} y={l.y - 3} fontSize={10} fill="#5f7896" className="font-mono">
                 {l.label}
               </text>
             </g>
@@ -308,8 +312,8 @@ function SchematicCanvas({ bounds, markers, polylines, onClick, empty }: CanvasP
                     textAnchor="middle"
                     fontSize={11}
                     fontWeight={600}
-                    fill="#1e293b"
-                    stroke="#fff"
+                    fill="#e8f0f9"
+                    stroke="#071223"
                     strokeWidth={3}
                     paintOrder="stroke"
                     style={{ pointerEvents: 'none' }}
@@ -325,17 +329,17 @@ function SchematicCanvas({ bounds, markers, polylines, onClick, empty }: CanvasP
           {scale && (
             <g transform={`translate(${size.w - 16 - scale.px} ${size.h - 22})`}>
               <rect x={-6} y={-16} width={scale.px + 12} height={24} rx={4} fill="#fff" fillOpacity={0.85} />
-              <line x1={0} x2={scale.px} y1={2} y2={2} stroke="#475569" strokeWidth={2} />
-              <line x1={0} x2={0} y1={-3} y2={6} stroke="#475569" strokeWidth={2} />
-              <line x1={scale.px} x2={scale.px} y1={-3} y2={6} stroke="#475569" strokeWidth={2} />
-              <text x={scale.px / 2} y={-4} textAnchor="middle" fontSize={10} fill="#475569" className="font-mono">
+              <line x1={0} x2={scale.px} y1={2} y2={2} stroke="#7089a8" strokeWidth={2} />
+              <line x1={0} x2={0} y1={-3} y2={6} stroke="#7089a8" strokeWidth={2} />
+              <line x1={scale.px} x2={scale.px} y1={-3} y2={6} stroke="#7089a8" strokeWidth={2} />
+              <text x={scale.px / 2} y={-4} textAnchor="middle" fontSize={10} fill="#7089a8" className="font-mono">
                 {scale.label}
               </text>
             </g>
           )}
 
           {empty && (
-            <text x={size.w / 2} y={size.h / 2} textAnchor="middle" dominantBaseline="central" fontSize={13} fill="#94a3b8">
+            <text x={size.w / 2} y={size.h / 2} textAnchor="middle" dominantBaseline="central" fontSize={13} fill="#5f7896">
               暂无位置数据
             </text>
           )}
@@ -343,14 +347,14 @@ function SchematicCanvas({ bounds, markers, polylines, onClick, empty }: CanvasP
       )}
 
       {/* 缩放控件 */}
-      <div className="absolute right-2 top-2 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <button type="button" aria-label="放大" title="放大" onClick={() => zoomBy(1.5)} className="flex h-7 w-7 items-center justify-center text-slate-600 hover:bg-slate-50">
+      <div className="absolute right-2 top-2 flex flex-col overflow-hidden rounded-lg border border-line bg-surface-2/90 backdrop-blur">
+        <button type="button" aria-label="放大" title="放大" onClick={() => zoomBy(1.5)} className="flex h-7 w-7 items-center justify-center text-ink-muted hover:bg-surface-3">
           <Plus size={14} />
         </button>
-        <button type="button" aria-label="缩小" title="缩小" onClick={() => zoomBy(1 / 1.5)} className="flex h-7 w-7 items-center justify-center border-t border-slate-100 text-slate-600 hover:bg-slate-50">
+        <button type="button" aria-label="缩小" title="缩小" onClick={() => zoomBy(1 / 1.5)} className="flex h-7 w-7 items-center justify-center border-t border-line-soft text-ink-muted hover:bg-surface-3">
           <Minus size={14} />
         </button>
-        <button type="button" aria-label="重置视野" title="重置视野" onClick={() => setView(IDENTITY)} className="flex h-7 w-7 items-center justify-center border-t border-slate-100 text-slate-600 hover:bg-slate-50">
+        <button type="button" aria-label="重置视野" title="重置视野" onClick={() => setView(IDENTITY)} className="flex h-7 w-7 items-center justify-center border-t border-line-soft text-ink-muted hover:bg-surface-3">
           <Maximize2 size={13} />
         </button>
       </div>
@@ -381,8 +385,8 @@ export default function SchematicMap({ markers = [], polylines = [], center, fit
       <FrozenCanvas key={mountKey} initialBounds={bounds} markers={markers} polylines={polylines} onClick={onClick} empty={!hasData} />
       {!hideBadge && (
         <div className="pointer-events-none absolute left-2 top-2 flex flex-col items-start gap-1">
-          <span className="rounded-md bg-slate-800/80 px-2 py-0.5 text-[11px] font-medium text-white shadow-sm">示意图（未配置地图 Key）</span>
-          {hint && <span className="rounded-md bg-white/90 px-2 py-0.5 text-[11px] text-slate-500 shadow-sm">{hint}</span>}
+          <span className="rounded-md border border-line bg-surface-1/85 px-2 py-0.5 text-[11px] font-medium text-ink backdrop-blur">示意图（未配置地图 Key）</span>
+          {hint && <span className="rounded-md border border-line bg-surface-2/85 px-2 py-0.5 text-[11px] text-ink-muted backdrop-blur">{hint}</span>}
         </div>
       )}
     </>

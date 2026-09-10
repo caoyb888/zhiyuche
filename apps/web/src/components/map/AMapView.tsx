@@ -59,7 +59,8 @@ export default function AMapView({ markers = [], polylines = [], center, zoom, f
       .load()
       .then((ns) => {
         if (cancelled) return
-        const map = new ns.Map(el, { zoom: initial.zoom, center: initial.center, viewMode: '2D', resizeEnable: true })
+        // 深空控制台：底图走高德官方深色样式，轨迹/标记才压得住
+        const map = new ns.Map(el, { zoom: initial.zoom, center: initial.center, viewMode: '2D', resizeEnable: true, mapStyle: 'amap://styles/darkblue' })
         map.addControl(new ns.Scale())
         map.on('click', (e) => onClickRef.current?.([e.lnglat.getLng(), e.lnglat.getLat()]))
         ctxRef.current = { ns, map, markers: new Map(), lines: new Map() }
@@ -186,12 +187,12 @@ export default function AMapView({ markers = [], polylines = [], center, zoom, f
     <>
       <div ref={containerRef} className="absolute inset-0" />
       {!ready && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
+        <div className="absolute inset-0 flex items-center justify-center bg-surface-2">
           <Spinner label="正在加载地图…" />
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-50 p-4 text-center text-xs text-slate-500">
+        <div className="absolute inset-0 flex items-center justify-center bg-surface-2 p-4 text-center text-xs text-ink-muted">
           地图加载失败：{error}
         </div>
       )}

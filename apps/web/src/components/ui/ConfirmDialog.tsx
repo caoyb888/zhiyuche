@@ -47,12 +47,12 @@ export default function ConfirmDialog({
       }
     >
       <div className="flex gap-3">
-        <div className={danger ? 'text-red-500' : 'text-amber-500'}>
+        <div className={danger ? 'text-danger-400' : 'text-warn-400'}>
           <AlertTriangle size={22} />
         </div>
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-slate-800">{title}</div>
-          {description && <div className="mt-1 text-sm text-slate-500">{description}</div>}
+          <div className="text-sm font-semibold text-ink-strong">{title}</div>
+          {description && <div className="mt-1 text-sm text-ink-muted">{description}</div>}
         </div>
       </div>
     </Modal>

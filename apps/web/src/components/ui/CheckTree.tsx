@@ -32,7 +32,7 @@ function IndeterminateCheckbox({ state, disabled, onToggle, label }: { state: Ch
       disabled={disabled}
       onChange={onToggle}
       onClick={(e) => e.stopPropagation()}
-      className="h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-300 accent-brand-600 cursor-pointer disabled:cursor-not-allowed"
+      className="h-4 w-4 shrink-0 rounded border-line-strong bg-surface-3 text-brand-600 focus:ring-brand-600/30 accent-brand-600 cursor-pointer disabled:cursor-not-allowed"
     />
   )
 }
@@ -77,7 +77,7 @@ function CheckTreeItem({ node, depth, expanded, toggleExpand, checked, toggleChe
         className={clsx(
           'flex items-center gap-1.5 rounded-md pr-2 transition-colors',
           size === 'sm' ? 'py-1 text-xs' : 'py-1.5 text-sm',
-          itemDisabled ? 'cursor-not-allowed text-slate-300' : 'cursor-pointer text-slate-700 hover:bg-slate-50',
+          itemDisabled ? 'cursor-not-allowed text-ink-disabled' : 'cursor-pointer text-ink hover:bg-surface-3',
         )}
       >
         <button
@@ -89,16 +89,16 @@ function CheckTreeItem({ node, depth, expanded, toggleExpand, checked, toggleChe
             if (hasChildren) toggleExpand(node.key)
           }}
           className={clsx(
-            'flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400',
-            hasChildren ? 'hover:bg-slate-200/70 hover:text-slate-600' : 'invisible',
+            'flex h-5 w-5 shrink-0 items-center justify-center rounded text-ink-faint',
+            hasChildren ? 'hover:bg-surface-4 hover:text-ink-strong' : 'invisible',
           )}
         >
           <ChevronRight size={14} className={clsx('transition-transform', open && 'rotate-90')} />
         </button>
         <IndeterminateCheckbox state={state} disabled={itemDisabled} onToggle={() => toggleCheck(node)} label={node.label} />
-        {Icon && <Icon size={14} className="shrink-0 text-slate-400" />}
+        {Icon && <Icon size={14} className="shrink-0 text-ink-faint" />}
         <span className={clsx('truncate flex-1', hasChildren && 'font-medium')}>{node.title ?? node.label}</span>
-        {node.extra !== undefined && <span className="shrink-0 text-xs text-slate-400">{node.extra}</span>}
+        {node.extra !== undefined && <span className="shrink-0 text-xs text-ink-faint">{node.extra}</span>}
       </div>
       {open && node.children && (
         <ul role="group">
@@ -157,7 +157,7 @@ export default function CheckTree({ nodes, value, onChange, defaultExpandAll = t
   }
 
   if (nodes.length === 0) {
-    return <div className={clsx('py-4 text-center text-xs text-slate-400', className)}>{emptyText}</div>
+    return <div className={clsx('py-4 text-center text-xs text-ink-faint', className)}>{emptyText}</div>
   }
 
   return (

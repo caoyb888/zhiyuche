@@ -45,13 +45,13 @@ export default function CheckboxGroup({
     onChange(options.filter((o) => next.has(o.value)).map((o) => o.value))
   }
   if (options.length === 0) {
-    return <div className="text-sm text-slate-400 py-1">{emptyText}</div>
+    return <div className="text-sm text-ink-faint py-1">{emptyText}</div>
   }
   return (
     <div
       className={clsx(
         'grid grid-cols-1 gap-x-4 gap-y-2 rounded-lg border p-3',
-        invalid ? 'border-red-300' : 'border-slate-200',
+        invalid ? 'border-danger-400' : 'border-line-strong',
         columnClass[columns],
         className,
       )}

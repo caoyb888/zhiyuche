@@ -34,26 +34,26 @@ export default function Modal({ open, onClose, title, children, footer, size = '
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-slate-900/40" onClick={closeOnBackdrop ? onClose : undefined} />
+      <div className="absolute inset-0 bg-[#03080F]/70 backdrop-blur-[2px]" onClick={closeOnBackdrop ? onClose : undefined} />
       <div
         className={clsx(
-          'relative w-full bg-white shadow-xl flex flex-col max-h-[92vh] slide-up',
-          'rounded-t-2xl sm:rounded-2xl',
+          'relative w-full bg-surface-2 border border-line shadow-float flex flex-col max-h-[92vh] slide-up',
+          'rounded-t-[14px] sm:rounded-[14px]',
           sizeClass[size],
         )}
       >
         {(title || !hideClose) && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <h3 className="text-base font-semibold text-slate-800">{title}</h3>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-line-soft">
+            <h3 className="text-base font-semibold text-ink-strong">{title}</h3>
             {!hideClose && (
-              <button type="button" onClick={onClose} className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100" aria-label="关闭">
+              <button type="button" onClick={onClose} className="p-1 rounded-md text-ink-faint hover:text-ink-strong hover:bg-surface-3" aria-label="关闭">
                 <X size={18} />
               </button>
             )}
           </div>
         )}
         <div className="px-5 py-4 overflow-y-auto">{children}</div>
-        {footer && <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-end gap-2">{footer}</div>}
+        {footer && <div className="px-5 py-3 border-t border-line-soft flex items-center justify-end gap-2">{footer}</div>}
       </div>
     </div>,
     document.body,

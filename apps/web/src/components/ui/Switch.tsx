@@ -28,9 +28,9 @@ export default function Switch({ checked, onChange, disabled, label, size = 'md'
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={clsx(
-          'relative inline-flex shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300',
+          'relative inline-flex shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40',
           track,
-          checked ? 'bg-brand-600' : 'bg-slate-300',
+          checked ? 'bg-brand-600' : 'bg-surface-4 border border-line-strong',
           disabled && 'cursor-not-allowed',
         )}
       >
@@ -42,7 +42,7 @@ export default function Switch({ checked, onChange, disabled, label, size = 'md'
           )}
         />
       </button>
-      {label && <span className="text-sm text-slate-700">{label}</span>}
+      {label && <span className="text-sm text-ink">{label}</span>}
     </label>
   )
 }
