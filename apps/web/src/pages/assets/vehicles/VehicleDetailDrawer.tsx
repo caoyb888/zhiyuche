@@ -50,15 +50,15 @@ function TelemetryChart({ data, dataKey, color, unit, domain }: { data: ChartPoi
   return (
     <ResponsiveContainer width="100%" height={150}>
       <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
-        <CartesianGrid vertical={false} stroke="#f1f5f9" />
-        <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(v: number) => dayjs(v).format('HH:mm')} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} minTickGap={32} />
-        <YAxis domain={domain ?? ['auto', 'auto']} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={40} />
+        <CartesianGrid vertical={false} stroke="#16304f" />
+        <XAxis dataKey="t" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(v: number) => dayjs(v).format('HH:mm')} tick={{ fontSize: 10, fill: '#93aac4' }} axisLine={false} tickLine={false} minTickGap={32} />
+        <YAxis domain={domain ?? ['auto', 'auto']} tick={{ fontSize: 10, fill: '#93aac4' }} axisLine={false} tickLine={false} width={40} />
         <Tooltip
           labelFormatter={(v) => dayjs(Number(v)).format('MM-DD HH:mm:ss')}
           formatter={(v) => [`${typeof v === 'number' ? Math.round(v * 10) / 10 : v} ${unit}`, '']}
           separator=""
-          contentStyle={{ fontSize: 12, borderRadius: 8, borderColor: '#e2e8f0' }}
-          cursor={{ stroke: '#cbd5e1', strokeDasharray: '3 3' }}
+          contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #23456B', background: '#0D1E33' }} labelStyle={{ color: '#93AAC4' }} itemStyle={{ color: '#DCE7F2' }}
+          cursor={{ stroke: '#465e7e', strokeDasharray: '3 3' }}
         />
         <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 4 }} connectNulls isAnimationActive={false} />
       </LineChart>
@@ -84,15 +84,15 @@ function LiveCard({ live }: { live: VehicleLive }) {
       <MapView height={200} markers={markers} fitKey={pos ? 'pos' : 'none'} hint={!pos ? '暂无位置' : undefined} />
       <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
         <div>
-          <div className="text-xs text-slate-400">速度</div>
-          <div className="font-medium text-slate-800">{formatSpeed(live.speed)}</div>
+          <div className="text-xs text-ink-faint">速度</div>
+          <div className="font-medium text-ink-strong">{formatSpeed(live.speed)}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">电量 SOC</div>
-          <div className={clsx('font-medium', soc !== null ? socTextClass(soc) : 'text-slate-800')}>
+          <div className="text-xs text-ink-faint">电量 SOC</div>
+          <div className={clsx('font-medium', soc !== null ? socTextClass(soc) : 'text-ink-strong')}>
             {soc !== null ? (
               <span className="flex items-center gap-2">
-                <span className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+                <span className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-4">
                   <span className={clsx('block h-full rounded-full', socBarClass(soc))} style={{ width: `${Math.max(0, Math.min(100, soc))}%` }} />
                 </span>
                 {formatPercent(soc)}
@@ -103,29 +103,29 @@ function LiveCard({ live }: { live: VehicleLive }) {
           </div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">续航</div>
-          <div className="font-medium text-slate-800">{formatKm(live.range_km)}</div>
+          <div className="text-xs text-ink-faint">续航</div>
+          <div className="font-medium text-ink-strong">{formatKm(live.range_km)}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">电池健康 SOH</div>
-          <div className="font-medium text-slate-800">{formatPercent(live.soh)}</div>
+          <div className="text-xs text-ink-faint">电池健康 SOH</div>
+          <div className="font-medium text-ink-strong">{formatPercent(live.soh)}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">里程</div>
-          <div className="font-medium text-slate-800">{formatKm(live.odometer_km, 1)}</div>
+          <div className="text-xs text-ink-faint">里程</div>
+          <div className="font-medium text-ink-strong">{formatKm(live.odometer_km, 1)}</div>
         </div>
         <div>
-          <div className="text-xs text-slate-400">驾驶员</div>
-          <div className="font-medium text-slate-800">{text(live.driver_name)}</div>
+          <div className="text-xs text-ink-faint">驾驶员</div>
+          <div className="font-medium text-ink-strong">{text(live.driver_name)}</div>
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {chip(live.online, 'bg-emerald-50 text-emerald-700', 'bg-slate-100 text-slate-500', live.online ? '在线' : '离线', live.online ? Wifi : WifiOff)}
-        {chip(live.sign_on, 'bg-brand-50 text-brand-700', 'bg-slate-100 text-slate-500', live.sign_on ? '灯牌亮' : '灯牌灭', Lightbulb)}
-        {chip(live.locked, 'bg-slate-100 text-slate-600', 'bg-amber-50 text-amber-700', live.locked ? '已锁车' : '未锁车', live.locked ? Lock : Unlock)}
-        {chip(live.charging, 'bg-amber-50 text-amber-700', 'bg-slate-100 text-slate-500', live.charging ? '充电中' : '未充电', BatteryCharging)}
+        {chip(live.online, 'bg-ev-500/10 text-ev-200', 'bg-surface-4 text-ink-muted', live.online ? '在线' : '离线', live.online ? Wifi : WifiOff)}
+        {chip(live.sign_on, 'bg-brand-600/10 text-brand-300', 'bg-surface-4 text-ink-muted', live.sign_on ? '灯牌亮' : '灯牌灭', Lightbulb)}
+        {chip(live.locked, 'bg-surface-4 text-ink', 'bg-warn-500/10 text-warn-200', live.locked ? '已锁车' : '未锁车', live.locked ? Lock : Unlock)}
+        {chip(live.charging, 'bg-warn-500/10 text-warn-200', 'bg-surface-4 text-ink-muted', live.charging ? '充电中' : '未充电', BatteryCharging)}
       </div>
-      <div className="text-xs text-slate-400">最后遥测 {formatDateTime(live.last_telemetry_at)} · 状态更新 {formatDateTime(live.updated_at)}</div>
+      <div className="text-xs text-ink-faint">最后遥测 {formatDateTime(live.last_telemetry_at)} · 状态更新 {formatDateTime(live.updated_at)}</div>
     </div>
   )
 }
@@ -157,11 +157,11 @@ function DetailBody({ id, onEdit }: { id: string; onEdit?: (v: Vehicle) => void 
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-slate-800">{v.plate_no}</span>
+          <span className="text-lg font-semibold text-ink-strong">{v.plate_no}</span>
           <Badge color={VEHICLE_STATUS_BADGE[status]}>{VEHICLE_STATUS_LABEL[status]}</Badge>
           {live && (
-            <span className={clsx('inline-flex items-center gap-1 text-xs', live.online ? 'text-emerald-600' : 'text-slate-400')}>
-              <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', live.online ? 'bg-emerald-500 pulse-dot' : 'bg-slate-300')} />
+            <span className={clsx('inline-flex items-center gap-1 text-xs', live.online ? 'text-ev-200' : 'text-ink-faint')}>
+              <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', live.online ? 'bg-ev-500 pulse-dot' : 'bg-ink-disabled')} />
               {live.online ? '在线' : '离线'}
             </span>
           )}
@@ -174,7 +174,7 @@ function DetailBody({ id, onEdit }: { id: string; onEdit?: (v: Vehicle) => void 
       </div>
 
       <section>
-        <h4 className="mb-3 text-sm font-semibold text-slate-700">基本信息</h4>
+        <h4 className="mb-3 text-sm font-semibold text-ink">基本信息</h4>
         <DescriptionList
           columns={3}
           items={[
@@ -190,7 +190,7 @@ function DetailBody({ id, onEdit }: { id: string; onEdit?: (v: Vehicle) => void 
             { label: '购置日期', value: formatDate(v.purchase_date) },
             { label: '保险到期', value: formatDate(v.insurance_expire) },
             { label: '年检到期', value: formatDate(v.inspection_expire) },
-            { label: '绑定设备', value: v.device_serial ? <span className="font-mono text-xs">{v.device_serial}</span> : <span className="text-slate-400">未绑定网关</span> },
+            { label: '绑定设备', value: v.device_serial ? <span className="font-mono text-xs">{v.device_serial}</span> : <span className="text-ink-faint">未绑定网关</span> },
             { label: '创建时间', value: formatDateTime(v.created_at) },
             { label: '更新时间', value: formatDateTime(v.updated_at) },
             { label: '备注', value: v.remark, span: 3 },
@@ -199,15 +199,15 @@ function DetailBody({ id, onEdit }: { id: string; onEdit?: (v: Vehicle) => void 
       </section>
 
       <section>
-        <h4 className="mb-3 text-sm font-semibold text-slate-700">实时状态</h4>
+        <h4 className="mb-3 text-sm font-semibold text-ink">实时状态</h4>
         {live ? <LiveCard live={live} /> : <Empty size="sm" title="暂无实时状态" description="车辆尚未绑定网关或未上报遥测" />}
       </section>
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-slate-700">最近 {TELEMETRY_HOURS} 小时遥测</h4>
+          <h4 className="text-sm font-semibold text-ink">最近 {TELEMETRY_HOURS} 小时遥测</h4>
           {telemetry.data && telemetry.data.length > 0 && (
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-ink-faint">
               {telemetry.data.length} 点{telemetry.data.length > CHART_MAX_POINTS ? `，抽样至 ${chart.length} 点` : ''}
             </span>
           )}
@@ -223,18 +223,18 @@ function DetailBody({ id, onEdit }: { id: string; onEdit?: (v: Vehicle) => void 
         ) : (
           <div className="space-y-3">
             <div>
-              <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-500">
+              <div className="mb-1 flex items-center gap-1.5 text-xs text-ink-muted">
                 <span className="inline-block h-2 w-2 rounded-full" style={{ background: '#10b981' }} />
                 电量 SOC（%）
               </div>
               <TelemetryChart data={chart} dataKey="soc" color="#10b981" unit="%" domain={[0, 100]} />
             </div>
             <div>
-              <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-500">
-                <span className="inline-block h-2 w-2 rounded-full" style={{ background: '#1d6fd8' }} />
+              <div className="mb-1 flex items-center gap-1.5 text-xs text-ink-muted">
+                <span className="inline-block h-2 w-2 rounded-full" style={{ background: '#5c9df0' }} />
                 速度（km/h）
               </div>
-              <TelemetryChart data={chart} dataKey="speed" color="#1d6fd8" unit="km/h" domain={[0, 'auto']} />
+              <TelemetryChart data={chart} dataKey="speed" color="#5c9df0" unit="km/h" domain={[0, 'auto']} />
             </div>
           </div>
         )}

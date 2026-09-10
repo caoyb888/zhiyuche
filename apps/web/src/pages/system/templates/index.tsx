@@ -95,7 +95,7 @@ export default function TemplatesPage() {
   const hasRowActions = canUpdate || canDelete
 
   const columns: Column<Template>[] = [
-    { key: 'code', title: '代码', sortable: true, render: (t) => <code className="font-mono text-xs text-slate-800">{t.code}</code> },
+    { key: 'code', title: '代码', sortable: true, render: (t) => <code className="font-mono text-xs text-ink-strong">{t.code}</code> },
     { key: 'channel', title: '渠道', sortable: true, width: 90, render: (t) => <Badge color={channelColor[t.channel]}>{channelLabel[t.channel]}</Badge> },
     {
       key: 'title',
@@ -103,8 +103,8 @@ export default function TemplatesPage() {
       sortable: true,
       render: (t) => (
         <div className="max-w-[22rem]">
-          <div className="truncate font-medium text-slate-800">{t.title}</div>
-          <div className="truncate text-xs text-slate-400" title={t.content}>
+          <div className="truncate font-medium text-ink-strong">{t.title}</div>
+          <div className="truncate text-xs text-ink-faint" title={t.content}>
             {t.content}
           </div>
         </div>
@@ -124,11 +124,11 @@ export default function TemplatesPage() {
       ),
     },
     { key: 'is_global', title: '作用域', width: 80, render: (t) => (t.is_global ? <Badge color="purple">全局</Badge> : <Badge color="blue">租户</Badge>) },
-    { key: 'updated_at', title: '更新时间', render: (t) => <span className="text-xs text-slate-500">{formatDateTime(t.updated_at)}</span> },
+    { key: 'updated_at', title: '更新时间', render: (t) => <span className="text-xs text-ink-muted">{formatDateTime(t.updated_at)}</span> },
   ]
 
   const renderActions = (t: Template) => {
-    if (!writable(t)) return <span className="text-xs text-slate-400">仅平台可改</span>
+    if (!writable(t)) return <span className="text-xs text-ink-faint">仅平台可改</span>
     return (
       <div className="flex items-center justify-end gap-0.5">
         {canUpdate && <Button variant="ghost" size="sm" icon={Pencil} className="!px-2" title="编辑" aria-label="编辑" onClick={() => setDrawer({ mode: 'edit', template: t })} />}
@@ -137,7 +137,7 @@ export default function TemplatesPage() {
             variant="ghost"
             size="sm"
             icon={Trash2}
-            className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+            className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200"
             title="删除"
             aria-label="删除"
             onClick={() => setDeleteTarget(t)}

@@ -126,8 +126,8 @@ export default function DevicesPage() {
       sortable: true,
       render: (d) => (
         <div>
-          <div className="font-mono text-sm font-medium text-slate-800">{d.serial_no}</div>
-          <div className="text-xs text-slate-400">
+          <div className="font-mono text-sm font-medium text-ink-strong">{d.serial_no}</div>
+          <div className="text-xs text-ink-faint">
             {d.model}
             {d.firmware ? ` · v${d.firmware}` : ''}
           </div>
@@ -138,7 +138,7 @@ export default function DevicesPage() {
     {
       key: 'vehicle_plate',
       title: '绑定车辆',
-      render: (d) => (d.vehicle_id ? <Badge color="blue">{d.vehicle_plate ?? d.vehicle_id.slice(0, 8)}</Badge> : <span className="text-xs text-slate-400">未绑定</span>),
+      render: (d) => (d.vehicle_id ? <Badge color="blue">{d.vehicle_plate ?? d.vehicle_id.slice(0, 8)}</Badge> : <span className="text-xs text-ink-faint">未绑定</span>),
     },
     { key: 'status', title: '状态', sortable: true, render: (d) => <Badge color={deviceStatusColor[d.status]}>{deviceStatusLabel[d.status]}</Badge> },
     {
@@ -146,16 +146,16 @@ export default function DevicesPage() {
       title: '在线',
       render: (d) => (
         <div>
-          <span className={clsx('inline-flex items-center gap-1 text-xs', d.online ? 'text-emerald-600' : 'text-slate-400')}>
-            <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', d.online ? 'bg-emerald-500 pulse-dot' : 'bg-slate-300')} />
+          <span className={clsx('inline-flex items-center gap-1 text-xs', d.online ? 'text-ev-200' : 'text-ink-faint')}>
+            <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', d.online ? 'bg-ev-500 pulse-dot' : 'bg-ink-disabled')} />
             {d.online ? '在线' : '离线'}
           </span>
-          <div className="text-[11px] text-slate-400">{formatDateTime(d.last_online_at)}</div>
+          <div className="text-[11px] text-ink-faint">{formatDateTime(d.last_online_at)}</div>
         </div>
       ),
     },
     { key: 'last_ip', title: '最近 IP', render: (d) => <span className="font-mono text-xs">{text(d.last_ip)}</span> },
-    { key: 'created_at', title: '创建时间', sortable: true, render: (d) => <span className="text-xs text-slate-500">{formatDateTime(d.created_at)}</span> },
+    { key: 'created_at', title: '创建时间', sortable: true, render: (d) => <span className="text-xs text-ink-muted">{formatDateTime(d.created_at)}</span> },
   ]
 
   const renderActions = (d: Device) => (
@@ -169,7 +169,7 @@ export default function DevicesPage() {
         ))}
       {canUpdate && <Button variant="ghost" size="sm" icon={KeyRound} className="!px-2" title="重置密钥" aria-label="重置密钥" onClick={() => setRotateTarget(d)} />}
       {canDelete && (
-        <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600" title="删除" aria-label="删除" onClick={() => setDeleteTarget(d)} />
+        <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200" title="删除" aria-label="删除" onClick={() => setDeleteTarget(d)} />
       )}
     </div>
   )

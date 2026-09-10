@@ -47,8 +47,8 @@ function AccountLine({ a }: { a: Pick<Account, 'owner_name' | 'level' | 'balance
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
       <Badge color={ACCOUNT_LEVEL_BADGE[a.level]}>{ACCOUNT_LEVEL_LABEL[a.level]}</Badge>
-      <span className="font-medium text-slate-800">{a.owner_name}</span>
-      <span className="text-xs text-slate-400">
+      <span className="font-medium text-ink-strong">{a.owner_name}</span>
+      <span className="text-xs text-ink-faint">
         余额 <span className="font-mono">{formatMoney(a.balance)}</span> · 透支额度 <span className="font-mono">{formatMoney(a.credit_limit)}</span>
       </span>
     </div>
@@ -73,7 +73,7 @@ function RechargeForm({ onClose, onDone }: { onClose: () => void; onDone: () => 
   })
   return (
     <Form form={form} onSubmit={(v) => save.mutate(v)}>
-      <div className="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-slate-500">线下到账后在此登记，金额计入企业账户余额（流水类型：充值）</div>
+      <div className="rounded-lg bg-surface-3 px-3 py-2.5 text-xs text-ink-muted">线下到账后在此登记，金额计入企业账户余额（流水类型：充值）</div>
       <FormField name="amount" label="充值金额（元）" required>
         <Input type="number" inputMode="decimal" min={0} step="0.01" placeholder="如 50000" autoFocus {...form.register('amount')} />
       </FormField>
@@ -157,22 +157,22 @@ function AllocateForm({ source, target, onClose, onDone }: AllocateFormProps) {
     save.mutate(v)
   }
 
-  if (!toLevel) return <div className="text-sm text-slate-500">员工账户没有下级，无法向下划拨。</div>
+  if (!toLevel) return <div className="text-sm text-ink-muted">员工账户没有下级，无法向下划拨。</div>
 
   return (
     <Form form={form} onSubmit={submit}>
-      <div className="space-y-2 rounded-lg bg-slate-50 px-3 py-2.5">
-        <div className="text-[11px] text-slate-400">划出账户</div>
+      <div className="space-y-2 rounded-lg bg-surface-3 px-3 py-2.5">
+        <div className="text-[11px] text-ink-faint">划出账户</div>
         <AccountLine a={source} />
-        <div className="text-[11px] text-slate-400">
-          可用额度（余额 + 透支）<span className="font-mono text-slate-600">{formatMoney(available)}</span> 元；超出将被拒绝
+        <div className="text-[11px] text-ink-faint">
+          可用额度（余额 + 透支）<span className="font-mono text-ink">{formatMoney(available)}</span> 元；超出将被拒绝
         </div>
       </div>
 
       <div className="space-y-2">
-        <div className="text-sm font-medium text-slate-700">划入{ACCOUNT_LEVEL_LABEL[toLevel]}账户</div>
+        <div className="text-sm font-medium text-ink">划入{ACCOUNT_LEVEL_LABEL[toLevel]}账户</div>
         {target ? (
-          <div className="rounded-lg border border-slate-200 px-3 py-2.5">
+          <div className="rounded-lg border border-line-strong px-3 py-2.5">
             <AccountLine a={target} />
             {!nodeExists(target) && <div className="mt-1 text-[11px] text-brand-600">该账户尚未创建，划拨成功后自动创建</div>}
           </div>
@@ -195,7 +195,7 @@ function AllocateForm({ source, target, onClose, onDone }: AllocateFormProps) {
               <UserPicker value={user} onChange={setUser} placeholder="搜索员工姓名 / 用户名" invalid={Boolean(targetError)} />
             )}
             {targetError && (
-              <p className="text-xs text-red-500" role="alert">
+              <p className="text-xs text-danger-200" role="alert">
                 {targetError}
               </p>
             )}
@@ -248,7 +248,7 @@ function AdjustForm({ account, onClose, onDone }: { account: Account; onClose: (
   })
   return (
     <Form form={form} onSubmit={(v) => save.mutate(v)}>
-      <div className="rounded-lg bg-slate-50 px-3 py-2.5">
+      <div className="rounded-lg bg-surface-3 px-3 py-2.5">
         <AccountLine a={account} />
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -305,7 +305,7 @@ function EditForm({ account, onClose, onDone }: { account: Account; onClose: () 
   })
   return (
     <Form form={form} onSubmit={(v) => save.mutate(v)}>
-      <div className="rounded-lg bg-slate-50 px-3 py-2.5">
+      <div className="rounded-lg bg-surface-3 px-3 py-2.5">
         <AccountLine a={account} />
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

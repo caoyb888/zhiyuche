@@ -63,10 +63,10 @@ export const pileStatusColor: Record<PileStatus, BadgeColor> = {
 /** 地图标记颜色 */
 export const pileStatusHex: Record<PileStatus, string> = {
   available: '#10b981',
-  charging: '#f59e0b',
-  offline: '#94a3b8',
-  faulted: '#ef4444',
-  disabled: '#cbd5e1',
+  charging: '#f0a32b',
+  offline: '#93aac4',
+  faulted: '#ef4b3c',
+  disabled: '#465e7e',
 }
 
 export const pileStatusOptions: SelectOption[] = (Object.keys(pileStatusLabel) as PileStatus[]).map((s) => ({ value: s, label: pileStatusLabel[s] }))

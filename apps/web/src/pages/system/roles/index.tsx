@@ -81,13 +81,13 @@ export default function RolesPage() {
       sortable: true,
       render: (r) => (
         <div className="flex items-center gap-1.5">
-          <code className="font-mono text-xs text-slate-700">{r.code}</code>
+          <code className="font-mono text-xs text-ink">{r.code}</code>
           {r.tenant_id === null && <Badge color="purple">平台级</Badge>}
         </div>
       ),
     },
-    { key: 'name', title: '名称', sortable: true, render: (r) => <span className="font-medium text-slate-800">{r.name}</span> },
-    { key: 'description', title: '描述', render: (r) => <span className="text-slate-500">{text(r.description)}</span> },
+    { key: 'name', title: '名称', sortable: true, render: (r) => <span className="font-medium text-ink-strong">{r.name}</span> },
+    { key: 'description', title: '描述', render: (r) => <span className="text-ink-muted">{text(r.description)}</span> },
     {
       key: 'is_system',
       title: '类型',
@@ -95,7 +95,7 @@ export default function RolesPage() {
     },
     { key: 'permissions', title: '权限数', align: 'right', render: (r) => <span className="tabular-nums">{r.permissions.length}</span> },
     { key: 'user_count', title: '用户数', align: 'right', render: (r) => <span className="tabular-nums">{r.user_count}</span> },
-    { key: 'created_at', title: '创建时间', sortable: true, render: (r) => <span className="text-xs text-slate-500">{formatDateTime(r.created_at)}</span> },
+    { key: 'created_at', title: '创建时间', sortable: true, render: (r) => <span className="text-xs text-ink-muted">{formatDateTime(r.created_at)}</span> },
   ]
 
   const renderActions = (r: Role) => (
@@ -111,7 +111,7 @@ export default function RolesPage() {
           variant="ghost"
           size="sm"
           icon={Trash2}
-          className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+          className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200"
           title={r.is_system ? '内置角色不能删除' : r.user_count > 0 ? '仍有用户持有该角色' : '删除'}
           aria-label="删除"
           onClick={() => setDeleteTarget(r)}

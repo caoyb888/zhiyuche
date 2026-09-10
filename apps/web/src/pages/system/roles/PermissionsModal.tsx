@@ -40,10 +40,10 @@ function PermissionsBody({ role, onClose, onSaved }: Props & { role: Role }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink">
         <div>
-          为 <span className="font-medium text-slate-800">{role.name}</span>
-          <span className="ml-1 font-mono text-xs text-slate-400">{role.code}</span> 设置权限，将整体替换现有权限。
+          为 <span className="font-medium text-ink-strong">{role.name}</span>
+          <span className="ml-1 font-mono text-xs text-ink-faint">{role.code}</span> 设置权限，将整体替换现有权限。
         </div>
         <div className="flex items-center gap-2">
           <Badge color="blue">已选 {selected.length} 项</Badge>
@@ -56,7 +56,7 @@ function PermissionsBody({ role, onClose, onSaved }: Props & { role: Role }) {
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 p-2 max-h-[55vh] overflow-y-auto">
+      <div className="rounded-lg border border-line-strong p-2 max-h-[55vh] overflow-y-auto">
         {query.isPending ? (
           <div className="flex justify-center py-8">
             <Spinner label="加载权限树" />
@@ -69,7 +69,7 @@ function PermissionsBody({ role, onClose, onSaved }: Props & { role: Role }) {
       </div>
 
       {unknown.length > 0 && (
-        <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+        <p className="text-xs text-warn-200 bg-warn-500/10 rounded-lg px-3 py-2">
           该角色持有 {unknown.length} 个当前权限树未列出的权限码（{unknown.join('、')}），保存时将原样保留。
         </p>
       )}

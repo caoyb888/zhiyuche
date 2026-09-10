@@ -29,12 +29,12 @@ function BindBody({ card, onClose, onSaved }: { card: Card; onClose: () => void;
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
-        为卡片 <span className="font-mono font-medium text-slate-800">{card.card_uid}</span> {card.user_id ? '更换' : '绑定'}持卡人。
-        {card.user_name && <span className="text-slate-400">（当前：{card.user_name}）</span>}
+      <p className="text-sm text-ink">
+        为卡片 <span className="font-mono font-medium text-ink-strong">{card.card_uid}</span> {card.user_id ? '更换' : '绑定'}持卡人。
+        {card.user_name && <span className="text-ink-faint">（当前：{card.user_name}）</span>}
       </p>
       <div className="space-y-1.5">
-        <label htmlFor="bind-user" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="bind-user" className="block text-sm font-medium text-ink">
           持卡人
         </label>
         <UserPicker id="bind-user" value={user} onChange={setUser} />

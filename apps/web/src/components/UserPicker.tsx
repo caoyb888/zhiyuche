@@ -116,7 +116,7 @@ export default function UserPicker(props: UserPickerProps) {
           props.value.length > 0 ? (
             <span className="flex flex-wrap gap-1">
               {props.value.map((u) => (
-                <span key={u.id} className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">
+                <span key={u.id} className="inline-flex items-center gap-1 rounded-md bg-surface-4 px-1.5 py-0.5 text-xs text-ink">
                   {u.name}
                   {!disabled && (
                     <span
@@ -126,7 +126,7 @@ export default function UserPicker(props: UserPickerProps) {
                         e.stopPropagation()
                         props.onChange(props.value.filter((x) => x.id !== u.id))
                       }}
-                      className="text-slate-400 hover:text-red-500"
+                      className="text-ink-faint hover:text-danger-200"
                     >
                       <X size={11} />
                     </span>
@@ -135,37 +135,37 @@ export default function UserPicker(props: UserPickerProps) {
               ))}
             </span>
           ) : (
-            <span className="text-slate-400">{placeholder}</span>
+            <span className="text-ink-faint">{placeholder}</span>
           )
         ) : props.value ? (
           <span className="truncate">
             {props.value.name}
-            {props.value.dept_name && <span className="ml-1 text-xs text-slate-400">{props.value.dept_name}</span>}
+            {props.value.dept_name && <span className="ml-1 text-xs text-ink-faint">{props.value.dept_name}</span>}
           </span>
         ) : (
-          <span className="text-slate-400">{placeholder}</span>
+          <span className="text-ink-faint">{placeholder}</span>
         )}
       </button>
       <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-0.5">
         {hasValue && !disabled && (
-          <button type="button" aria-label="清空" onMouseDown={(e) => e.preventDefault()} onClick={clearAll} className="rounded p-0.5 text-slate-400 hover:text-slate-600">
+          <button type="button" aria-label="清空" onMouseDown={(e) => e.preventDefault()} onClick={clearAll} className="rounded p-0.5 text-ink-faint hover:text-ink">
             <X size={14} />
           </button>
         )}
-        <ChevronDown size={16} className={clsx('pointer-events-none text-slate-400 transition-transform', open && 'rotate-180')} />
+        <ChevronDown size={16} className={clsx('pointer-events-none text-ink-faint transition-transform', open && 'rotate-180')} />
       </div>
 
       {open && (
-        <div className="absolute z-40 mt-1 w-full min-w-[16rem] rounded-lg border border-slate-200 bg-white shadow-lg">
-          <div className="relative border-b border-slate-100 p-2">
-            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div className="absolute z-40 mt-1 w-full min-w-[16rem] rounded-lg border border-line-strong bg-surface-2 shadow-lg">
+          <div className="relative border-b border-line p-2">
+            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-faint" />
             <input
               autoFocus
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="输入姓名 / 用户名 / 手机号"
               aria-label="搜索用户"
-              className="h-8 w-full rounded-md border border-slate-200 pl-7 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-100"
+              className="h-8 w-full rounded-md border border-line-strong pl-7 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-600/30"
             />
           </div>
           <ul role="listbox" aria-multiselectable={props.multiple || undefined} className="max-h-64 overflow-y-auto p-1">
@@ -174,9 +174,9 @@ export default function UserPicker(props: UserPickerProps) {
                 <Spinner size="sm" label="搜索中" />
               </li>
             ) : query.isError ? (
-              <li className="px-3 py-3 text-center text-xs text-red-500">{errorMessage(query.error)}</li>
+              <li className="px-3 py-3 text-center text-xs text-danger-200">{errorMessage(query.error)}</li>
             ) : items.length === 0 ? (
-              <li className="px-3 py-3 text-center text-xs text-slate-400">{debounced ? '无匹配用户' : '暂无用户'}</li>
+              <li className="px-3 py-3 text-center text-xs text-ink-faint">{debounced ? '无匹配用户' : '暂无用户'}</li>
             ) : (
               items.map((u) => {
                 const selected = selectedIds.has(u.id)
@@ -187,19 +187,19 @@ export default function UserPicker(props: UserPickerProps) {
                       role="option"
                       aria-selected={selected}
                       onClick={() => pick(u)}
-                      className={clsx('flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-sm hover:bg-slate-50', selected && 'bg-brand-50 text-brand-700')}
+                      className={clsx('flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-sm hover:bg-surface-3', selected && 'bg-brand-600/10 text-brand-300')}
                     >
                       <span className="min-w-0">
                         <span className="font-medium">{u.name}</span>
-                        <span className="ml-1.5 text-xs text-slate-400">{u.username}</span>
+                        <span className="ml-1.5 text-xs text-ink-faint">{u.username}</span>
                       </span>
-                      {u.dept_name && <span className="shrink-0 truncate text-xs text-slate-400">{u.dept_name}</span>}
+                      {u.dept_name && <span className="shrink-0 truncate text-xs text-ink-faint">{u.dept_name}</span>}
                     </button>
                   </li>
                 )
               })
             )}
-            {query.data && query.data.length >= PAGE_SIZE && <li className="px-3 py-1.5 text-center text-[11px] text-slate-400">仅显示前 {PAGE_SIZE} 条，请输入更精确的关键字</li>}
+            {query.data && query.data.length >= PAGE_SIZE && <li className="px-3 py-1.5 text-center text-[11px] text-ink-faint">仅显示前 {PAGE_SIZE} 条，请输入更精确的关键字</li>}
           </ul>
         </div>
       )}

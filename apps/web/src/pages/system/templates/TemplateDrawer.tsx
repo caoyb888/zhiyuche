@@ -72,14 +72,14 @@ function TemplateForm({ template, onCancel, onSaved }: { template?: Template; on
         required
         hint={
           <span>
-            用 <code className="font-mono text-slate-600">{'{{变量名}}'}</code> 引用变量，发送时替换为实际值，如 <code className="font-mono text-slate-600">{'{{applicant}}'}</code>。
+            用 <code className="font-mono text-ink">{'{{变量名}}'}</code> 引用变量，发送时替换为实际值，如 <code className="font-mono text-ink">{'{{applicant}}'}</code>。
           </span>
         }
       >
         <Textarea rows={6} placeholder={'{{applicant}} 提交了用车申请，目的地 {{destination}}，请及时审批。'} {...form.register('content')} />
       </FormField>
       {variables.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-ink-muted">
           <span>检测到变量：</span>
           {variables.map((v) => (
             <Badge key={v} color="gray">
@@ -92,7 +92,7 @@ function TemplateForm({ template, onCancel, onSaved }: { template?: Template; on
         <Controller control={form.control} name="enabled" render={({ field }) => <Switch checked={field.value} onChange={field.onChange} label={field.value ? '启用' : '停用'} />} />
       </FormField>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

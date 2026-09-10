@@ -75,18 +75,18 @@ function DictTypeForm({ dictType, onCancel, onSaved }: { dictType?: DictType; on
       {!isEdit && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">
-              初始条目 <span className="font-normal text-slate-400">（可选，创建后可继续维护）</span>
+            <span className="text-sm font-medium text-ink">
+              初始条目 <span className="font-normal text-ink-faint">（可选，创建后可继续维护）</span>
             </span>
             <Button size="sm" variant="secondary" icon={Plus} onClick={() => items.append({ label: '', value: '', sort: String(items.fields.length) })}>
               添加条目
             </Button>
           </div>
           {items.fields.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 py-4 text-center text-xs text-slate-400">尚未添加条目</div>
+            <div className="rounded-lg border border-dashed border-line-strong py-4 text-center text-xs text-ink-faint">尚未添加条目</div>
           ) : (
             <div className="space-y-2">
-              <div className="grid grid-cols-[1fr_1fr_5rem_2rem] gap-2 px-1 text-xs text-slate-400">
+              <div className="grid grid-cols-[1fr_1fr_5rem_2rem] gap-2 px-1 text-xs text-ink-faint">
                 <span>显示名</span>
                 <span>值</span>
                 <span>排序</span>
@@ -103,7 +103,7 @@ function DictTypeForm({ dictType, onCancel, onSaved }: { dictType?: DictType; on
                   <FormField name={`items.${i}.sort`}>
                     <Input inputMode="numeric" {...form.register(`items.${i}.sort`)} />
                   </FormField>
-                  <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 h-9 text-red-500 hover:bg-red-50" aria-label="移除" onClick={() => items.remove(i)} />
+                  <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 h-9 text-danger-200 hover:bg-danger-500/10" aria-label="移除" onClick={() => items.remove(i)} />
                 </div>
               ))}
             </div>
@@ -111,7 +111,7 @@ function DictTypeForm({ dictType, onCancel, onSaved }: { dictType?: DictType; on
         </div>
       )}
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

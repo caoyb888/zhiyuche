@@ -61,7 +61,7 @@ function IssueForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: (c: C
       <FormField name="remark" label="备注">
         <Textarea placeholder="可选" {...form.register('remark')} />
       </FormField>
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-2">
+      <div className="flex justify-end gap-2 border-t border-line pt-2">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>
@@ -98,13 +98,13 @@ function EditForm({ card, onCancel, onSaved }: { card: Card; onCancel: () => voi
 
   return (
     <Form form={form} onSubmit={(v) => save.mutate(v)}>
-      <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm">
-        <span className="text-slate-400">UID </span>
-        <span className="font-mono text-slate-800">{card.card_uid}</span>
+      <div className="rounded-lg bg-surface-3 px-3 py-2 text-sm">
+        <span className="text-ink-faint">UID </span>
+        <span className="font-mono text-ink-strong">{card.card_uid}</span>
         {card.user_name && (
           <>
-            <span className="ml-3 text-slate-400">持卡人 </span>
-            <span className="text-slate-800">{card.user_name}</span>
+            <span className="ml-3 text-ink-faint">持卡人 </span>
+            <span className="text-ink-strong">{card.user_name}</span>
           </>
         )}
       </div>
@@ -114,7 +114,7 @@ function EditForm({ card, onCancel, onSaved }: { card: Card; onCancel: () => voi
       <FormField name="remark" label="备注">
         <Textarea {...form.register('remark')} />
       </FormField>
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-2">
+      <div className="flex justify-end gap-2 border-t border-line pt-2">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

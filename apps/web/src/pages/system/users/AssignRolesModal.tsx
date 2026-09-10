@@ -40,11 +40,11 @@ function AssignRolesBody({ user, roleOptions, rolesUnavailable, onClose, onSaved
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
-        为 <span className="font-medium text-slate-800">{user.name}</span>（{user.username}）分配角色，将整体替换现有角色。
+      <p className="text-sm text-ink">
+        为 <span className="font-medium text-ink-strong">{user.name}</span>（{user.username}）分配角色，将整体替换现有角色。
       </p>
       {rolesUnavailable && options.length === 0 ? (
-        <p className="text-sm text-slate-400 rounded-lg bg-slate-50 px-3 py-2">角色数据暂不可用，请稍后再试。</p>
+        <p className="text-sm text-ink-faint rounded-lg bg-surface-3 px-3 py-2">角色数据暂不可用，请稍后再试。</p>
       ) : (
         <CheckboxGroup options={options} value={selected} onChange={setSelected} emptyText="本租户尚无角色" />
       )}

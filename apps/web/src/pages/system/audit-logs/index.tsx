@@ -76,15 +76,15 @@ export default function AuditLogsPage() {
   }
 
   const columns: Column<AuditLog>[] = [
-    { key: 'created_at', title: '时间', sortable: true, width: 150, render: (l) => <span className="text-xs text-slate-600 whitespace-nowrap">{formatDateTime(l.created_at)}</span> },
-    { key: 'username', title: '用户', render: (l) => <span className="font-medium text-slate-800">{text(l.username)}</span> },
-    { key: 'module', title: '模块', sortable: true, render: (l) => <span className="text-slate-600">{auditModuleLabel(l.module)}</span> },
-    { key: 'action', title: '动作', sortable: true, render: (l) => <code className="font-mono text-xs text-slate-700">{l.action}</code> },
+    { key: 'created_at', title: '时间', sortable: true, width: 150, render: (l) => <span className="text-xs text-ink whitespace-nowrap">{formatDateTime(l.created_at)}</span> },
+    { key: 'username', title: '用户', render: (l) => <span className="font-medium text-ink-strong">{text(l.username)}</span> },
+    { key: 'module', title: '模块', sortable: true, render: (l) => <span className="text-ink">{auditModuleLabel(l.module)}</span> },
+    { key: 'action', title: '动作', sortable: true, render: (l) => <code className="font-mono text-xs text-ink">{l.action}</code> },
     {
       key: 'summary',
       title: '摘要',
       render: (l) => (
-        <span className="block max-w-[20rem] truncate text-slate-700" title={l.summary ?? undefined}>
+        <span className="block max-w-[20rem] truncate text-ink" title={l.summary ?? undefined}>
           {text(l.summary)}
         </span>
       ),
@@ -95,14 +95,14 @@ export default function AuditLogsPage() {
       render: (l) => (
         <span className="inline-flex items-center gap-1.5">
           <Badge color={methodColor[l.method] ?? 'gray'}>{l.method}</Badge>
-          <code className="block max-w-[16rem] truncate font-mono text-xs text-slate-500" title={l.path}>
+          <code className="block max-w-[16rem] truncate font-mono text-xs text-ink-muted" title={l.path}>
             {l.path}
           </code>
         </span>
       ),
     },
     { key: 'status', title: '状态码', width: 80, render: (l) => <Badge color={statusColor(l.status)}>{l.status}</Badge> },
-    { key: 'ip', title: 'IP', render: (l) => <span className="font-mono text-xs text-slate-500">{text(l.ip)}</span> },
+    { key: 'ip', title: 'IP', render: (l) => <span className="font-mono text-xs text-ink-muted">{text(l.ip)}</span> },
   ]
 
   return (
@@ -131,7 +131,7 @@ export default function AuditLogsPage() {
         </div>
         <div className="flex w-full items-center gap-1.5 sm:w-auto">
           <DateTimeInput value={draft.from} onChange={(v) => setDraft((d) => ({ ...d, from: v }))} aria-label="开始时间" className="text-xs" />
-          <span className="text-xs text-slate-400">至</span>
+          <span className="text-xs text-ink-faint">至</span>
           <DateTimeInput value={draft.to} onChange={(v) => setDraft((d) => ({ ...d, to: v }))} aria-label="结束时间" className="text-xs" />
         </div>
       </FilterBar>

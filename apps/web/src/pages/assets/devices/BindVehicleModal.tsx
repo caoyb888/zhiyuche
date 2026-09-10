@@ -31,11 +31,11 @@ function BindBody({ device, vehicleOptions, vehiclesUnavailable, onClose, onSave
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
-        为设备 <span className="font-mono font-medium text-slate-800">{device.serial_no}</span> 绑定车辆。一车一网关：目标车辆已有设备时会提示冲突。
+      <p className="text-sm text-ink">
+        为设备 <span className="font-mono font-medium text-ink-strong">{device.serial_no}</span> 绑定车辆。一车一网关：目标车辆已有设备时会提示冲突。
       </p>
       <div className="space-y-1.5">
-        <label htmlFor="bind-vehicle" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="bind-vehicle" className="block text-sm font-medium text-ink">
           车辆
         </label>
         <Select id="bind-vehicle" options={vehicleOptions} placeholder={vehiclesUnavailable ? '车辆列表暂不可用' : '请选择车辆'} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} disabled={vehiclesUnavailable} />

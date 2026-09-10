@@ -182,7 +182,7 @@ export default function DeptForm(props: DeptFormProps) {
         </FormField>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         {props.onCancel && (
           <Button variant="secondary" onClick={props.onCancel} disabled={save.isPending}>
             取消

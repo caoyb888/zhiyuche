@@ -25,7 +25,7 @@ function highlight(source: string, kw: string): ReactNode {
     if (hit < 0) break
     if (hit > i) parts.push(source.slice(i, hit))
     parts.push(
-      <mark key={n++} className="rounded bg-amber-100 px-0.5 text-amber-900">
+      <mark key={n++} className="rounded bg-warn-500/20 px-0.5 text-warn-200">
         {source.slice(hit, hit + kw.length)}
       </mark>,
     )
@@ -64,8 +64,8 @@ function toNodes(nodes: PermissionNode[], kw: string): TreeNode[] {
       icon: isMenu ? getMenuIcon(n.icon) : KeyRound,
       extra: (
         <span className="inline-flex items-center gap-3 font-mono">
-          {isMenu && n.path && <span className="text-slate-400">{highlight(n.path, kw)}</span>}
-          <span className={isMenu ? 'text-slate-400' : 'text-slate-600'}>{highlight(n.code, kw)}</span>
+          {isMenu && n.path && <span className="text-ink-faint">{highlight(n.path, kw)}</span>}
+          <span className={isMenu ? 'text-ink-faint' : 'text-ink'}>{highlight(n.code, kw)}</span>
         </span>
       ),
       children: n.children && n.children.length > 0 ? toNodes(n.children, kw) : undefined,
@@ -106,7 +106,7 @@ export default function PermissionsPage() {
         description="权限点由代码注册表定义：菜单节点带路由与图标，动作节点为可分配给角色的权限码"
         extra={
           query.isSuccess && (
-            <div className="flex items-center gap-2 text-xs text-slate-500">
+            <div className="flex items-center gap-2 text-xs text-ink-muted">
               <Badge color="blue">{total.menus} 个菜单</Badge>
               <Badge color="gray">{total.actions} 个动作</Badge>
             </div>
@@ -142,7 +142,7 @@ export default function PermissionsPage() {
         ) : (
           <>
             {kw && (
-              <div className="mb-2 px-1 text-xs text-slate-400">
+              <div className="mb-2 px-1 text-xs text-ink-faint">
                 匹配 {shown.menus} 个菜单、{shown.actions} 个动作
               </div>
             )}

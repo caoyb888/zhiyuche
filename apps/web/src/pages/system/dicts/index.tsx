@@ -98,8 +98,8 @@ export default function DictsPage() {
   const canEditItems = canEditType
 
   const itemColumns: Column<DictItem>[] = [
-    { key: 'label', title: '显示名', render: (it) => <span className="font-medium text-slate-800">{it.label}</span> },
-    { key: 'value', title: '值', render: (it) => <code className="font-mono text-xs text-slate-700">{it.value}</code> },
+    { key: 'label', title: '显示名', render: (it) => <span className="font-medium text-ink-strong">{it.label}</span> },
+    { key: 'value', title: '值', render: (it) => <code className="font-mono text-xs text-ink">{it.value}</code> },
     { key: 'sort', title: '排序', align: 'right', width: 70, render: (it) => <span className="tabular-nums">{it.sort}</span> },
     {
       key: 'color',
@@ -108,11 +108,11 @@ export default function DictsPage() {
       render: (it) =>
         it.color ? (
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-4 w-4 rounded border border-slate-200" style={{ backgroundColor: it.color }} />
-            <code className="font-mono text-xs text-slate-500">{it.color}</code>
+            <span className="h-4 w-4 rounded border border-line-strong" style={{ backgroundColor: it.color }} />
+            <code className="font-mono text-xs text-ink-muted">{it.color}</code>
           </span>
         ) : (
-          <span className="text-slate-400">—</span>
+          <span className="text-ink-faint">—</span>
         ),
     },
     { key: 'status', title: '状态', width: 80, render: (it) => <Badge color={dictItemStatusColor[it.status]}>{dictItemStatusLabel[it.status]}</Badge> },
@@ -121,7 +121,7 @@ export default function DictsPage() {
       title: '附加数据',
       render: (it) => {
         const keys = Object.keys(it.extra ?? {})
-        return keys.length === 0 ? <span className="text-slate-400">—</span> : <code className="font-mono text-xs text-slate-500">{keys.length} 个字段</code>
+        return keys.length === 0 ? <span className="text-ink-faint">—</span> : <code className="font-mono text-xs text-ink-muted">{keys.length} 个字段</code>
       },
     },
   ]
@@ -133,7 +133,7 @@ export default function DictsPage() {
         variant="ghost"
         size="sm"
         icon={Trash2}
-        className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+        className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200"
         title="删除"
         aria-label="删除"
         onClick={() => setDeleteItemTarget(it)}
@@ -191,16 +191,16 @@ export default function DictsPage() {
                         aria-current={active || undefined}
                         className={clsx(
                           'w-full rounded-lg px-3 py-2 text-left transition-colors',
-                          active ? 'bg-brand-50 text-brand-700' : 'hover:bg-slate-50 text-slate-700',
+                          active ? 'bg-brand-600/10 text-brand-300' : 'hover:bg-surface-3 text-ink',
                         )}
                       >
                         <div className="flex items-center gap-2">
-                          <span className={clsx('truncate text-sm', active ? 'font-medium' : 'font-medium text-slate-800')}>{t.name}</span>
+                          <span className={clsx('truncate text-sm', active ? 'font-medium' : 'font-medium text-ink-strong')}>{t.name}</span>
                           <span className="ml-auto flex shrink-0 items-center gap-1">
                             <ScopeBadges t={t} />
                           </span>
                         </div>
-                        <div className="mt-0.5 font-mono text-xs text-slate-400 truncate">{t.code}</div>
+                        <div className="mt-0.5 font-mono text-xs text-ink-faint truncate">{t.code}</div>
                       </button>
                     </li>
                   )
@@ -209,7 +209,7 @@ export default function DictsPage() {
             )}
           </div>
           {(list.data?.total ?? 0) > PAGE_SIZE && (
-            <Pagination className="pt-2 border-t border-slate-100" page={page} pageSize={PAGE_SIZE} total={list.data?.total ?? 0} pageSizeOptions={[PAGE_SIZE]} onChange={(p) => setPage(p)} />
+            <Pagination className="pt-2 border-t border-line" page={page} pageSize={PAGE_SIZE} total={list.data?.total ?? 0} pageSizeOptions={[PAGE_SIZE]} onChange={(p) => setPage(p)} />
           )}
         </div>
 
@@ -228,14 +228,14 @@ export default function DictsPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-semibold text-slate-800 truncate">{selected.name}</h3>
-                    <code className="font-mono text-xs text-slate-400">{selected.code}</code>
+                    <h3 className="text-base font-semibold text-ink-strong truncate">{selected.name}</h3>
+                    <code className="font-mono text-xs text-ink-faint">{selected.code}</code>
                     <ScopeBadges t={selected} />
                   </div>
-                  <div className="mt-0.5 text-xs text-slate-400">
+                  <div className="mt-0.5 text-xs text-ink-faint">
                     {text(selected.description)} · {items.length} 个条目 · 更新于 {formatDateTime(selected.updated_at)}
                   </div>
-                  {selected.is_global && !isSuper && <div className="mt-1 text-xs text-amber-700">全局字典仅平台管理员可修改</div>}
+                  {selected.is_global && !isSuper && <div className="mt-1 text-xs text-warn-200">全局字典仅平台管理员可修改</div>}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {canEditItems && (

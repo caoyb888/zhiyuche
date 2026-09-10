@@ -127,9 +127,9 @@ export default function ApprovalPage() {
       sortable: true,
       render: (a) => (
         <div>
-          <div className="font-mono text-xs font-medium text-slate-800">{a.apply_no}</div>
+          <div className="font-mono text-xs font-medium text-ink-strong">{a.apply_no}</div>
           {a.urgency === 'urgent' && (
-            <span className="mt-0.5 inline-flex items-center gap-0.5 text-[11px] font-medium text-red-600">
+            <span className="mt-0.5 inline-flex items-center gap-0.5 text-[11px] font-medium text-danger-200">
               <Zap size={11} /> 紧急
             </span>
           )}
@@ -141,8 +141,8 @@ export default function ApprovalPage() {
       title: '申请人',
       render: (a) => (
         <div>
-          <div className="text-slate-800">{a.applicant.name}</div>
-          <div className="text-xs text-slate-400">{text(a.dept_name)}</div>
+          <div className="text-ink-strong">{a.applicant.name}</div>
+          <div className="text-xs text-ink-faint">{text(a.dept_name)}</div>
         </div>
       ),
     },
@@ -152,10 +152,10 @@ export default function ApprovalPage() {
       title: '事由',
       render: (a) => (
         <div className="max-w-[16rem]">
-          <div className="truncate text-slate-800" title={a.purpose_detail}>
+          <div className="truncate text-ink-strong" title={a.purpose_detail}>
             {purposeText(a)}
           </div>
-          <div className="truncate text-xs text-slate-400" title={a.purpose_detail}>
+          <div className="truncate text-xs text-ink-faint" title={a.purpose_detail}>
             {a.purpose_detail}
           </div>
         </div>
@@ -171,14 +171,14 @@ export default function ApprovalPage() {
         </div>
       ),
     },
-    { key: 'vehicle', title: '车辆', render: (a) => (a.vehicle ? <span className="whitespace-nowrap">{a.vehicle.plate_no}</span> : <span className="text-xs text-slate-400">待指派</span>) },
+    { key: 'vehicle', title: '车辆', render: (a) => (a.vehicle ? <span className="whitespace-nowrap">{a.vehicle.plate_no}</span> : <span className="text-xs text-ink-faint">待指派</span>) },
     { key: 'status', title: '状态', sortable: true, render: (a) => <Badge color={APPROVAL_STATUS_BADGE[a.status]}>{APPROVAL_STATUS_LABEL[a.status]}</Badge> },
     {
       key: 'approver',
       title: '当前审批人',
       render: (a) => {
         const name = currentApproverName(a)
-        return name ? <span className="text-xs text-slate-700">{name}</span> : <span className="text-xs text-slate-300">—</span>
+        return name ? <span className="text-xs text-ink">{name}</span> : <span className="text-xs text-ink-disabled">—</span>
       },
     },
   ]
@@ -190,8 +190,8 @@ export default function ApprovalPage() {
         <Button variant="ghost" size="sm" icon={Eye} className="!px-2" title="查看" aria-label="查看" onClick={() => setParam('id', a.id)} />
         {quickable && (
           <>
-            <Button variant="ghost" size="sm" icon={Check} className="!px-2 text-emerald-600 hover:bg-emerald-50" title="通过" aria-label="通过" onClick={() => setQuick({ action: 'approve', approval: a })} />
-            <Button variant="ghost" size="sm" icon={X} className="!px-2 text-red-500 hover:bg-red-50" title="驳回" aria-label="驳回" onClick={() => setQuick({ action: 'reject', approval: a })} />
+            <Button variant="ghost" size="sm" icon={Check} className="!px-2 text-ev-200 hover:bg-ev-500/10" title="通过" aria-label="通过" onClick={() => setQuick({ action: 'approve', approval: a })} />
+            <Button variant="ghost" size="sm" icon={X} className="!px-2 text-danger-200 hover:bg-danger-500/10" title="驳回" aria-label="驳回" onClick={() => setQuick({ action: 'reject', approval: a })} />
           </>
         )}
       </div>
@@ -264,7 +264,7 @@ export default function ApprovalPage() {
         )}
         <div className="flex w-full items-center gap-1 sm:w-auto">
           <DateTimeInput value={draft.from} onChange={(v) => setDraft((d) => ({ ...d, from: v }))} aria-label="计划开始起" className="sm:w-44" />
-          <span className="text-xs text-slate-400">至</span>
+          <span className="text-xs text-ink-faint">至</span>
           <DateTimeInput value={draft.to} onChange={(v) => setDraft((d) => ({ ...d, to: v }))} aria-label="计划开始止" className="sm:w-44" />
         </div>
       </FilterBar>

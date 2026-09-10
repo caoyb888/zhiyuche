@@ -54,8 +54,8 @@ export default function ReviewTab({ onOpen }: ReviewTabProps) {
     <div className="space-y-4">
       <div className="card p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs text-slate-400">未绑定车辆、桩侧计量与 BMS 估算偏差超过 5%、或计价失败的事务进入待复核；通过后按当前规则计价扣费，拒绝则不计费。</div>
-          {typeof list.data?.total === 'number' && <span className="text-xs text-slate-500">共 {list.data.total} 条</span>}
+          <div className="text-xs text-ink-faint">未绑定车辆、桩侧计量与 BMS 估算偏差超过 5%、或计价失败的事务进入待复核；通过后按当前规则计价扣费，拒绝则不计费。</div>
+          {typeof list.data?.total === 'number' && <span className="text-xs text-ink-muted">共 {list.data.total} 条</span>}
         </div>
         {list.isError ? (
           <ErrorState message={errorMessage(list.error)} onRetry={() => void list.refetch()} />

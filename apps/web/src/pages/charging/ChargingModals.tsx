@@ -91,43 +91,43 @@ function RemoteStartForm({ pile, connectorId, onClose }: { pile: PileLive; conne
       }
     >
       <div className="space-y-4">
-        <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-          <span className="font-medium text-slate-700">{pile.name}</span>
+        <div className="rounded-lg bg-surface-3 px-3 py-2 text-xs text-ink-muted">
+          <span className="font-medium text-ink">{pile.name}</span>
           <span className="mx-1.5">·</span>
           <span className="font-mono">{pile.pile_code}</span>
           <span className="mx-1.5">·</span>
           {pile.power_kw} kW
           <span className="mx-1.5">·</span>
-          <span className={pile.online ? 'text-emerald-600' : 'text-red-500'}>{pile.online ? '在线' : '离线'}</span>
+          <span className={pile.online ? 'text-ev-200' : 'text-danger-200'}>{pile.online ? '在线' : '离线'}</span>
         </div>
         {!pile.online && (
-          <div className="flex gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+          <div className="flex gap-2 rounded-lg bg-danger-500/10 px-3 py-2 text-xs text-danger-200">
             <AlertTriangle size={14} className="mt-0.5 shrink-0" />
             桩当前离线，无法下发远程指令。
           </div>
         )}
         {pile.online && startable.length === 0 && (
-          <div className="flex gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          <div className="flex gap-2 rounded-lg bg-warn-500/10 px-3 py-2 text-xs text-warn-200">
             <AlertTriangle size={14} className="mt-0.5 shrink-0" />
             没有可启动的连接器（需为空闲或已插枪且无进行中事务）。
           </div>
         )}
         <div className="space-y-1.5">
-          <label htmlFor="rs-connector" className="block text-sm font-medium text-slate-700">
-            连接器<span className="ml-0.5 text-red-500">*</span>
+          <label htmlFor="rs-connector" className="block text-sm font-medium text-ink">
+            连接器<span className="ml-0.5 text-danger-200">*</span>
           </label>
           <Select id="rs-connector" options={connectorOptions} value={connector} onChange={(e) => setConnector(e.target.value)} placeholder={connectorOptions.length === 0 ? '无连接器' : undefined} />
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="rs-idtag" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="rs-idtag" className="block text-sm font-medium text-ink">
             卡号（id_tag）
           </label>
           <Input id="rs-idtag" value={idTag} onChange={(e) => setIdTag(e.target.value)} placeholder={profile ? `缺省使用 ${profile.name} 的第一张有效卡` : '缺省使用当前用户的第一张有效卡'} maxLength={32} className="font-mono" />
-          <p className="text-xs text-slate-400">留空时按当前登录用户归属；填写其他人的卡号则事务归属该持卡人。</p>
+          <p className="text-xs text-ink-faint">留空时按当前登录用户归属；填写其他人的卡号则事务归属该持卡人。</p>
         </div>
         {canPickVehicle && (
           <div className="space-y-1.5">
-            <label htmlFor="rs-vehicle" className="block text-sm font-medium text-slate-700">
+            <label htmlFor="rs-vehicle" className="block text-sm font-medium text-ink">
               归属车辆
             </label>
             <Select id="rs-vehicle" options={vehicleOptions} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} placeholder={vehicleQuery.isError ? '车辆数据暂不可用' : '可选，不选则按桩位 / 最近行程自动匹配'} />
@@ -209,17 +209,17 @@ interface ReviewModalProps {
 function MeterCompare({ t }: { t: ChargeTransaction }) {
   const over = deviationExceeded(t.deviation_pct)
   const cells: Array<{ label: string; value: string; sub?: string; cls?: string }> = [
-    { label: '桩侧计量', value: formatKwh(t.kwh), sub: typeof t.meter_start === 'number' ? `${t.meter_start} → ${t.meter_stop ?? '—'} Wh` : undefined, cls: 'text-slate-800' },
-    { label: 'BMS 估算', value: formatKwh(t.bms_kwh_est), sub: `SOC ${formatPct(t.bms_soc_start, 0)} → ${formatPct(t.bms_soc_end, 0)}`, cls: 'text-slate-800' },
-    { label: '偏差', value: formatPct(t.deviation_pct), sub: over ? '超过 5% 阈值' : '在阈值内', cls: over ? 'text-red-600' : 'text-emerald-600' },
+    { label: '桩侧计量', value: formatKwh(t.kwh), sub: typeof t.meter_start === 'number' ? `${t.meter_start} → ${t.meter_stop ?? '—'} Wh` : undefined, cls: 'text-ink-strong' },
+    { label: 'BMS 估算', value: formatKwh(t.bms_kwh_est), sub: `SOC ${formatPct(t.bms_soc_start, 0)} → ${formatPct(t.bms_soc_end, 0)}`, cls: 'text-ink-strong' },
+    { label: '偏差', value: formatPct(t.deviation_pct), sub: over ? '超过 5% 阈值' : '在阈值内', cls: over ? 'text-danger-200' : 'text-ev-200' },
   ]
   return (
     <div className="grid grid-cols-3 gap-2">
       {cells.map((c) => (
-        <div key={c.label} className={clsx('rounded-xl p-3', c.cls === 'text-red-600' ? 'bg-red-50' : 'bg-slate-50')}>
-          <div className="text-xs text-slate-400">{c.label}</div>
+        <div key={c.label} className={clsx('rounded-xl p-3', c.cls === 'text-danger-200' ? 'bg-danger-500/10' : 'bg-surface-3')}>
+          <div className="text-xs text-ink-faint">{c.label}</div>
           <div className={clsx('mt-0.5 text-base font-semibold', c.cls)}>{c.value}</div>
-          {c.sub && <div className="text-[11px] text-slate-400">{c.sub}</div>}
+          {c.sub && <div className="text-[11px] text-ink-faint">{c.sub}</div>}
         </div>
       ))}
     </div>
@@ -284,8 +284,8 @@ function ReviewForm({ t, onClose, onSuccess }: { t: ChargeTransaction; onClose: 
       }
     >
       <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-          <span className="font-mono text-slate-700">{t.tx_no}</span>
+        <div className="flex flex-wrap items-center gap-2 rounded-lg bg-surface-3 px-3 py-2 text-xs text-ink-muted">
+          <span className="font-mono text-ink">{t.tx_no}</span>
           <span>·</span>
           <span>
             {t.pile_name} {t.connector_id} 号枪
@@ -299,66 +299,66 @@ function ReviewForm({ t, onClose, onSuccess }: { t: ChargeTransaction; onClose: 
         </div>
 
         <section>
-          <h4 className="mb-2 text-sm font-semibold text-slate-700">计量与交叉校验</h4>
+          <h4 className="mb-2 text-sm font-semibold text-ink">计量与交叉校验</h4>
           <MeterCompare t={t} />
         </section>
 
         <section>
-          <h4 className="mb-2 text-sm font-semibold text-slate-700">当前归属</h4>
+          <h4 className="mb-2 text-sm font-semibold text-ink">当前归属</h4>
           <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
             <div>
-              <div className="text-xs text-slate-400">用户</div>
-              <div className="text-slate-800">{t.user?.name ?? <span className="text-slate-400">未识别</span>}</div>
+              <div className="text-xs text-ink-faint">用户</div>
+              <div className="text-ink-strong">{t.user?.name ?? <span className="text-ink-faint">未识别</span>}</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">部门</div>
-              <div className="text-slate-800">{text(t.dept_name ?? t.user?.dept_name)}</div>
+              <div className="text-xs text-ink-faint">部门</div>
+              <div className="text-ink-strong">{text(t.dept_name ?? t.user?.dept_name)}</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">车辆</div>
-              <div className="text-slate-800">{t.vehicle?.plate_no ?? <span className="text-amber-600">未绑定</span>}</div>
+              <div className="text-xs text-ink-faint">车辆</div>
+              <div className="text-ink-strong">{t.vehicle?.plate_no ?? <span className="text-warn-200">未绑定</span>}</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">绑定方式 / 归属级别</div>
-              <div className="text-slate-800">
+              <div className="text-xs text-ink-faint">绑定方式 / 归属级别</div>
+              <div className="text-ink-strong">
                 {bindMethodLabel(t.bind_method)}
-                {attributionLabel(t.attribution) && <span className="ml-1 text-xs text-slate-400">· {attributionLabel(t.attribution)}</span>}
+                {attributionLabel(t.attribution) && <span className="ml-1 text-xs text-ink-faint">· {attributionLabel(t.attribution)}</span>}
               </div>
             </div>
           </div>
         </section>
 
         <section>
-          <h4 className="mb-2 text-sm font-semibold text-slate-700">修正归属（通过时生效）</h4>
+          <h4 className="mb-2 text-sm font-semibold text-ink">修正归属（通过时生效）</h4>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label htmlFor="rv-vehicle" className="block text-sm font-medium text-slate-700">
-                车辆{!t.vehicle && <span className="ml-0.5 text-red-500">*</span>}
+              <label htmlFor="rv-vehicle" className="block text-sm font-medium text-ink">
+                车辆{!t.vehicle && <span className="ml-0.5 text-danger-200">*</span>}
               </label>
               {canPickVehicle ? (
                 <Select id="rv-vehicle" options={vehicleOptions} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} placeholder={vehicleQuery.isError ? '车辆数据暂不可用' : t.vehicle ? '保持当前车辆' : '请选择车辆'} invalid={approveDisabled} />
               ) : (
-                <div className="text-xs text-slate-400">无车辆档案查看权限，无法修正车辆</div>
+                <div className="text-xs text-ink-faint">无车辆档案查看权限，无法修正车辆</div>
               )}
-              {vehicleChanged && vehicleId && <p className="text-xs text-amber-600">将把车辆改为所选车辆</p>}
+              {vehicleChanged && vehicleId && <p className="text-xs text-warn-200">将把车辆改为所选车辆</p>}
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="rv-user" className="block text-sm font-medium text-slate-700">
+              <label htmlFor="rv-user" className="block text-sm font-medium text-ink">
                 用户
               </label>
               <UserPicker id="rv-user" value={user} onChange={setUser} placeholder="保持当前用户" />
-              {userChanged && <p className="text-xs text-amber-600">{user ? `将把用户改为 ${user.name}` : '将清空用户（按车辆归属计费）'}</p>}
+              {userChanged && <p className="text-xs text-warn-200">{user ? `将把用户改为 ${user.name}` : '将清空用户（按车辆归属计费）'}</p>}
             </div>
           </div>
         </section>
 
         <div className="space-y-1.5">
-          <label htmlFor="rv-note" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="rv-note" className="block text-sm font-medium text-ink">
             复核备注
           </label>
           <Textarea id="rv-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="可选：如“BMS 上报延迟，按桩侧计量为准”" maxLength={500} />
         </div>
-        <p className="text-xs text-slate-400">通过：按当前生效计费规则计价并从归属账户扣费，状态变为已结算；拒绝：不计费，保留记录。</p>
+        <p className="text-xs text-ink-faint">通过：按当前生效计费规则计价并从归属账户扣费，状态变为已结算；拒绝：不计费，保留记录。</p>
       </div>
     </Modal>
   )

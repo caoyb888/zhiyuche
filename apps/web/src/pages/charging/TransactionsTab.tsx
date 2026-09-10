@@ -171,7 +171,7 @@ export default function TransactionsTab({ onOpen }: TransactionsTabProps) {
         </div>
         <div className="flex w-full items-center gap-1 sm:w-auto">
           <DateTimeInput value={draft.from} onChange={(v) => setDraft((d) => ({ ...d, from: v }))} aria-label="开始时间起" className="sm:w-44" />
-          <span className="text-xs text-slate-400">至</span>
+          <span className="text-xs text-ink-faint">至</span>
           <DateTimeInput value={draft.to} onChange={(v) => setDraft((d) => ({ ...d, to: v }))} aria-label="开始时间止" className="sm:w-44" />
         </div>
       </FilterBar>

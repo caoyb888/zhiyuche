@@ -114,12 +114,12 @@ export default function BillingRulesPage() {
       <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] items-start">
         {/* ── 左：规则列表 ── */}
         <div className="card p-3">
-          <div className="flex items-center justify-between px-1 pb-2 border-b border-slate-100">
-            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
-              <Calculator size={15} className="text-slate-400" />
+          <div className="flex items-center justify-between px-1 pb-2 border-b border-line">
+            <div className="flex items-center gap-1.5 text-sm font-medium text-ink">
+              <Calculator size={15} className="text-ink-faint" />
               规则列表
             </div>
-            <span className="text-xs text-slate-400">{list.length > 0 ? `${list.length} 条` : ''}</span>
+            <span className="text-xs text-ink-faint">{list.length > 0 ? `${list.length} 条` : ''}</span>
           </div>
           <div className="pt-2 max-h-[70vh] overflow-y-auto">
             {rules.isPending ? (
@@ -157,14 +157,14 @@ export default function BillingRulesPage() {
                             setSelection({ kind: 'rule', id: r.id })
                           }
                         }}
-                        className={clsx('group cursor-pointer rounded-lg px-3 py-2.5 transition-colors', active ? 'bg-brand-50' : 'hover:bg-slate-50')}
+                        className={clsx('group cursor-pointer rounded-lg px-3 py-2.5 transition-colors', active ? 'bg-brand-600/10' : 'hover:bg-surface-3')}
                       >
                         <div className="flex items-center gap-2">
-                          <span className={clsx('min-w-0 flex-1 truncate text-sm font-medium', active ? 'text-brand-700' : 'text-slate-800')}>{r.name}</span>
+                          <span className={clsx('min-w-0 flex-1 truncate text-sm font-medium', active ? 'text-brand-300' : 'text-ink-strong')}>{r.name}</span>
                           {r.is_default && <Badge color="green">生效中</Badge>}
                           {!r.enabled && <Badge color="gray">停用</Badge>}
                         </div>
-                        <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
+                        <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-ink-faint">
                           <span className="truncate">
                             {effectiveText(r)} · 更新 {formatDateTime(r.updated_at)}
                           </span>
@@ -172,7 +172,7 @@ export default function BillingRulesPage() {
                         {canUpdate && (
                           <div className="mt-1.5 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                             {!r.is_default && (
-                              <Button variant="ghost" size="sm" icon={BadgeCheck} className="!h-7 !px-2 text-emerald-600 hover:bg-emerald-50" disabled={!r.enabled} title={r.enabled ? '设为生效' : '停用的规则不能设为生效'} onClick={() => setActivateTarget(r)}>
+                              <Button variant="ghost" size="sm" icon={BadgeCheck} className="!h-7 !px-2 text-ev-200 hover:bg-ev-500/10" disabled={!r.enabled} title={r.enabled ? '设为生效' : '停用的规则不能设为生效'} onClick={() => setActivateTarget(r)}>
                                 设为生效
                               </Button>
                             )}
@@ -180,7 +180,7 @@ export default function BillingRulesPage() {
                               复制
                             </Button>
                             {!r.is_default && (
-                              <Button variant="ghost" size="sm" icon={Trash2} className="!h-7 !px-2 text-red-500 hover:bg-red-50 hover:text-red-600" onClick={() => setDeleteTarget(r)}>
+                              <Button variant="ghost" size="sm" icon={Trash2} className="!h-7 !px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200" onClick={() => setDeleteTarget(r)}>
                                 删除
                               </Button>
                             )}

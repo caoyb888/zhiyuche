@@ -20,10 +20,10 @@ export const monthlyTrend: MonthlyTrendPoint[] = [
   { month:'6月', 销售部:2340, 工程部:3100, 行政部:1450, 财务部:620 },
 ]
 export const deptPie: DeptPieSlice[] = [
-  { name:'工程部', value:3100, color:'#1d6fd8' },
+  { name:'工程部', value:3100, color:'#5c9df0' },
   { name:'销售部', value:2340, color:'#10b981' },
-  { name:'行政部', value:1450, color:'#f59e0b' },
-  { name:'财务部', value:620,  color:'#8b5cf6' },
+  { name:'行政部', value:1450, color:'#f0a32b' },
+  { name:'财务部', value:620,  color:'#9b7cf6' },
 ]
 export const dailyUsage: DailyUsagePoint[] = [
   { day:'12日',trips:8,km:312},{day:'13日',trips:11,km:438},{day:'14日',trips:7,km:265},

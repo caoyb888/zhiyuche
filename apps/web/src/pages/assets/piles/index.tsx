@@ -75,8 +75,8 @@ function PilesMap({ selectedId, onSelect }: { selectedId: string | null; onSelec
   return (
     <div className="card p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-700">桩位分布</h3>
-        <span className="text-xs text-slate-400">
+        <h3 className="text-sm font-semibold text-ink">桩位分布</h3>
+        <span className="text-xs text-ink-faint">
           {all.isPending ? '加载中…' : `${located.length} / ${piles.length} 个桩有坐标`}
         </span>
       </div>
@@ -88,7 +88,7 @@ function PilesMap({ selectedId, onSelect }: { selectedId: string | null; onSelec
         hint={!all.isPending && located.length === 0 ? '暂无带坐标的充电桩' : undefined}
         overlay={
           <>
-            <div className="absolute bottom-8 left-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md bg-white/90 px-2 py-1 text-[11px] text-slate-600 shadow-sm">
+            <div className="absolute bottom-8 left-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md bg-surface-2/90 px-2 py-1 text-[11px] text-ink shadow-sm">
               {LEGEND.map((s) => (
                 <span key={s} className="inline-flex items-center gap-1">
                   <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: pileStatusHex[s] }} />
@@ -97,17 +97,17 @@ function PilesMap({ selectedId, onSelect }: { selectedId: string | null; onSelec
               ))}
             </div>
             {sel && (
-              <div className="absolute right-11 top-2 w-56 rounded-xl border border-slate-100 bg-white/95 p-3 text-xs shadow-lg backdrop-blur">
+              <div className="absolute right-11 top-2 w-56 rounded-xl border border-line bg-surface-2/95 p-3 text-xs shadow-lg backdrop-blur">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-slate-800">{sel.name}</span>
+                  <span className="text-sm font-semibold text-ink-strong">{sel.name}</span>
                   <Badge color={pileStatusColor[sel.status]}>{pileStatusLabel[sel.status]}</Badge>
                 </div>
-                <div className="mt-1 font-mono text-slate-500">{sel.pile_code}</div>
-                <div className="mt-1 text-slate-600">
+                <div className="mt-1 font-mono text-ink-muted">{sel.pile_code}</div>
+                <div className="mt-1 text-ink">
                   {pileTypeLabel[sel.type]} · {sel.power_kw} kW · {sel.connector_count} 枪
                 </div>
-                {sel.location && <div className="mt-1 truncate text-slate-500">{sel.location}</div>}
-                <div className="mt-1 text-slate-400">心跳 {formatDateTime(sel.last_heartbeat_at)}</div>
+                {sel.location && <div className="mt-1 truncate text-ink-muted">{sel.location}</div>}
+                <div className="mt-1 text-ink-faint">心跳 {formatDateTime(sel.last_heartbeat_at)}</div>
               </div>
             )}
           </>
@@ -172,8 +172,8 @@ export default function PilesPage() {
       sortable: true,
       render: (p) => (
         <div>
-          <div className="font-medium text-slate-800">{p.name}</div>
-          <div className="font-mono text-xs text-slate-400">{p.pile_code}</div>
+          <div className="font-medium text-ink-strong">{p.name}</div>
+          <div className="font-mono text-xs text-ink-faint">{p.pile_code}</div>
         </div>
       ),
     },
@@ -186,26 +186,26 @@ export default function PilesPage() {
       title: '位置',
       render: (p) => (
         <div>
-          <div className="line-clamp-1 max-w-xs text-xs text-slate-700">{text(p.location)}</div>
+          <div className="line-clamp-1 max-w-xs text-xs text-ink">{text(p.location)}</div>
           {toLngLat(p.lng, p.lat) ? (
-            <div className="font-mono text-[11px] text-slate-400">
+            <div className="font-mono text-[11px] text-ink-faint">
               {p.lng?.toFixed(5)}, {p.lat?.toFixed(5)}
             </div>
           ) : (
-            <div className="text-[11px] text-slate-400">无坐标</div>
+            <div className="text-[11px] text-ink-faint">无坐标</div>
           )}
         </div>
       ),
     },
     { key: 'status', title: '状态', sortable: true, render: (p) => <Badge color={pileStatusColor[p.status]}>{pileStatusLabel[p.status]}</Badge> },
-    { key: 'last_heartbeat_at', title: '最近心跳', sortable: true, render: (p) => <span className="text-xs text-slate-500">{formatDateTime(p.last_heartbeat_at)}</span> },
+    { key: 'last_heartbeat_at', title: '最近心跳', sortable: true, render: (p) => <span className="text-xs text-ink-muted">{formatDateTime(p.last_heartbeat_at)}</span> },
   ]
 
   const renderActions = (p: Pile) => (
     <div className="flex items-center justify-end gap-0.5">
       {canUpdate && <Button variant="ghost" size="sm" icon={Pencil} className="!px-2" title="编辑" aria-label="编辑" onClick={() => setDrawer({ mode: 'edit', pile: p })} />}
       {canDelete && (
-        <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600" title="删除" aria-label="删除" onClick={() => setDeleteTarget(p)} />
+        <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200" title="删除" aria-label="删除" onClick={() => setDeleteTarget(p)} />
       )}
     </div>
   )

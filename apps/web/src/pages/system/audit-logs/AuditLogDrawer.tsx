@@ -52,12 +52,12 @@ function Detail({ log }: { log: AuditLog }) {
           { label: 'IP', value: <span className="font-mono text-xs">{text(full.ip)}</span> },
           { label: '目标', value: full.target_id ? <span className="font-mono text-xs break-all">{full.target_type ? `${full.target_type} · ` : ''}{full.target_id}</span> : '—', span: 2 },
           { label: '请求 ID', value: <span className="font-mono text-xs break-all">{text(full.request_id)}</span>, span: 2 },
-          { label: 'User-Agent', value: <span className="text-xs text-slate-500 break-all">{text(full.user_agent)}</span>, span: 2 },
+          { label: 'User-Agent', value: <span className="text-xs text-ink-muted break-all">{text(full.user_agent)}</span>, span: 2 },
         ]}
       />
 
       <div>
-        <div className="mb-2 text-sm font-medium text-slate-700">变更数据</div>
+        <div className="mb-2 text-sm font-medium text-ink">变更数据</div>
         {detail.isPending ? (
           <div className="flex justify-center py-6">
             <Spinner size="sm" label="加载详情" />
@@ -65,18 +65,18 @@ function Detail({ log }: { log: AuditLog }) {
         ) : detail.isError ? (
           <ErrorState size="sm" message={errorMessage(detail.error)} onRetry={() => void detail.refetch()} />
         ) : !hasBody(before) && !hasBody(after) ? (
-          <div className="rounded-lg bg-slate-50 px-3 py-6 text-center text-xs text-slate-400">该操作未记录变更前后数据</div>
+          <div className="rounded-lg bg-surface-3 px-3 py-6 text-center text-xs text-ink-faint">该操作未记录变更前后数据</div>
         ) : (
           <div className={both ? 'grid grid-cols-1 gap-3 md:grid-cols-2' : 'grid grid-cols-1 gap-3'}>
             {hasBody(before) && (
               <div className="min-w-0">
-                <div className="mb-1 text-xs text-slate-400">变更前 (before)</div>
+                <div className="mb-1 text-xs text-ink-faint">变更前 (before)</div>
                 <JsonView value={before} maxHeight="50vh" />
               </div>
             )}
             {hasBody(after) && (
               <div className="min-w-0">
-                <div className="mb-1 text-xs text-slate-400">变更后 (after)</div>
+                <div className="mb-1 text-xs text-ink-faint">变更后 (after)</div>
                 <JsonView value={after} maxHeight="50vh" />
               </div>
             )}

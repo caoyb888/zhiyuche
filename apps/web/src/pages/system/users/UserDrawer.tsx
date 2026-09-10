@@ -190,7 +190,7 @@ function UserForm({ user, deptNodes, deptLoading, deptUnavailable, roleOptions, 
         </FormField>
       )}
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

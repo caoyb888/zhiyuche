@@ -47,7 +47,7 @@ export function RequireAuth() {
   if (!profile) {
     if (me.isError) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+        <div className="flex min-h-screen items-center justify-center bg-surface-3 p-4">
           <div className="card w-full max-w-sm p-6">
             <ErrorState message={errorMessage(me.error)} onRetry={() => void me.refetch()} />
             <div className="mt-2 text-center">
@@ -60,7 +60,7 @@ export function RequireAuth() {
       )
     }
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-surface-3">
         <PageLoading label="正在加载用户资料…" />
       </div>
     )

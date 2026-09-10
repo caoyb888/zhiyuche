@@ -82,17 +82,17 @@ async function planWithAMap(ns: AMapNS, origin: LngLat, dest: LngLat): Promise<P
 function PrecheckCard({ r }: { r: PrecheckResult }) {
   const pass = r.problems.length === 0
   return (
-    <div className={clsx('rounded-xl border p-4 text-sm', pass ? 'border-emerald-100 bg-emerald-50/60' : 'border-red-100 bg-red-50/60')}>
-      <div className={clsx('flex items-center gap-2 font-medium', pass ? 'text-emerald-700' : 'text-red-700')}>
+    <div className={clsx('rounded-xl border p-4 text-sm', pass ? 'border-ev-500/30 bg-ev-500/15' : 'border-danger-500/30 bg-danger-500/15')}>
+      <div className={clsx('flex items-center gap-2 font-medium', pass ? 'text-ev-200' : 'text-danger-200')}>
         {pass ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
         {pass ? '预检通过，可以提交申请' : '预检未通过，请根据下列问题调整后重新预检'}
       </div>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
-          <div className="text-xs text-slate-400">所需审批级别</div>
-          <div className="font-medium text-slate-800">{r.level_required} 级审批</div>
+          <div className="text-xs text-ink-faint">所需审批级别</div>
+          <div className="font-medium text-ink-strong">{r.level_required} 级审批</div>
           {r.level2_reasons && r.level2_reasons.length > 0 && (
-            <ul className="mt-1 list-inside list-disc text-xs text-slate-500">
+            <ul className="mt-1 list-inside list-disc text-xs text-ink-muted">
               {r.level2_reasons.map((s) => (
                 <li key={s}>{s}</li>
               ))}
@@ -100,30 +100,30 @@ function PrecheckCard({ r }: { r: PrecheckResult }) {
           )}
         </div>
         <div>
-          <div className="text-xs text-slate-400">审批人链</div>
+          <div className="text-xs text-ink-faint">审批人链</div>
           {r.approvers.length > 0 ? (
             <div className="mt-0.5 flex flex-wrap items-center gap-1">
               {r.approvers.map((u, i) => (
                 <span key={`${u.id}-${i}`} className="inline-flex items-center gap-1">
-                  <span className="rounded-md bg-white px-1.5 py-0.5 text-xs text-slate-700 ring-1 ring-slate-200">
+                  <span className="rounded-md bg-surface-2 px-1.5 py-0.5 text-xs text-ink ring-1 ring-line-strong">
                     {i + 1}. {u.name}
-                    {u.dept_name && <span className="ml-1 text-slate-400">{u.dept_name}</span>}
+                    {u.dept_name && <span className="ml-1 text-ink-faint">{u.dept_name}</span>}
                   </span>
-                  {i < r.approvers.length - 1 && <span className="text-slate-300">→</span>}
+                  {i < r.approvers.length - 1 && <span className="text-ink-disabled">→</span>}
                 </span>
               ))}
             </div>
           ) : (
-            <div className="text-xs text-slate-500">未能确定审批人</div>
+            <div className="text-xs text-ink-muted">未能确定审批人</div>
           )}
         </div>
       </div>
       {r.conflicts.length > 0 && (
         <div className="mt-3">
-          <div className="text-xs text-slate-400">车辆时段冲突</div>
+          <div className="text-xs text-ink-faint">车辆时段冲突</div>
           <ul className="mt-1 space-y-1">
             {r.conflicts.map((c, i) => (
-              <li key={`${c.apply_no ?? ''}-${i}`} className="rounded-md bg-white px-2 py-1 text-xs text-slate-600 ring-1 ring-red-100">
+              <li key={`${c.apply_no ?? ''}-${i}`} className="rounded-md bg-surface-2 px-2 py-1 text-xs text-ink ring-1 ring-danger-500/25">
                 <span className="font-mono">{c.apply_no}</span> · {c.applicant_name} · {formatTimeRange(c.planned_start, c.planned_end)} · {c.status}
               </li>
             ))}
@@ -131,7 +131,7 @@ function PrecheckCard({ r }: { r: PrecheckResult }) {
         </div>
       )}
       {r.problems.length > 0 && (
-        <ul className="mt-3 list-inside list-disc space-y-0.5 text-xs text-red-700">
+        <ul className="mt-3 list-inside list-disc space-y-0.5 text-xs text-danger-200">
           {r.problems.map((p) => (
             <li key={p}>{p}</li>
           ))}
@@ -238,7 +238,7 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
     <Form form={form} onSubmit={(v) => canSubmit && createMutation.mutate(v)}>
       {/* 1. 基本信息 */}
       <section className="space-y-4">
-        <h4 className="text-sm font-semibold text-slate-700">1. 基本信息</h4>
+        <h4 className="text-sm font-semibold text-ink">1. 基本信息</h4>
         {canManage && (
           <FormField name="applicant" label="申请人" hint={canSearchUsers ? '代人发起：留空则为本人' : '需要「用户管理-查看」权限才能代人发起'}>
             {({ id, invalid }) => <Controller control={form.control} name="applicant" render={({ field }) => <UserPicker id={id} invalid={invalid} value={field.value} onChange={field.onChange} placeholder={`本人（${profile?.name ?? ''}）`} />} />}
@@ -257,14 +257,14 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
                     role="radio"
                     aria-checked={active}
                     onClick={() => form.setValue('trip_type', t, { shouldValidate: true })}
-                    className={clsx('flex items-start gap-3 rounded-xl border p-3 text-left transition-colors', active ? 'border-brand-400 bg-brand-50/60 ring-2 ring-brand-100' : 'border-slate-200 hover:border-slate-300')}
+                    className={clsx('flex items-start gap-3 rounded-xl border p-3 text-left transition-colors', active ? 'border-brand-400 bg-brand-600/15 ring-2 ring-brand-600/30' : 'border-line-strong hover:border-line-strong')}
                   >
-                    <span className={clsx('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', active ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-500')}>
+                    <span className={clsx('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', active ? 'bg-brand-600 text-white' : 'bg-surface-4 text-ink-muted')}>
                       <Icon size={16} />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-medium text-slate-800">{TRIP_TYPE_LABEL[t]}</span>
-                      <span className="block text-xs text-slate-400">{TRIP_TYPE_DESC[t]}</span>
+                      <span className="block text-sm font-medium text-ink-strong">{TRIP_TYPE_LABEL[t]}</span>
+                      <span className="block text-xs text-ink-faint">{TRIP_TYPE_DESC[t]}</span>
                     </span>
                   </button>
                 )
@@ -286,8 +286,8 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
       </section>
 
       {/* 2. 时段与车辆 */}
-      <section className="space-y-4 border-t border-slate-100 pt-4">
-        <h4 className="text-sm font-semibold text-slate-700">2. 用车时段与车辆</h4>
+      <section className="space-y-4 border-t border-line pt-4">
+        <h4 className="text-sm font-semibold text-ink">2. 用车时段与车辆</h4>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField name="planned_start" label="开始时间" required>
             {({ id, invalid }) => <Controller control={form.control} name="planned_start" render={({ field }) => <DateTimeInput id={id} invalid={invalid} value={field.value} onChange={field.onChange} />} />}
@@ -314,8 +314,8 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
       </section>
 
       {/* 3. 目的地与路线 */}
-      <section className="space-y-4 border-t border-slate-100 pt-4">
-        <h4 className="text-sm font-semibold text-slate-700">3. 目的地与路线</h4>
+      <section className="space-y-4 border-t border-line pt-4">
+        <h4 className="text-sm font-semibold text-ink">3. 目的地与路线</h4>
         <FormField name="destination" label="目的地" required hint="地图选点后自动填入地址，可修改">
           <Input
             placeholder="如：某某市政务中心"
@@ -381,8 +381,8 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
       </section>
 
       {/* 4. 其他 */}
-      <section className="space-y-4 border-t border-slate-100 pt-4">
-        <h4 className="text-sm font-semibold text-slate-700">4. 随行与附件</h4>
+      <section className="space-y-4 border-t border-line pt-4">
+        <h4 className="text-sm font-semibold text-ink">4. 随行与附件</h4>
         <FormField name="passengers" label="随行人员" hint={canSearchUsers ? '可多选' : '需要「用户管理-查看」权限才能选择随行人员'}>
           {({ id, invalid }) => (
             <Controller
@@ -394,13 +394,13 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
         </FormField>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-700">附件</span>
+            <span className="text-sm font-medium text-ink">附件</span>
             <Button variant="ghost" size="sm" icon={Plus} onClick={() => attachments.append({ name: '', url: '' })} disabled={attachments.fields.length >= 10}>
               添加附件
             </Button>
           </div>
           {attachments.fields.length === 0 ? (
-            <p className="text-xs text-slate-400">本阶段不支持上传，仅登记附件名称与链接地址</p>
+            <p className="text-xs text-ink-faint">本阶段不支持上传，仅登记附件名称与链接地址</p>
           ) : (
             <div className="space-y-2">
               {attachments.fields.map((f, i) => (
@@ -411,7 +411,7 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
                   <FormField name={`attachments.${i}.url`}>
                     <Input placeholder="https://…" {...form.register(`attachments.${i}.url` as const)} />
                   </FormField>
-                  <Button variant="ghost" size="md" icon={Trash2} className="text-red-500 hover:bg-red-50" aria-label="删除附件" onClick={() => attachments.remove(i)} />
+                  <Button variant="ghost" size="md" icon={Trash2} className="text-danger-200 hover:bg-danger-500/10" aria-label="删除附件" onClick={() => attachments.remove(i)} />
                 </div>
               ))}
             </div>
@@ -422,8 +422,8 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
       {/* 预检结果 */}
       {precheck && <PrecheckCard r={precheck} />}
 
-      <div className="sticky bottom-0 -mx-5 -mb-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-white px-5 py-3">
-        <span className="text-xs text-slate-400">申请人：{applicantName}</span>
+      <div className="sticky bottom-0 -mx-5 -mb-4 flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-2 px-5 py-3">
+        <span className="text-xs text-ink-faint">申请人：{applicantName}</span>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={onCancel} disabled={busy}>
             取消

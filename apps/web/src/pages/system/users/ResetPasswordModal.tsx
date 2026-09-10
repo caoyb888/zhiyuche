@@ -44,16 +44,16 @@ function ResetPasswordBody({ user, onClose }: { user: User; onClose: () => void 
   if (result !== null) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-slate-600">
-          用户 <span className="font-medium text-slate-800">{user.name}</span>（{user.username}）的新密码：
+        <p className="text-sm text-ink">
+          用户 <span className="font-medium text-ink-strong">{user.name}</span>（{user.username}）的新密码：
         </p>
         <div className="flex items-center gap-2">
-          <code className="flex-1 rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 font-mono text-base text-slate-800 break-all select-all">{result}</code>
+          <code className="flex-1 rounded-lg bg-surface-3 border border-line-strong px-3 py-2 font-mono text-base text-ink-strong break-all select-all">{result}</code>
           <Button variant="secondary" icon={copied ? Check : Copy} onClick={() => void copy()}>
             {copied ? '已复制' : '复制'}
           </Button>
         </div>
-        <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">明文密码仅显示一次，请立即告知用户；关闭后无法再次查看。</p>
+        <p className="text-xs text-warn-200 bg-warn-500/10 rounded-lg px-3 py-2">明文密码仅显示一次，请立即告知用户；关闭后无法再次查看。</p>
         <div className="flex justify-end">
           <Button onClick={onClose}>关闭</Button>
         </div>
@@ -63,8 +63,8 @@ function ResetPasswordBody({ user, onClose }: { user: User; onClose: () => void 
 
   return (
     <Form form={form} onSubmit={(v) => mutation.mutate(v)}>
-      <p className="text-sm text-slate-600">
-        为 <span className="font-medium text-slate-800">{user.name}</span>（{user.username}）重置密码，重置后该用户需重新登录。
+      <p className="text-sm text-ink">
+        为 <span className="font-medium text-ink-strong">{user.name}</span>（{user.username}）重置密码，重置后该用户需重新登录。
       </p>
       <FormField name="password" label="新密码" hint="留空则使用系统缺省密码；否则至少 8 位，含字母和数字">
         <Input type="text" autoComplete="off" placeholder="留空使用系统缺省密码" {...form.register('password')} />

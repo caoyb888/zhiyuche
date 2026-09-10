@@ -149,13 +149,13 @@ export function formatSignedMoney(value: number | null | undefined): string {
 
 /** 有符号金额的颜色：正绿 / 负红 / 零灰 */
 export function signedMoneyClass(value: number | null | undefined): string {
-  if (value === null || value === undefined) return 'text-slate-400'
-  return value > 0 ? 'text-emerald-600' : value < 0 ? 'text-red-600' : 'text-slate-500'
+  if (value === null || value === undefined) return 'text-ink-faint'
+  return value > 0 ? 'text-ev-200' : value < 0 ? 'text-danger-200' : 'text-ink-muted'
 }
 
 /** 余额颜色：负数红 */
 export function balanceClass(value: number): string {
-  return value < 0 ? 'text-red-600' : 'text-slate-800'
+  return value < 0 ? 'text-danger-200' : 'text-ink-strong'
 }
 
 /** 预算使用率 0–100+（预算为 0 时返回 null） */
@@ -166,5 +166,5 @@ export function budgetUsage(spent: number | null | undefined, budget: number | n
 
 /** 进度条颜色：< 80% 绿、< 100% 琥珀、超支红 */
 export function usageBarClass(pct: number): string {
-  return pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-emerald-500'
+  return pct >= 100 ? 'bg-danger-500' : pct >= 80 ? 'bg-warn-500' : 'bg-ev-500'
 }

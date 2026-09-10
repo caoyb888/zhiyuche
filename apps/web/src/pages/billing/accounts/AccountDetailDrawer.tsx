@@ -50,11 +50,11 @@ function Body({ id, onAdjust, onEdit }: { id: string } & Pick<AccountDetailDrawe
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="text-base font-semibold text-slate-800 truncate">{a.owner_name}</h4>
+            <h4 className="text-base font-semibold text-ink-strong truncate">{a.owner_name}</h4>
             <Badge color={ACCOUNT_LEVEL_BADGE[a.level]}>{ACCOUNT_LEVEL_LABEL[a.level]}账户</Badge>
             <Badge color={ACCOUNT_STATUS_BADGE[a.status]}>{ACCOUNT_STATUS_LABEL[a.status]}</Badge>
           </div>
-          {a.owner_sub && <div className="mt-0.5 text-xs text-slate-400">{a.owner_sub}</div>}
+          {a.owner_sub && <div className="mt-0.5 text-xs text-ink-faint">{a.owner_sub}</div>}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {onAdjust && (
@@ -71,16 +71,16 @@ function Body({ id, onAdjust, onEdit }: { id: string } & Pick<AccountDetailDrawe
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <div className="rounded-lg bg-slate-50 px-3 py-2">
-          <div className="text-[11px] text-slate-400">余额（元）</div>
+        <div className="rounded-lg bg-surface-3 px-3 py-2">
+          <div className="text-[11px] text-ink-faint">余额（元）</div>
           <div className={clsx('mt-0.5 font-mono text-lg font-semibold', balanceClass(a.balance))}>{formatMoney(a.balance)}</div>
         </div>
-        <div className="rounded-lg bg-slate-50 px-3 py-2">
-          <div className="text-[11px] text-slate-400">透支额度（元）</div>
-          <div className="mt-0.5 font-mono text-lg font-semibold text-slate-800">{formatMoney(a.credit_limit)}</div>
+        <div className="rounded-lg bg-surface-3 px-3 py-2">
+          <div className="text-[11px] text-ink-faint">透支额度（元）</div>
+          <div className="mt-0.5 font-mono text-lg font-semibold text-ink-strong">{formatMoney(a.credit_limit)}</div>
         </div>
-        <div className="col-span-2 rounded-lg bg-slate-50 px-3 py-2 sm:col-span-1">
-          <div className="text-[11px] text-slate-400">本月支出 / 月预算</div>
+        <div className="col-span-2 rounded-lg bg-surface-3 px-3 py-2 sm:col-span-1">
+          <div className="text-[11px] text-ink-faint">本月支出 / 月预算</div>
           <div className="mt-1">
             <BudgetBar spent={a.month_spent} budget={a.monthly_budget} />
           </div>
@@ -99,7 +99,7 @@ function Body({ id, onAdjust, onEdit }: { id: string } & Pick<AccountDetailDrawe
 
       <div>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold text-slate-700">账户流水</h4>
+          <h4 className="text-sm font-semibold text-ink">账户流水</h4>
           <div className="w-40">
             <Select
               options={TRANSACTION_TYPE_OPTIONS}

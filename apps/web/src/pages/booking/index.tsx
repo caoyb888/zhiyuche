@@ -130,7 +130,7 @@ export default function BookingPage() {
       sortable: true,
       render: (b) => (
         <div>
-          <div className="font-mono text-xs font-medium text-slate-800">{b.booking_no}</div>
+          <div className="font-mono text-xs font-medium text-ink-strong">{b.booking_no}</div>
           <Badge className="mt-0.5" color={BOOKING_SOURCE_BADGE[b.source]}>
             {BOOKING_SOURCE_LABEL[b.source]}
           </Badge>
@@ -142,8 +142,8 @@ export default function BookingPage() {
       title: '联系人',
       render: (b) => (
         <div>
-          <div className="text-slate-800">{b.contact_name}</div>
-          <div className="text-xs text-slate-400">{text(b.contact_phone)}</div>
+          <div className="text-ink-strong">{b.contact_name}</div>
+          <div className="text-xs text-ink-faint">{text(b.contact_phone)}</div>
         </div>
       ),
     },
@@ -153,11 +153,11 @@ export default function BookingPage() {
       render: (b) =>
         b.passenger ? (
           <div>
-            <div className="text-slate-800">{b.passenger.name}</div>
-            <div className="text-xs text-slate-400">{text(b.dept_name)}</div>
+            <div className="text-ink-strong">{b.passenger.name}</div>
+            <div className="text-xs text-ink-faint">{text(b.dept_name)}</div>
           </div>
         ) : (
-          <span className="text-xs text-slate-300">—</span>
+          <span className="text-xs text-ink-disabled">—</span>
         ),
     },
     {
@@ -170,18 +170,18 @@ export default function BookingPage() {
       key: 'vehicle',
       title: '车辆',
       width: 110,
-      render: (b) => (b.vehicle ? <span className="whitespace-nowrap">{b.vehicle.plate_no}</span> : <span className="text-xs text-amber-600">待派车</span>),
+      render: (b) => (b.vehicle ? <span className="whitespace-nowrap">{b.vehicle.plate_no}</span> : <span className="text-xs text-warn-200">待派车</span>),
     },
     {
       key: 'route',
       title: '出发地 → 目的地',
       render: (b) => (
         <div className="max-w-[18rem]">
-          <div className="truncate text-slate-800" title={`${b.origin} → ${b.destination}`}>
+          <div className="truncate text-ink-strong" title={`${b.origin} → ${b.destination}`}>
             {b.origin} → {b.destination}
           </div>
           {b.purpose && (
-            <div className="truncate text-xs text-slate-400" title={b.purpose}>
+            <div className="truncate text-xs text-ink-faint" title={b.purpose}>
               {b.purpose}
             </div>
           )}
@@ -192,7 +192,7 @@ export default function BookingPage() {
     {
       key: 'created_by',
       title: '记录人',
-      render: (b) => (b.created_by ? <span className="text-xs text-slate-700">{b.created_by.name}</span> : <span className="text-xs text-slate-300">—</span>),
+      render: (b) => (b.created_by ? <span className="text-xs text-ink">{b.created_by.name}</span> : <span className="text-xs text-ink-disabled">—</span>),
     },
   ]
 
@@ -206,7 +206,7 @@ export default function BookingPage() {
           variant="ghost"
           size="sm"
           icon={Play}
-          className="!px-2 text-blue-600 hover:bg-blue-50"
+          className="!px-2 text-brand-200 hover:bg-brand-600/10"
           title={b.vehicle ? '确认出车' : '请先派车'}
           aria-label="确认出车"
           disabled={!b.vehicle || depart.isPending}
@@ -218,7 +218,7 @@ export default function BookingPage() {
           variant="ghost"
           size="sm"
           icon={CheckCircle2}
-          className="!px-2 text-emerald-600 hover:bg-emerald-50"
+          className="!px-2 text-ev-200 hover:bg-ev-500/10"
           title="完成"
           aria-label="完成"
           disabled={complete.isPending}
@@ -226,7 +226,7 @@ export default function BookingPage() {
         />
       )}
       {canCancel && b.status === 'reserved' && (
-        <Button variant="ghost" size="sm" icon={X} className="!px-2 text-red-500 hover:bg-red-50" title="取消" aria-label="取消" onClick={() => setCancelTarget(b)} />
+        <Button variant="ghost" size="sm" icon={X} className="!px-2 text-danger-200 hover:bg-danger-500/10" title="取消" aria-label="取消" onClick={() => setCancelTarget(b)} />
       )}
     </div>
   )
@@ -302,7 +302,7 @@ export default function BookingPage() {
         )}
         <div className="flex w-full items-center gap-1 sm:w-auto">
           <DateTimeInput value={draft.from} onChange={(v) => setDraft((d) => ({ ...d, from: v }))} aria-label="预约开始起" className="sm:w-44" />
-          <span className="text-xs text-slate-400">至</span>
+          <span className="text-xs text-ink-faint">至</span>
           <DateTimeInput value={draft.to} onChange={(v) => setDraft((d) => ({ ...d, to: v }))} aria-label="预约开始止" className="sm:w-44" />
         </div>
       </FilterBar>

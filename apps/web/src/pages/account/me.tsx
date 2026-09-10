@@ -18,9 +18,9 @@ import { ACCOUNT_STATUS_BADGE, ACCOUNT_STATUS_LABEL, balanceClass } from '../bil
 function Stat({ label, value, hint, className }: { label: string; value: ReactNode; hint?: string; className?: string }) {
   return (
     <div className="card p-5">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className={clsx('mt-1 font-mono text-2xl font-semibold text-slate-800', className)}>{value}</div>
-      {hint && <div className="mt-1 text-[11px] text-slate-400">{hint}</div>}
+      <div className="text-xs text-ink-faint">{label}</div>
+      <div className={clsx('mt-1 font-mono text-2xl font-semibold text-ink-strong', className)}>{value}</div>
+      {hint && <div className="mt-1 text-[11px] text-ink-faint">{hint}</div>}
     </div>
   )
 }
@@ -58,7 +58,7 @@ export default function MyAccountPage() {
             <Stat label="本月支出（元）" value={formatMoney(me.data.month_spent ?? 0)} hint="行程 + 充电 + 罚金" />
             <div className="card p-5">
               <div className="flex items-center justify-between">
-                <div className="text-xs text-slate-400">月预算</div>
+                <div className="text-xs text-ink-faint">月预算</div>
                 <Badge color={ACCOUNT_STATUS_BADGE[me.data.status]}>{ACCOUNT_STATUS_LABEL[me.data.status]}</Badge>
               </div>
               <div className="mt-2">
@@ -69,11 +69,11 @@ export default function MyAccountPage() {
 
           <div className="card p-4">
             <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
-                <Wallet size={15} className="text-slate-400" />
+              <div className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                <Wallet size={15} className="text-ink-faint" />
                 最近流水
               </div>
-              <span className="text-xs text-slate-400">最近 20 条 · 更新于 {formatDateTime(me.data.updated_at)}</span>
+              <span className="text-xs text-ink-faint">最近 20 条 · 更新于 {formatDateTime(me.data.updated_at)}</span>
             </div>
             <TransactionTable data={me.data.transactions ?? []} hideOperator />
           </div>

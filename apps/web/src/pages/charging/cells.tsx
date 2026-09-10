@@ -9,8 +9,8 @@ import { CHARGE_STATUS_BADGE, CHARGE_STATUS_LABEL, REVIEW_STATUS_BADGE, REVIEW_S
 /** 事务号（进行中带呼吸点） */
 export function TxNoCell({ t }: { t: ChargeTransaction }) {
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-slate-800">
-      {t.status === 'charging' && <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 pulse-dot" aria-label="充电中" />}
+    <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-ink-strong">
+      {t.status === 'charging' && <span className="inline-block h-1.5 w-1.5 rounded-full bg-warn-500 pulse-dot" aria-label="充电中" />}
       {t.tx_no}
     </span>
   )
@@ -19,8 +19,8 @@ export function TxNoCell({ t }: { t: ChargeTransaction }) {
 export function PileCell({ t }: { t: ChargeTransaction }) {
   return (
     <div>
-      <div className="text-slate-800">{t.pile_name}</div>
-      <div className="font-mono text-xs text-slate-400">
+      <div className="text-ink-strong">{t.pile_name}</div>
+      <div className="font-mono text-xs text-ink-faint">
         {t.pile_code} · {t.connector_id} 号枪
       </div>
     </div>
@@ -30,8 +30,8 @@ export function PileCell({ t }: { t: ChargeTransaction }) {
 export function UserCell({ t }: { t: ChargeTransaction }) {
   return (
     <div>
-      <div className="text-slate-800">{t.user?.name ?? <span className="text-slate-400">未识别</span>}</div>
-      <div className="text-xs text-slate-400">{text(t.dept_name ?? t.user?.dept_name)}</div>
+      <div className="text-ink-strong">{t.user?.name ?? <span className="text-ink-faint">未识别</span>}</div>
+      <div className="text-xs text-ink-faint">{text(t.dept_name ?? t.user?.dept_name)}</div>
     </div>
   )
 }
@@ -39,22 +39,22 @@ export function UserCell({ t }: { t: ChargeTransaction }) {
 export function VehicleCell({ t, link = false }: { t: ChargeTransaction; link?: boolean }) {
   if (!t.vehicle) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-amber-600">
+      <span className="inline-flex items-center gap-1 text-xs text-warn-200">
         <AlertTriangle size={12} /> 未绑定
       </span>
     )
   }
   const plate = link ? (
-    <Link to={`/assets/vehicles?id=${encodeURIComponent(t.vehicle.id)}`} className="font-medium text-brand-700 hover:underline" onClick={(e) => e.stopPropagation()}>
+    <Link to={`/assets/vehicles?id=${encodeURIComponent(t.vehicle.id)}`} className="font-medium text-brand-300 hover:underline" onClick={(e) => e.stopPropagation()}>
       {t.vehicle.plate_no}
     </Link>
   ) : (
-    <span className="text-slate-800">{t.vehicle.plate_no}</span>
+    <span className="text-ink-strong">{t.vehicle.plate_no}</span>
   )
   return (
     <div>
       <div>{plate}</div>
-      <div className="text-xs text-slate-400">{text(t.vehicle.model)}</div>
+      <div className="text-xs text-ink-faint">{text(t.vehicle.model)}</div>
     </div>
   )
 }
@@ -70,8 +70,8 @@ export function DurationCell({ t }: { t: ChargeTransaction }) {
 export function KwhCell({ t }: { t: ChargeTransaction }) {
   return (
     <div className="whitespace-nowrap text-right text-xs">
-      <div className={clsx('font-medium', t.status === 'charging' ? 'text-amber-600' : 'text-slate-800')}>{formatKwh(t.kwh)}</div>
-      {typeof t.bms_kwh_est === 'number' && <div className="text-[11px] text-slate-400">BMS 估算 {t.bms_kwh_est.toFixed(2)}</div>}
+      <div className={clsx('font-medium', t.status === 'charging' ? 'text-warn-200' : 'text-ink-strong')}>{formatKwh(t.kwh)}</div>
+      {typeof t.bms_kwh_est === 'number' && <div className="text-[11px] text-ink-faint">BMS 估算 {t.bms_kwh_est.toFixed(2)}</div>}
     </div>
   )
 }
@@ -83,23 +83,23 @@ export function PowerCell({ t }: { t: ChargeTransaction }) {
 export function CostCell({ t }: { t: ChargeTransaction }) {
   return (
     <div className="whitespace-nowrap text-right text-xs">
-      <div className={clsx(typeof t.cost === 'number' ? 'font-medium text-emerald-700' : 'text-slate-400')}>{typeof t.cost === 'number' ? `¥ ${formatMoney(t.cost)}` : '—'}</div>
-      {typeof t.unit_price === 'number' && <div className="text-[11px] text-slate-400">{t.unit_price.toFixed(2)} 元/kWh</div>}
+      <div className={clsx(typeof t.cost === 'number' ? 'font-medium text-ev-200' : 'text-ink-faint')}>{typeof t.cost === 'number' ? `¥ ${formatMoney(t.cost)}` : '—'}</div>
+      {typeof t.unit_price === 'number' && <div className="text-[11px] text-ink-faint">{t.unit_price.toFixed(2)} 元/kWh</div>}
     </div>
   )
 }
 
 export function AttributionCell({ t }: { t: ChargeTransaction }) {
   const label = attributionLabel(t.attribution)
-  return label ? <span className="whitespace-nowrap text-xs text-slate-600">{label}</span> : <span className="text-xs text-slate-300">—</span>
+  return label ? <span className="whitespace-nowrap text-xs text-ink">{label}</span> : <span className="text-xs text-ink-disabled">—</span>
 }
 
 /** 偏差百分比：超过阈值标红 */
 export function DeviationCell({ t }: { t: ChargeTransaction }) {
   const over = deviationExceeded(t.deviation_pct)
-  if (t.deviation_pct === null || t.deviation_pct === undefined) return <span className="text-xs text-slate-300">—</span>
+  if (t.deviation_pct === null || t.deviation_pct === undefined) return <span className="text-xs text-ink-disabled">—</span>
   return (
-    <span className={clsx('inline-flex items-center gap-0.5 whitespace-nowrap text-xs', over ? 'font-medium text-red-600' : 'text-slate-600')} title={over ? '桩侧计量与 BMS 估算偏差超过 5%' : undefined}>
+    <span className={clsx('inline-flex items-center gap-0.5 whitespace-nowrap text-xs', over ? 'font-medium text-danger-200' : 'text-ink')} title={over ? '桩侧计量与 BMS 估算偏差超过 5%' : undefined}>
       {over && <AlertTriangle size={12} />}
       {formatPct(t.deviation_pct)}
     </span>

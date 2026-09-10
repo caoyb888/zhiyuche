@@ -117,8 +117,8 @@ function RulesForm({ rules }: { rules: ApprovalRules }) {
       <div className="card space-y-5 p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-800">启用审批流</h3>
-            <p className="mt-0.5 text-xs text-slate-400">关闭后新申请仍会创建，但不再按下列条件判定二级审批</p>
+            <h3 className="text-sm font-semibold text-ink-strong">启用审批流</h3>
+            <p className="mt-0.5 text-xs text-ink-faint">关闭后新申请仍会创建，但不再按下列条件判定二级审批</p>
           </div>
           <Controller control={form.control} name="enabled" render={({ field }) => <Switch checked={field.value} onChange={field.onChange} label={field.value ? '已启用' : '已关闭'} />} />
         </div>
@@ -126,8 +126,8 @@ function RulesForm({ rules }: { rules: ApprovalRules }) {
 
       <div className="card space-y-5 p-5">
         <div>
-          <h3 className="text-sm font-semibold text-slate-800">二级审批触发条件</h3>
-          <p className="mt-0.5 text-xs text-slate-400">满足任一条件的申请在一级（部门负责人）通过后转交二级审批人；均不满足则一级通过即批准</p>
+          <h3 className="text-sm font-semibold text-ink-strong">二级审批触发条件</h3>
+          <p className="mt-0.5 text-xs text-ink-faint">满足任一条件的申请在一级（部门负责人）通过后转交二级审批人；均不满足则一级通过即批准</p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField name="level2_km" label="预计里程阈值（km）" hint="预计里程 ≥ 阈值时需二级审批；留空则不按里程触发">
@@ -137,7 +137,7 @@ function RulesForm({ rules }: { rules: ApprovalRules }) {
             {({ invalid }) => <Controller control={form.control} name="level2_trip_types" render={({ field }) => <CheckboxGroup options={TRIP_TYPE_CHECKS} value={field.value} onChange={(v) => field.onChange(v.filter((x): x is TripType => x === 'official' || x === 'daily'))} disabled={!enabled} invalid={invalid} columns={2} />} />}
           </FormField>
         </div>
-        <div className="space-y-3 rounded-xl border border-slate-100 p-4">
+        <div className="space-y-3 rounded-xl border border-line p-4">
           <Controller control={form.control} name="level2_night" render={({ field }) => <Switch checked={field.value} onChange={field.onChange} disabled={!enabled} label="夜间用车需二级审批" size="sm" />} />
           <div className="grid grid-cols-2 gap-4 sm:max-w-md">
             <FormField name="night_start" label="夜间开始">
@@ -148,15 +148,15 @@ function RulesForm({ rules }: { rules: ApprovalRules }) {
             </FormField>
           </div>
         </div>
-        <div className="rounded-xl border border-slate-100 p-4">
+        <div className="rounded-xl border border-line p-4">
           <Controller control={form.control} name="level2_cross_dept" render={({ field }) => <Switch checked={field.value} onChange={field.onChange} disabled={!enabled} label="跨部门用车（车辆归属部门与申请人部门不同）需二级审批" size="sm" />} />
         </div>
       </div>
 
       <div className="card space-y-5 p-5">
         <div>
-          <h3 className="text-sm font-semibold text-slate-800">审批人</h3>
-          <p className="mt-0.5 text-xs text-slate-400">一级审批人为申请人所在部门负责人（逐级向上，跳过本人）；找不到时回退到持有指定角色的用户</p>
+          <h3 className="text-sm font-semibold text-ink-strong">审批人</h3>
+          <p className="mt-0.5 text-xs text-ink-faint">一级审批人为申请人所在部门负责人（逐级向上，跳过本人）；找不到时回退到持有指定角色的用户</p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField name="level2_approver" label="二级审批人" hint="可清空；配置了触发条件时必填">
@@ -172,7 +172,7 @@ function RulesForm({ rules }: { rules: ApprovalRules }) {
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-slate-400">{rules.updated_at ? `最近更新 ${formatDateTime(rules.updated_at)}` : '尚未保存过，当前为系统缺省值'}</span>
+        <span className="text-xs text-ink-faint">{rules.updated_at ? `最近更新 ${formatDateTime(rules.updated_at)}` : '尚未保存过，当前为系统缺省值'}</span>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={() => form.reset(toForm(rules))} disabled={!form.formState.isDirty || save.isPending}>
             还原

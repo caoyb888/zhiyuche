@@ -121,7 +121,7 @@ export default function UsersPage() {
       sortable: true,
       render: (u) => (
         <div className="flex items-center gap-1.5">
-          <span className="font-medium text-slate-800">{u.username}</span>
+          <span className="font-medium text-ink-strong">{u.username}</span>
           {u.is_super && <Badge color="purple">平台</Badge>}
         </div>
       ),
@@ -134,7 +134,7 @@ export default function UsersPage() {
       title: '角色',
       render: (u) =>
         u.roles.length === 0 ? (
-          <span className="text-slate-400">—</span>
+          <span className="text-ink-faint">—</span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {u.roles.map((r) => (
@@ -151,7 +151,7 @@ export default function UsersPage() {
       sortable: true,
       render: (u) => <Badge color={userStatusColor[u.status]}>{userStatusLabel[u.status]}</Badge>,
     },
-    { key: 'last_login_at', title: '最后登录', sortable: true, render: (u) => <span className="text-xs text-slate-500">{formatDateTime(u.last_login_at)}</span> },
+    { key: 'last_login_at', title: '最后登录', sortable: true, render: (u) => <span className="text-xs text-ink-muted">{formatDateTime(u.last_login_at)}</span> },
   ]
 
   const renderActions = (u: User) => {
@@ -172,7 +172,7 @@ export default function UsersPage() {
             variant="ghost"
             size="sm"
             icon={Trash2}
-            className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600"
+            className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200"
             title={isSelf ? '不能删除自己的账号' : '删除'}
             aria-label="删除"
             disabled={isSelf}

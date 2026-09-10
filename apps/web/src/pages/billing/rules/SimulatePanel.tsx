@@ -28,9 +28,9 @@ interface SimulatePanelProps {
 }
 
 function amountClass(line: BillingLine): string {
-  if (line.kind === 'penalty') return 'text-red-600'
-  if (line.amount < 0) return 'text-emerald-600'
-  return 'text-slate-800'
+  if (line.kind === 'penalty') return 'text-danger-200'
+  if (line.amount < 0) return 'text-ev-200'
+  return 'text-ink-strong'
 }
 
 const lineColumns: Column<BillingLine>[] = [
@@ -39,14 +39,14 @@ const lineColumns: Column<BillingLine>[] = [
     title: '项目',
     render: (l) => (
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="font-medium text-slate-800">{l.item}</span>
+        <span className="font-medium text-ink-strong">{l.item}</span>
         <Badge color={LINE_KIND_BADGE[l.kind]}>{LINE_KIND_LABEL[l.kind]}</Badge>
-        {l.note && <span className="text-xs text-slate-400">{l.note}</span>}
+        {l.note && <span className="text-xs text-ink-faint">{l.note}</span>}
       </div>
     ),
   },
   { key: 'qty', title: '数量', align: 'right', render: (l) => <span className="font-mono text-xs">{formatNumber(l.qty, l.unit === '次' || l.unit === '天' ? 0 : 2)}</span> },
-  { key: 'unit', title: '单位', render: (l) => <span className="text-xs text-slate-500">{l.unit}</span> },
+  { key: 'unit', title: '单位', render: (l) => <span className="text-xs text-ink-muted">{l.unit}</span> },
   {
     key: 'unit_price',
     title: '单价',
@@ -58,9 +58,9 @@ const lineColumns: Column<BillingLine>[] = [
 
 function Stat({ label, value, className }: { label: string; value: string; className?: string }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-2">
-      <div className="text-[11px] text-slate-400">{label}</div>
-      <div className={clsx('mt-0.5 font-mono text-sm font-medium text-slate-800', className)}>{value}</div>
+    <div className="rounded-lg bg-surface-3 px-3 py-2">
+      <div className="text-[11px] text-ink-faint">{label}</div>
+      <div className={clsx('mt-0.5 font-mono text-sm font-medium text-ink-strong', className)}>{value}</div>
     </div>
   )
 }
@@ -69,19 +69,19 @@ function ResultView({ r }: { r: BillingResult }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label="合计（元）" value={formatMoney(r.total)} className="text-base text-brand-700" />
+        <Stat label="合计（元）" value={formatMoney(r.total)} className="text-base text-brand-300" />
         <Stat label="基础费（未乘系数）" value={formatMoney(r.base)} />
         <Stat label="时段系数" value={r.multiplier === 1 ? '无（×1）' : `×${formatNumber(r.multiplier, 2)}`} />
-        <Stat label="日封顶" value={r.cap_applied ? '已触发' : '未触发'} className={r.cap_applied ? 'text-emerald-600' : undefined} />
+        <Stat label="日封顶" value={r.cap_applied ? '已触发' : '未触发'} className={r.cap_applied ? 'text-ev-200' : undefined} />
         <Stat label="低电附加" value={formatMoney(r.surcharge)} />
         <Stat label="电费" value={formatMoney(r.electricity)} />
-        <Stat label="罚金" value={formatMoney(r.penalty)} className={r.penalty > 0 ? 'text-red-600' : undefined} />
+        <Stat label="罚金" value={formatMoney(r.penalty)} className={r.penalty > 0 ? 'text-danger-200' : undefined} />
         <Stat label="扣费账户" value={`${ACCOUNT_LEVEL_LABEL[r.attribution]}账户`} />
       </div>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-500">账单明细 · {r.rule_name}</span>
-          <span className="text-[11px] text-slate-400">罚金红色单列；减免（如日封顶）为负数绿色</span>
+          <span className="text-xs font-medium text-ink-muted">账单明细 · {r.rule_name}</span>
+          <span className="text-[11px] text-ink-faint">罚金红色单列；减免（如日封顶）为负数绿色</span>
         </div>
         <Table columns={lineColumns} data={r.lines} rowKey={(l) => `${l.kind}:${l.item}`} empty={<Empty size="sm" title="无费用明细" description="基础费率与其他项均未产生费用" />} />
       </div>
@@ -108,9 +108,9 @@ export default function SimulatePanel({ doc, ruleId, dirty }: SimulatePanelProps
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] items-start">
-      <div className="rounded-xl border border-slate-100 p-4">
-        <h4 className="text-sm font-semibold text-slate-700">行程参数</h4>
-        <p className="mt-0.5 mb-4 text-xs text-slate-400">{useInline ? '按当前编辑中的规则计算（含未保存修改）' : canRun ? '表单有校验错误，按已保存的规则计算' : '表单存在校验错误，请先修正后再模拟'}</p>
+      <div className="rounded-xl border border-line p-4">
+        <h4 className="text-sm font-semibold text-ink">行程参数</h4>
+        <p className="mt-0.5 mb-4 text-xs text-ink-faint">{useInline ? '按当前编辑中的规则计算（含未保存修改）' : canRun ? '表单有校验错误，按已保存的规则计算' : '表单存在校验错误，请先修正后再模拟'}</p>
         <Form form={form} onSubmit={(v) => run.mutate(v)}>
           <FormField name="trip_type" label="用车类型">
             <Select options={TRIP_TYPE_OPTIONS} {...form.register('trip_type')} />
@@ -147,7 +147,7 @@ export default function SimulatePanel({ doc, ruleId, dirty }: SimulatePanelProps
         </Form>
       </div>
 
-      <div className="min-w-0 rounded-xl border border-slate-100 p-4">
+      <div className="min-w-0 rounded-xl border border-line p-4">
         {run.data ? (
           <ResultView r={run.data} />
         ) : (

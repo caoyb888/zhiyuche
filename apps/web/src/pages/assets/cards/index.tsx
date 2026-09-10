@@ -106,24 +106,24 @@ export default function CardsPage() {
   const canDelete = can('asset:card:delete')
 
   const columns: Column<Card>[] = [
-    { key: 'card_uid', title: '卡片 UID', sortable: true, render: (c) => <span className="font-mono text-sm font-medium text-slate-800">{c.card_uid}</span> },
+    { key: 'card_uid', title: '卡片 UID', sortable: true, render: (c) => <span className="font-mono text-sm font-medium text-ink-strong">{c.card_uid}</span> },
     {
       key: 'user_name',
       title: '持卡人',
       render: (c) =>
         c.user_id ? (
           <div>
-            <div className="text-slate-800">{text(c.user_name)}</div>
-            {c.username && <div className="text-xs text-slate-400">@{c.username}</div>}
+            <div className="text-ink-strong">{text(c.user_name)}</div>
+            {c.username && <div className="text-xs text-ink-faint">@{c.username}</div>}
           </div>
         ) : (
-          <span className="text-xs text-slate-400">未绑定</span>
+          <span className="text-xs text-ink-faint">未绑定</span>
         ),
     },
     { key: 'status', title: '状态', sortable: true, render: (c) => <Badge color={cardStatusColor[c.status]}>{cardStatusLabel[c.status]}</Badge> },
-    { key: 'issued_at', title: '发卡时间', sortable: true, render: (c) => <span className="text-xs text-slate-500">{formatDateTime(c.issued_at)}</span> },
-    { key: 'remark', title: '备注', render: (c) => <span className="line-clamp-1 max-w-xs text-xs text-slate-500">{text(c.remark)}</span> },
-    { key: 'created_at', title: '创建时间', sortable: true, render: (c) => <span className="text-xs text-slate-500">{formatDateTime(c.created_at)}</span> },
+    { key: 'issued_at', title: '发卡时间', sortable: true, render: (c) => <span className="text-xs text-ink-muted">{formatDateTime(c.issued_at)}</span> },
+    { key: 'remark', title: '备注', render: (c) => <span className="line-clamp-1 max-w-xs text-xs text-ink-muted">{text(c.remark)}</span> },
+    { key: 'created_at', title: '创建时间', sortable: true, render: (c) => <span className="text-xs text-ink-muted">{formatDateTime(c.created_at)}</span> },
   ]
 
   const renderActions = (c: Card) => (
@@ -136,10 +136,10 @@ export default function CardsPage() {
           <Button variant="ghost" size="sm" icon={Link2} className="!px-2" title="绑定持卡人" aria-label="绑定持卡人" onClick={() => setBindTarget(c)} />
         ))}
       {canUpdate && c.status === 'active' && (
-        <Button variant="ghost" size="sm" icon={ShieldAlert} className="!px-2 text-amber-600 hover:bg-amber-50" title="挂失" aria-label="挂失" onClick={() => setLossTarget(c)} />
+        <Button variant="ghost" size="sm" icon={ShieldAlert} className="!px-2 text-warn-200 hover:bg-warn-500/10" title="挂失" aria-label="挂失" onClick={() => setLossTarget(c)} />
       )}
       {canDelete && (
-        <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600" title="删除" aria-label="删除" onClick={() => setDeleteTarget(c)} />
+        <Button variant="ghost" size="sm" icon={Trash2} className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200" title="删除" aria-label="删除" onClick={() => setDeleteTarget(c)} />
       )}
     </div>
   )

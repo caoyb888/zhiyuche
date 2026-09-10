@@ -85,7 +85,7 @@ export default function TransactionsTab() {
           <div className="w-full sm:w-48">
             <DateTimeInput value={draft.from} onChange={(v) => setDraft((d) => ({ ...d, from: v }))} aria-label="开始时间" />
           </div>
-          <span className="text-xs text-slate-400">至</span>
+          <span className="text-xs text-ink-faint">至</span>
           <div className="w-full sm:w-48">
             <DateTimeInput value={draft.to} onChange={(v) => setDraft((d) => ({ ...d, to: v }))} aria-label="结束时间" />
           </div>

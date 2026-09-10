@@ -37,30 +37,30 @@ function useMinuteTick(): number {
 
 function OngoingTransaction({ t, now, onOpen }: { t: ChargeTransaction; now: number; onOpen: () => void }) {
   return (
-    <button type="button" onClick={onOpen} className="mt-2 w-full rounded-lg bg-white/80 px-3 py-2 text-left text-xs transition-colors hover:bg-white" title="查看事务详情">
+    <button type="button" onClick={onOpen} className="mt-2 w-full rounded-lg bg-surface-2/80 px-3 py-2 text-left text-xs transition-colors hover:bg-surface-2" title="查看事务详情">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-slate-500">{t.tx_no}</span>
-        <span className="font-medium text-amber-600">{formatKwh(t.kwh)}</span>
+        <span className="font-mono text-ink-muted">{t.tx_no}</span>
+        <span className="font-medium text-warn-200">{formatKwh(t.kwh)}</span>
       </div>
-      <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-slate-600">
+      <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-ink">
         <span className="truncate">
-          <span className="text-slate-400">用户 </span>
+          <span className="text-ink-faint">用户 </span>
           {t.user?.name ?? '未识别'}
         </span>
         <span className="truncate">
-          <span className="text-slate-400">车辆 </span>
-          {t.vehicle?.plate_no ?? <span className="text-amber-600">未绑定</span>}
+          <span className="text-ink-faint">车辆 </span>
+          {t.vehicle?.plate_no ?? <span className="text-warn-200">未绑定</span>}
         </span>
         <span>
-          <span className="text-slate-400">功率 </span>
+          <span className="text-ink-faint">功率 </span>
           {formatKw(t.power_kw)}
         </span>
         <span>
-          <span className="text-slate-400">时长 </span>
+          <span className="text-ink-faint">时长 </span>
           {formatMinutes(txDurationMin(t, now))}
         </span>
         <span className="col-span-2">
-          <span className="text-slate-400">开始 </span>
+          <span className="text-ink-faint">开始 </span>
           {formatDateTime(t.start_at)}
         </span>
       </div>
@@ -75,16 +75,16 @@ function ConnectorRow({ pile, c, now, canManage, onStart, onStop, onOpen }: { pi
   const showStart = controllable && s.startable && !tx
   const showStop = controllable && tx?.status === 'charging'
   return (
-    <div className="rounded-xl border border-slate-100 bg-white/60 px-3 py-2">
+    <div className="rounded-xl border border-line bg-surface-2/60 px-3 py-2">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs">
-          <span className="font-medium text-slate-700">{c.connector_id} 号枪</span>
+          <span className="font-medium text-ink">{c.connector_id} 号枪</span>
           <Badge color={s.badge}>
-            {s.pulse && <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 pulse-dot" />}
+            {s.pulse && <span className="inline-block h-1.5 w-1.5 rounded-full bg-warn-500 pulse-dot" />}
             {s.label}
           </Badge>
           {c.error_code && c.error_code !== 'NoError' && (
-            <span className="inline-flex items-center gap-0.5 font-mono text-[11px] text-red-500" title="OCPP errorCode">
+            <span className="inline-flex items-center gap-0.5 font-mono text-[11px] text-danger-200" title="OCPP errorCode">
               <AlertTriangle size={11} />
               {c.error_code}
             </span>
@@ -92,12 +92,12 @@ function ConnectorRow({ pile, c, now, canManage, onStart, onStop, onOpen }: { pi
         </div>
         <div className="flex items-center gap-1">
           {showStart && (
-            <Button size="sm" variant="secondary" icon={Play} className="!h-7 !px-2 text-emerald-700" onClick={onStart}>
+            <Button size="sm" variant="secondary" icon={Play} className="!h-7 !px-2 text-ev-200" onClick={onStart}>
               远程启动
             </Button>
           )}
           {showStop && (
-            <Button size="sm" variant="secondary" icon={Square} className="!h-7 !px-2 text-red-600" onClick={onStop}>
+            <Button size="sm" variant="secondary" icon={Square} className="!h-7 !px-2 text-danger-200" onClick={onStop}>
               远程停止
             </Button>
           )}
@@ -114,8 +114,8 @@ function PileCard({ pile, now, selected, canManage, onSelect, onStart, onStop, o
     <div className={clsx('card border p-4 transition-shadow', PILE_CARD_CLASS[pile.status], selected && 'ring-2 ring-brand-300')} onClick={onSelect}>
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-slate-800">{pile.name}</div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-400">
+          <div className="truncate text-sm font-semibold text-ink-strong">{pile.name}</div>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink-faint">
             <span className="font-mono">{pile.pile_code}</span>
             <span>
               {PILE_TYPE_LABEL[pile.type]} {pile.power_kw} kW
@@ -124,8 +124,8 @@ function PileCard({ pile, now, selected, canManage, onSelect, onStart, onStop, o
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className={clsx('inline-flex items-center gap-1 text-[11px]', pile.online ? 'text-emerald-600' : 'text-slate-400')} title={pile.last_heartbeat_at ? `最近心跳 ${formatDateTime(pile.last_heartbeat_at)}` : '无心跳'}>
-            <span className={clsx('inline-block h-2 w-2 rounded-full', pile.online ? 'bg-emerald-500 pulse-dot' : 'bg-slate-300')} />
+          <span className={clsx('inline-flex items-center gap-1 text-[11px]', pile.online ? 'text-ev-200' : 'text-ink-faint')} title={pile.last_heartbeat_at ? `最近心跳 ${formatDateTime(pile.last_heartbeat_at)}` : '无心跳'}>
+            <span className={clsx('inline-block h-2 w-2 rounded-full', pile.online ? 'bg-ev-500 pulse-dot' : 'bg-ink-disabled')} />
             {pile.online ? <Wifi size={12} /> : <WifiOff size={12} />}
           </span>
           <Badge color={PILE_STATUS_BADGE[pile.status]}>{PILE_STATUS_LABEL[pile.status]}</Badge>
@@ -134,19 +134,19 @@ function PileCard({ pile, now, selected, canManage, onSelect, onStart, onStop, o
 
       <div className="space-y-2">
         {pile.connectors.length === 0 ? (
-          <div className="text-xs text-slate-400">桩尚未上报连接器状态</div>
+          <div className="text-xs text-ink-faint">桩尚未上报连接器状态</div>
         ) : (
           pile.connectors.map((c) => <ConnectorRow key={c.connector_id} pile={pile} c={c} now={now} canManage={canManage} onStart={() => onStart(c.connector_id)} onStop={() => c.transaction && onStop(c.transaction)} onOpen={onOpen} />)
         )}
       </div>
 
       {pile.status === 'faulted' && (
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-red-600">
+        <div className="mt-3 flex items-center gap-1.5 text-xs text-danger-200">
           <AlertTriangle size={13} />
           桩上报故障，请检查现场或联系厂商
         </div>
       )}
-      {pile.status === 'charging' && chargingCount > 1 && <div className="mt-2 text-[11px] text-slate-400">{chargingCount} 个连接器同时充电</div>}
+      {pile.status === 'charging' && chargingCount > 1 && <div className="mt-2 text-[11px] text-ink-faint">{chargingCount} 个连接器同时充电</div>}
     </div>
   )
 }
@@ -182,7 +182,7 @@ function PilesLiveMap({ piles, selectedId, onSelect }: { piles: PileLive[]; sele
       onClick={() => onSelect(null)}
       hint={located.length === 0 ? '暂无带坐标的充电桩' : undefined}
       overlay={
-        <div className="absolute bottom-8 left-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md bg-white/90 px-2 py-1 text-[11px] text-slate-600 shadow-sm">
+        <div className="absolute bottom-8 left-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md bg-surface-2/90 px-2 py-1 text-[11px] text-ink shadow-sm">
           {LEGEND.map((s) => (
             <span key={s} className="inline-flex items-center gap-1">
               <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: PILE_STATUS_HEX[s] }} />
@@ -232,33 +232,33 @@ export default function PilesLiveTab({ onOpenTransaction }: PilesLiveTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-faint">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <span>
-            共 <span className="font-medium text-slate-700">{counts.total}</span> 桩
+            共 <span className="font-medium text-ink">{counts.total}</span> 桩
           </span>
           <span>
-            在线 <span className="font-medium text-emerald-600">{counts.online}</span>
+            在线 <span className="font-medium text-ev-200">{counts.online}</span>
           </span>
           <span>
-            充电中 <span className="font-medium text-amber-600">{counts.charging}</span>
+            充电中 <span className="font-medium text-warn-200">{counts.charging}</span>
           </span>
           <span>
-            故障 <span className={clsx('font-medium', counts.faulted > 0 ? 'text-red-600' : 'text-slate-700')}>{counts.faulted}</span>
+            故障 <span className={clsx('font-medium', counts.faulted > 0 ? 'text-danger-200' : 'text-ink')}>{counts.faulted}</span>
           </span>
         </div>
-        <span className={clsx('inline-flex items-center gap-1', wsStatus === 'open' && 'text-emerald-600')}>
-          <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', wsStatus === 'open' ? 'bg-emerald-500 pulse-dot' : wsStatus === 'reconnecting' ? 'bg-amber-400' : 'bg-slate-300')} />
+        <span className={clsx('inline-flex items-center gap-1', wsStatus === 'open' && 'text-ev-200')}>
+          <span className={clsx('inline-block h-1.5 w-1.5 rounded-full', wsStatus === 'open' ? 'bg-tech-400 pulse-dot' : wsStatus === 'reconnecting' ? 'bg-warn-400' : 'bg-ink-disabled')} />
           {wsStatus === 'open' ? '实时推送 + 每 30 秒刷新' : wsStatus === 'reconnecting' ? '重连中 · 每 30 秒刷新' : '每 30 秒刷新'}
           {live.isFetching && <Spinner size="sm" className="ml-1" />}
         </span>
       </div>
 
       {counts.faulted > 0 && (
-        <div className="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-4">
-          <AlertTriangle size={18} className="shrink-0 text-red-500" />
-          <div className="text-sm font-semibold text-red-800">{counts.faulted} 个充电桩故障</div>
-          <div className="text-xs text-red-600">
+        <div className="flex items-center gap-3 rounded-2xl border border-danger-500/30 bg-danger-500/10 p-4">
+          <AlertTriangle size={18} className="shrink-0 text-danger-200" />
+          <div className="text-sm font-semibold text-danger-200">{counts.faulted} 个充电桩故障</div>
+          <div className="text-xs text-danger-200">
             {sorted
               .filter((p) => p.status === 'faulted' || p.connectors.some((x) => x.status === 'Faulted'))
               .map((p) => p.name)
@@ -270,7 +270,7 @@ export default function PilesLiveTab({ onOpenTransaction }: PilesLiveTabProps) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           {live.isPending ? (
-            <div className="flex h-48 items-center justify-center rounded-xl bg-slate-50">
+            <div className="flex h-48 items-center justify-center rounded-xl bg-surface-3">
               <Spinner label="加载桩状态…" />
             </div>
           ) : sorted.length === 0 ? (
@@ -287,8 +287,8 @@ export default function PilesLiveTab({ onOpenTransaction }: PilesLiveTabProps) {
         </div>
         <div className="card p-4 xl:sticky xl:top-4 xl:self-start">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-700">桩位分布</h3>
-            <span className="text-xs text-slate-400">{live.isPending ? '加载中…' : `${piles.filter((p) => toLngLat(p.lng, p.lat) !== null).length} / ${piles.length} 个桩有坐标`}</span>
+            <h3 className="text-sm font-semibold text-ink">桩位分布</h3>
+            <span className="text-xs text-ink-faint">{live.isPending ? '加载中…' : `${piles.filter((p) => toLngLat(p.lng, p.lat) !== null).length} / ${piles.length} 个桩有坐标`}</span>
           </div>
           <PilesLiveMap piles={piles} selectedId={selectedId} onSelect={setSelectedId} />
         </div>

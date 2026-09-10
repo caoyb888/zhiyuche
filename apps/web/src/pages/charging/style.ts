@@ -59,18 +59,18 @@ export interface ConnectorStyle {
 
 export const CONNECTOR_STYLE: Record<ConnectorStatus, ConnectorStyle> = {
   Available: { label: '空闲', badge: 'green', hex: '#10b981', startable: true },
-  Preparing: { label: '已插枪', badge: 'blue', hex: '#3b82f6', startable: true },
-  Charging: { label: '充电中', badge: 'amber', hex: '#f59e0b', pulse: true },
-  SuspendedEV: { label: '车端暂停', badge: 'gray', hex: '#94a3b8' },
-  SuspendedEVSE: { label: '桩端暂停', badge: 'gray', hex: '#94a3b8' },
-  Finishing: { label: '结束中', badge: 'blue', hex: '#3b82f6' },
-  Reserved: { label: '已预约', badge: 'purple', hex: '#8b5cf6' },
-  Unavailable: { label: '不可用', badge: 'gray', hex: '#cbd5e1' },
-  Faulted: { label: '故障', badge: 'red', hex: '#ef4444' },
+  Preparing: { label: '已插枪', badge: 'blue', hex: '#5c9df0', startable: true },
+  Charging: { label: '充电中', badge: 'amber', hex: '#f0a32b', pulse: true },
+  SuspendedEV: { label: '车端暂停', badge: 'gray', hex: '#93aac4' },
+  SuspendedEVSE: { label: '桩端暂停', badge: 'gray', hex: '#93aac4' },
+  Finishing: { label: '结束中', badge: 'blue', hex: '#5c9df0' },
+  Reserved: { label: '已预约', badge: 'purple', hex: '#9b7cf6' },
+  Unavailable: { label: '不可用', badge: 'gray', hex: '#465e7e' },
+  Faulted: { label: '故障', badge: 'red', hex: '#ef4b3c' },
 }
 
 export function connectorStyle(status: string): ConnectorStyle {
-  return (CONNECTOR_STYLE as Record<string, ConnectorStyle>)[status] ?? { label: status, badge: 'gray', hex: '#94a3b8' }
+  return (CONNECTOR_STYLE as Record<string, ConnectorStyle>)[status] ?? { label: status, badge: 'gray', hex: '#93aac4' }
 }
 
 // ── 桩状态（与桩档案页一致的配色；离线优先）────────────
@@ -92,19 +92,19 @@ export const PILE_STATUS_BADGE: Record<PileStatus, BadgeColor> = {
 
 export const PILE_STATUS_HEX: Record<PileStatus, string> = {
   available: '#10b981',
-  charging: '#f59e0b',
-  offline: '#94a3b8',
-  faulted: '#ef4444',
-  disabled: '#cbd5e1',
+  charging: '#f0a32b',
+  offline: '#93aac4',
+  faulted: '#ef4b3c',
+  disabled: '#465e7e',
 }
 
 /** 卡片底色：故障红、充电中琥珀、离线 / 停用灰、空闲绿 */
 export const PILE_CARD_CLASS: Record<PileStatus, string> = {
-  available: 'border-emerald-100 bg-emerald-50/40',
-  charging: 'border-amber-100 bg-amber-50/40',
-  offline: 'border-slate-200 bg-slate-50',
-  faulted: 'border-red-100 bg-red-50/50',
-  disabled: 'border-slate-200 bg-slate-50',
+  available: 'border-ev-500/30 bg-ev-500/10',
+  charging: 'border-warn-500/30 bg-warn-500/10',
+  offline: 'border-line-strong bg-surface-3',
+  faulted: 'border-danger-500/30 bg-danger-500/10',
+  disabled: 'border-line-strong bg-surface-3',
 }
 
 // ── 归属 / 绑定方式 ────────────────────────────────────

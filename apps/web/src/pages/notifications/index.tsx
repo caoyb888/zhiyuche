@@ -129,30 +129,30 @@ export default function NotificationsPage() {
           ) : items.length === 0 ? (
             <Empty title={scope === 'unread' ? '没有未读通知' : '暂无通知'} />
           ) : (
-            <ul className={clsx('divide-y divide-slate-100', list.isFetching && 'opacity-70')}>
+            <ul className={clsx('divide-y divide-line-soft', list.isFetching && 'opacity-70')}>
               {items.map((n) => {
                 const meta = notificationTypeMeta(n.type)
                 const isUnread = !n.read_at
                 const href = notificationHref(n)
                 return (
                   <li key={n.id}>
-                    <div className={clsx('flex items-start gap-3 rounded-lg px-2 py-3 transition-colors', isUnread ? 'bg-brand-50/40' : 'hover:bg-slate-50')}>
-                      <span className={clsx('mt-2 h-2 w-2 shrink-0 rounded-full', isUnread ? 'bg-brand-600' : 'bg-slate-200')} aria-label={isUnread ? '未读' : '已读'} />
+                    <div className={clsx('flex items-start gap-3 rounded-lg px-2 py-3 transition-colors', isUnread ? 'bg-brand-600/10' : 'hover:bg-surface-3')}>
+                      <span className={clsx('mt-2 h-2 w-2 shrink-0 rounded-full', isUnread ? 'bg-brand-600' : 'bg-line-strong')} aria-label={isUnread ? '未读' : '已读'} />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => open(n)} className={clsx('text-left text-sm hover:underline', isUnread ? 'font-medium text-slate-800' : 'text-slate-700')}>
+                          <button type="button" onClick={() => open(n)} className={clsx('text-left text-sm hover:underline', isUnread ? 'font-medium text-ink-strong' : 'text-ink')}>
                             {n.title}
                           </button>
                           <Badge color={meta.color}>{meta.label}</Badge>
                           {href && (
-                            <span className="inline-flex items-center gap-0.5 text-[11px] text-slate-400">
+                            <span className="inline-flex items-center gap-0.5 text-[11px] text-ink-faint">
                               <ExternalLink size={11} />
                               可跳转
                             </span>
                           )}
                         </div>
-                        {n.content && <p className="mt-1 whitespace-pre-line text-sm text-slate-600">{n.content}</p>}
-                        <div className="mt-1 flex items-center gap-3 text-[11px] text-slate-400">
+                        {n.content && <p className="mt-1 whitespace-pre-line text-sm text-ink">{n.content}</p>}
+                        <div className="mt-1 flex items-center gap-3 text-[11px] text-ink-faint">
                           <span>{formatDateTime(n.created_at)}</span>
                           {n.read_at && <span>已读于 {formatDateTime(n.read_at)}</span>}
                         </div>

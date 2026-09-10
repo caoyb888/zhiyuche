@@ -19,8 +19,8 @@ interface Row {
   soc: number | null
 }
 
-const KWH_COLOR = '#f59e0b'
-const POWER_COLOR = '#1d6fd8'
+const KWH_COLOR = '#f0a32b'
+const POWER_COLOR = '#5c9df0'
 
 function num(v: number | null | undefined): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? v : null
@@ -46,12 +46,12 @@ export default function MeterChart({ values, height = 220, maxPoints = 600 }: Me
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-        <XAxis dataKey="ts" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={(v: number) => dayjs(v).format(fmt)} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} minTickGap={40} />
-        <YAxis yAxisId="kwh" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={40} tickFormatter={(v: number) => v.toFixed(1)} />
-        <YAxis yAxisId="power" orientation="right" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={36} tickFormatter={(v: number) => v.toFixed(0)} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#16304f" vertical={false} />
+        <XAxis dataKey="ts" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={(v: number) => dayjs(v).format(fmt)} tick={{ fontSize: 11, fill: '#93aac4' }} axisLine={false} tickLine={false} minTickGap={40} />
+        <YAxis yAxisId="kwh" tick={{ fontSize: 11, fill: '#93aac4' }} axisLine={false} tickLine={false} width={40} tickFormatter={(v: number) => v.toFixed(1)} />
+        <YAxis yAxisId="power" orientation="right" tick={{ fontSize: 11, fill: '#93aac4' }} axisLine={false} tickLine={false} width={36} tickFormatter={(v: number) => v.toFixed(0)} />
         <Tooltip
-          contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 4px 20px #0001', fontSize: 12 }}
+          contentStyle={{ borderRadius: 10, border: '1px solid #23456B', background: '#0D1E33', boxShadow: '0 16px 40px -20px rgba(0,0,0,.9)', fontSize: 12 }} labelStyle={{ color: '#93AAC4' }} itemStyle={{ color: '#DCE7F2' }}
           labelFormatter={(v) => dayjs(Number(v)).format('YYYY-MM-DD HH:mm:ss')}
           formatter={(value, name) => {
             const n = typeof value === 'number' ? value : Number(value)

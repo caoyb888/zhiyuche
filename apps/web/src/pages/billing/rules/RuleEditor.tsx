@@ -35,11 +35,11 @@ interface RuleEditorProps {
 
 function Section({ title, description, extra, children }: { title: string; description?: string; extra?: ReactNode; children: ReactNode }) {
   return (
-    <section className="space-y-4 rounded-xl border border-slate-100 p-4">
+    <section className="space-y-4 rounded-xl border border-line p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
-          {description && <p className="mt-0.5 text-xs text-slate-400">{description}</p>}
+          <h4 className="text-sm font-semibold text-ink">{title}</h4>
+          {description && <p className="mt-0.5 text-xs text-ink-faint">{description}</p>}
         </div>
         {extra}
       </div>
@@ -63,11 +63,11 @@ function MultiplierRows({ form, readOnly }: { form: UseFormReturn<RuleFormValues
       }
     >
       {fields.length === 0 ? (
-        <div className="text-xs text-slate-400">未配置时段系数，全天按基础费率计费</div>
+        <div className="text-xs text-ink-faint">未配置时段系数，全天按基础费率计费</div>
       ) : (
         <div className="space-y-3">
           {fields.map((f, i) => (
-            <div key={f.id} className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 sm:grid-cols-[1fr_1fr_1fr_6rem_auto] sm:items-start">
+            <div key={f.id} className="grid grid-cols-2 gap-3 rounded-lg bg-surface-3 p-3 sm:grid-cols-[1fr_1fr_1fr_6rem_auto] sm:items-start">
               <FormField name={`time_multipliers.${i}.name`} label={i === 0 ? '名称' : undefined}>
                 <Input placeholder="如 早高峰" maxLength={32} {...form.register(`time_multipliers.${i}.name`)} />
               </FormField>
@@ -82,7 +82,7 @@ function MultiplierRows({ form, readOnly }: { form: UseFormReturn<RuleFormValues
               </FormField>
               <div className={clsx('flex justify-end', i === 0 && 'sm:pt-7')}>
                 {!readOnly && (
-                  <Button type="button" variant="ghost" size="sm" icon={Trash2} className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600" title="删除" aria-label="删除时段" onClick={() => remove(i)} />
+                  <Button type="button" variant="ghost" size="sm" icon={Trash2} className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200" title="删除" aria-label="删除时段" onClick={() => remove(i)} />
                 )}
               </div>
             </div>
@@ -112,21 +112,21 @@ function PenaltyRows({ form, readOnly }: { form: UseFormReturn<RuleFormValues>; 
       }
     >
       {fields.length === 0 ? (
-        <div className="text-xs text-slate-400">未配置罚金规则</div>
+        <div className="text-xs text-ink-faint">未配置罚金规则</div>
       ) : (
         <div className="space-y-3">
           {fields.map((f, i) => {
             const type: BillingPenaltyType = rows[i]?.type ?? f.type
             const keys = PENALTY_FIELDS[type]
             return (
-              <div key={f.id} className="space-y-3 rounded-lg bg-slate-50 p-3">
+              <div key={f.id} className="space-y-3 rounded-lg bg-surface-3 p-3">
                 <div className="flex items-end gap-3">
                   <FormField name={`penalty_rules.${i}.type`} label="类型" className="w-full sm:w-56">
                     <Select options={PENALTY_TYPE_OPTIONS} {...form.register(`penalty_rules.${i}.type`)} />
                   </FormField>
                   <div className="flex-1" />
                   {!readOnly && (
-                    <Button type="button" variant="ghost" size="sm" icon={Trash2} className="!px-2 text-red-500 hover:bg-red-50 hover:text-red-600" title="删除" aria-label="删除罚金规则" onClick={() => remove(i)} />
+                    <Button type="button" variant="ghost" size="sm" icon={Trash2} className="!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200" title="删除" aria-label="删除罚金规则" onClick={() => remove(i)} />
                   )}
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -214,12 +214,12 @@ function RuleForm({ state, readOnly, onSaved, onCancelCreate }: RuleEditorProps)
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-slate-800 truncate">{rule ? rule.name : '新建规则'}</h3>
+            <h3 className="text-base font-semibold text-ink-strong truncate">{rule ? rule.name : '新建规则'}</h3>
             {rule?.is_default && <Badge color="green">生效中</Badge>}
             {rule && !rule.enabled && <Badge color="gray">已停用</Badge>}
             {state.mode === 'create' && state.source && <Badge color="blue">{state.source}</Badge>}
           </div>
-          <div className="mt-0.5 text-xs text-slate-400">
+          <div className="mt-0.5 text-xs text-ink-faint">
             {rule ? `更新于 ${formatDateTime(rule.updated_at)} · 创建于 ${formatDateTime(rule.created_at)}` : '保存后出现在左侧列表；首条规则将自动设为生效'}
           </div>
         </div>
@@ -312,8 +312,8 @@ function RuleForm({ state, readOnly, onSaved, onCancelCreate }: RuleEditorProps)
           </fieldset>
 
           {!readOnly && (
-            <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
-              <span className="text-xs text-slate-400">{form.formState.isDirty ? '有未保存的修改' : ''}</span>
+            <div className="flex items-center justify-between gap-3 border-t border-line pt-3">
+              <span className="text-xs text-ink-faint">{form.formState.isDirty ? '有未保存的修改' : ''}</span>
               <div className="flex items-center gap-2">
                 {isEdit ? (
                   <Button variant="secondary" onClick={() => form.reset(defaults)} disabled={!form.formState.isDirty || save.isPending}>
@@ -336,7 +336,7 @@ function RuleForm({ state, readOnly, onSaved, onCancelCreate }: RuleEditorProps)
       {tab === 'json' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-slate-400">{doc ? '当前编辑中的规则文档（与提交 PUT/POST 的 rule 字段一致）' : '表单存在校验错误，以下为按当前输入生成的草稿'}</p>
+            <p className="text-xs text-ink-faint">{doc ? '当前编辑中的规则文档（与提交 PUT/POST 的 rule 字段一致）' : '表单存在校验错误，以下为按当前输入生成的草稿'}</p>
             <Button variant="secondary" size="sm" icon={Copy} onClick={() => void copyJson()}>
               复制 JSON
             </Button>

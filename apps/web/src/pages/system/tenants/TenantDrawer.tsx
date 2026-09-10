@@ -71,8 +71,8 @@ function CreateForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: (t: 
         </FormField>
       </div>
 
-      <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-4 space-y-4">
-        <div className="text-sm font-medium text-slate-700">租户管理员账号</div>
+      <div className="rounded-lg border border-line bg-surface-3/60 p-4 space-y-4">
+        <div className="text-sm font-medium text-ink">租户管理员账号</div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField name="admin_username" label="用户名" required>
             <Input autoComplete="off" placeholder="如 chenhua_admin" spellCheck={false} {...form.register('admin_username')} />
@@ -86,7 +86,7 @@ function CreateForm({ onCancel, onSaved }: { onCancel: () => void; onSaved: (t: 
         </FormField>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>
@@ -153,7 +153,7 @@ function EditForm({ tenant, onCancel, onSaved }: { tenant: Tenant; onCancel: () 
           {({ id, invalid }) => <Controller control={form.control} name="expires_at" render={({ field }) => <DateTimeInput id={id} invalid={invalid} value={field.value} onChange={field.onChange} />} />}
         </FormField>
       </div>
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

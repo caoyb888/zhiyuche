@@ -52,21 +52,21 @@ export function BudgetBar({ spent, budget }: { spent: number | null | undefined;
   const pct = budgetUsage(spent, budget)
   if (pct === null) {
     return (
-      <div className="text-xs text-slate-400">
-        未设预算 · 本月支出 <span className="font-mono text-slate-600">{formatMoney(spent ?? 0)}</span>
+      <div className="text-xs text-ink-faint">
+        未设预算 · 本月支出 <span className="font-mono text-ink">{formatMoney(spent ?? 0)}</span>
       </div>
     )
   }
   return (
     <div className="min-w-[9rem]">
       <div className="flex items-center justify-between text-[11px]">
-        <span className="font-mono text-slate-600">{formatMoney(spent ?? 0)}</span>
-        <span className="text-slate-400">/ {formatMoney(budget)}</span>
+        <span className="font-mono text-ink">{formatMoney(spent ?? 0)}</span>
+        <span className="text-ink-faint">/ {formatMoney(budget)}</span>
       </div>
-      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-4">
         <div className={clsx('h-full rounded-full transition-all', usageBarClass(pct))} style={{ width: `${Math.min(100, pct)}%` }} />
       </div>
-      <div className={clsx('mt-0.5 text-[11px]', pct >= 100 ? 'text-red-600 font-medium' : 'text-slate-400')}>{pct.toFixed(0)}%{pct >= 100 ? ' 已超支' : ''}</div>
+      <div className={clsx('mt-0.5 text-[11px]', pct >= 100 ? 'text-danger-200 font-medium' : 'text-ink-faint')}>{pct.toFixed(0)}%{pct >= 100 ? ' 已超支' : ''}</div>
     </div>
   )
 }
@@ -114,36 +114,36 @@ export default function AccountTree({ root, canRecharge, canAllocate, canAdjust,
                       tabIndex={-1}
                       aria-label={open ? '收起' : '展开'}
                       onClick={() => hasChildren && toggle(key)}
-                      className={clsx('flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400', hasChildren ? 'hover:bg-slate-200/70 hover:text-slate-600' : 'invisible')}
+                      className={clsx('flex h-5 w-5 shrink-0 items-center justify-center rounded text-ink-faint', hasChildren ? 'hover:bg-line-strong/70 hover:text-ink' : 'invisible')}
                     >
                       <ChevronRight size={14} className={clsx('transition-transform', open && 'rotate-90')} />
                     </button>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <button type="button" onClick={() => exists && onDetail(node)} className={clsx('truncate text-sm text-left', exists ? 'font-medium text-slate-800 hover:text-brand-700' : 'text-slate-500 cursor-default')}>
+                        <button type="button" onClick={() => exists && onDetail(node)} className={clsx('truncate text-sm text-left', exists ? 'font-medium text-ink-strong hover:text-brand-300' : 'text-ink-muted cursor-default')}>
                           {node.owner_name}
                         </button>
                         <Badge color={ACCOUNT_LEVEL_BADGE[node.level]}>{ACCOUNT_LEVEL_LABEL[node.level]}</Badge>
-                        {!exists && <span className="text-[11px] text-slate-400">未创建</span>}
+                        {!exists && <span className="text-[11px] text-ink-faint">未创建</span>}
                       </div>
-                      {node.owner_sub && <div className="text-[11px] text-slate-400 truncate">{node.owner_sub}</div>}
+                      {node.owner_sub && <div className="text-[11px] text-ink-faint truncate">{node.owner_sub}</div>}
                     </div>
                   </div>
                 </td>
-                <td className={clsx('pr-3 text-right align-middle font-mono font-medium', exists ? balanceClass(node.balance) : 'text-slate-400')}>{formatMoney(node.balance)}</td>
-                <td className="pr-3 text-right align-middle font-mono text-xs text-slate-600">{formatMoney(node.credit_limit)}</td>
-                <td className="pr-3 align-middle">{exists ? <BudgetBar spent={node.month_spent} budget={node.monthly_budget} /> : <span className="text-xs text-slate-300">—</span>}</td>
-                <td className="pr-3 align-middle">{exists ? <Badge color={ACCOUNT_STATUS_BADGE[node.status]}>{ACCOUNT_STATUS_LABEL[node.status]}</Badge> : <span className="text-xs text-slate-300">—</span>}</td>
+                <td className={clsx('pr-3 text-right align-middle font-mono font-medium', exists ? balanceClass(node.balance) : 'text-ink-faint')}>{formatMoney(node.balance)}</td>
+                <td className="pr-3 text-right align-middle font-mono text-xs text-ink">{formatMoney(node.credit_limit)}</td>
+                <td className="pr-3 align-middle">{exists ? <BudgetBar spent={node.month_spent} budget={node.monthly_budget} /> : <span className="text-xs text-ink-disabled">—</span>}</td>
+                <td className="pr-3 align-middle">{exists ? <Badge color={ACCOUNT_STATUS_BADGE[node.status]}>{ACCOUNT_STATUS_LABEL[node.status]}</Badge> : <span className="text-xs text-ink-disabled">—</span>}</td>
                 <td className="align-middle whitespace-nowrap">
                   <div className="flex items-center justify-end gap-0.5">
-                    {isEnterprise && canRecharge && <Button variant="ghost" size="sm" icon={Coins} className="!px-2 text-emerald-600 hover:bg-emerald-50" title="充值" aria-label="充值" onClick={onRecharge} />}
+                    {isEnterprise && canRecharge && <Button variant="ghost" size="sm" icon={Coins} className="!px-2 text-ev-200 hover:bg-ev-500/10" title="充值" aria-label="充值" onClick={onRecharge} />}
                     {canAllocateDown && <Button variant="ghost" size="sm" icon={Send} className="!px-2" title="向下划拨" aria-label="向下划拨" onClick={() => onAllocate(node)} />}
                     {canAllocateIn && (
                       <Button
                         variant="ghost"
                         size="sm"
                         icon={exists ? ArrowDownToLine : PlusCircle}
-                        className={clsx('!px-2', !exists && 'text-brand-600 hover:bg-brand-50')}
+                        className={clsx('!px-2', !exists && 'text-brand-600 hover:bg-brand-600/10')}
                         title={exists ? `从「${parent?.owner_name ?? ''}」划入` : '划拨额度并创建账户'}
                         aria-label={exists ? '划入' : '划拨创建'}
                         onClick={() => parent && onAllocate(parent, node)}

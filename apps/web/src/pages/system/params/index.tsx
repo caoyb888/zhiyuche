@@ -20,11 +20,11 @@ import ParamEditModal from './ParamEditModal'
 import { paramSourceColor, paramSourceLabel, paramTypeLabel } from './schemas'
 
 function ValueCell({ p, value }: { p: Param; value: string | null | undefined }) {
-  if (value === null || value === undefined) return <span className="text-slate-400">—</span>
+  if (value === null || value === undefined) return <span className="text-ink-faint">—</span>
   if (p.value_type === 'bool') return <Badge color={value === 'true' ? 'green' : 'gray'}>{value}</Badge>
   return (
-    <code className="block max-w-[18rem] truncate font-mono text-xs text-slate-700" title={value}>
-      {value === '' ? <span className="text-slate-400">（空）</span> : value}
+    <code className="block max-w-[18rem] truncate font-mono text-xs text-ink" title={value}>
+      {value === '' ? <span className="text-ink-faint">（空）</span> : value}
     </code>
   )
 }
@@ -70,17 +70,17 @@ export default function ParamsPage() {
       : '保存将写入本租户的覆盖值，不影响其他租户；可随时恢复全局缺省。'
 
   const columns: Column<Param>[] = [
-    { key: 'key', title: '参数键', render: (p) => <code className="font-mono text-xs text-slate-800">{p.key}</code> },
+    { key: 'key', title: '参数键', render: (p) => <code className="font-mono text-xs text-ink-strong">{p.key}</code> },
     { key: 'value', title: '当前值', render: (p) => <ValueCell p={p} value={p.value} /> },
     { key: 'value_type', title: '类型', width: 80, render: (p) => <Badge color="gray">{paramTypeLabel[p.value_type]}</Badge> },
     { key: 'source', title: '来源', width: 80, render: (p) => <Badge color={paramSourceColor[p.source]}>{paramSourceLabel[p.source]}</Badge> },
     {
       key: 'global_value',
       title: '全局缺省值',
-      render: (p) => (p.source === 'tenant' ? <ValueCell p={p} value={p.global_value} /> : <span className="text-xs text-slate-400">（同当前值）</span>),
+      render: (p) => (p.source === 'tenant' ? <ValueCell p={p} value={p.global_value} /> : <span className="text-xs text-ink-faint">（同当前值）</span>),
     },
-    { key: 'description', title: '说明', render: (p) => <span className="text-slate-500">{text(p.description)}</span> },
-    { key: 'updated_at', title: '更新时间', render: (p) => <span className="text-xs text-slate-500">{formatDateTime(p.updated_at)}</span> },
+    { key: 'description', title: '说明', render: (p) => <span className="text-ink-muted">{text(p.description)}</span> },
+    { key: 'updated_at', title: '更新时间', render: (p) => <span className="text-xs text-ink-muted">{formatDateTime(p.updated_at)}</span> },
   ]
 
   const renderActions = (p: Param) => (
@@ -97,13 +97,13 @@ export default function ParamsPage() {
       <PageHeader title="参数设置" description="系统参数：租户覆盖值优先，否则采用全局缺省值" />
 
       {isSuper && (
-        <div className="flex items-start gap-2 rounded-xl border border-purple-100 bg-purple-50 px-4 py-3 text-sm text-purple-800">
+        <div className="flex items-start gap-2 rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-3 text-sm text-violet-200">
           <Globe size={16} className="mt-0.5 shrink-0" />
           <div>
             {globalScope ? (
               <>
                 <span className="font-medium">当前修改的是全局缺省值。</span>
-                <span className="ml-1 text-purple-700">如需为某个租户单独设置，请在顶栏切换查看租户。</span>
+                <span className="ml-1 text-violet-200">如需为某个租户单独设置，请在顶栏切换查看租户。</span>
               </>
             ) : (
               <>
@@ -118,7 +118,7 @@ export default function ParamsPage() {
         <div className="w-full sm:w-72">
           <Input icon={Search} value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="按键名 / 说明 / 值过滤" aria-label="过滤参数" />
         </div>
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-ink-faint">
           共 {list.data?.length ?? 0} 项{kw ? `，匹配 ${rows.length} 项` : ''}
         </span>
       </div>

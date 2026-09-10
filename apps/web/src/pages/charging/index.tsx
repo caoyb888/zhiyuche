@@ -28,52 +28,52 @@ function SummaryBar() {
       title: '今日',
       items: [
         { label: '次', value: s ? String(s.today?.sessions ?? 0) : '—' },
-        { label: 'kWh', value: s ? (s.today?.kwh ?? 0).toFixed(1) : '—', cls: 'text-amber-600' },
-        { label: '元', value: s ? formatMoney(s.today?.cost ?? 0) : '—', cls: 'text-emerald-700' },
+        { label: 'kWh', value: s ? (s.today?.kwh ?? 0).toFixed(1) : '—', cls: 'text-warn-200' },
+        { label: '元', value: s ? formatMoney(s.today?.cost ?? 0) : '—', cls: 'text-ev-200' },
       ],
     },
     {
       title: '本月',
       items: [
         { label: '次', value: s ? String(s.month?.sessions ?? 0) : '—' },
-        { label: 'kWh', value: s ? (s.month?.kwh ?? 0).toFixed(1) : '—', cls: 'text-amber-600' },
-        { label: '元', value: s ? formatMoney(s.month?.cost ?? 0) : '—', cls: 'text-emerald-700' },
+        { label: 'kWh', value: s ? (s.month?.kwh ?? 0).toFixed(1) : '—', cls: 'text-warn-200' },
+        { label: '元', value: s ? formatMoney(s.month?.cost ?? 0) : '—', cls: 'text-ev-200' },
       ],
     },
     {
       title: '事务',
       items: [
-        { label: '进行中', value: s ? String(s.ongoing) : '—', cls: s && s.ongoing > 0 ? 'text-amber-600' : undefined },
-        { label: '待复核', value: s ? String(s.pending_review) : '—', cls: s && s.pending_review > 0 ? 'text-red-600' : undefined },
+        { label: '进行中', value: s ? String(s.ongoing) : '—', cls: s && s.ongoing > 0 ? 'text-warn-200' : undefined },
+        { label: '待复核', value: s ? String(s.pending_review) : '—', cls: s && s.pending_review > 0 ? 'text-danger-200' : undefined },
       ],
     },
     {
       title: '充电桩',
       items: [
-        { label: '在线', value: s ? `${s.piles?.online ?? 0} / ${s.piles?.total ?? 0}` : '—', cls: 'text-emerald-600' },
-        { label: '充电中', value: s ? String(s.piles?.charging ?? 0) : '—', cls: 'text-amber-600' },
-        { label: '故障', value: s ? String(s.piles?.faulted ?? 0) : '—', cls: s && (s.piles?.faulted ?? 0) > 0 ? 'text-red-600' : undefined },
+        { label: '在线', value: s ? `${s.piles?.online ?? 0} / ${s.piles?.total ?? 0}` : '—', cls: 'text-ev-200' },
+        { label: '充电中', value: s ? String(s.piles?.charging ?? 0) : '—', cls: 'text-warn-200' },
+        { label: '故障', value: s ? String(s.piles?.faulted ?? 0) : '—', cls: s && (s.piles?.faulted ?? 0) > 0 ? 'text-danger-200' : undefined },
       ],
     },
   ]
   return (
     <div className="card flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted">
         <Zap size={14} className="text-brand-600" />
         {s ? `${s.date} 汇总` : '充电汇总'}
       </span>
       {groups.map((g) => (
         <div key={g.title} className="flex items-baseline gap-2">
-          <span className="text-[11px] uppercase tracking-wide text-slate-400">{g.title}</span>
+          <span className="text-[11px] uppercase tracking-wide text-ink-faint">{g.title}</span>
           {g.items.map((it) => (
             <span key={it.label} className="flex items-baseline gap-1">
-              <span className={clsx('text-lg font-semibold', it.cls ?? 'text-slate-800')}>{it.value}</span>
-              <span className="text-xs text-slate-400">{it.label}</span>
+              <span className={clsx('text-lg font-semibold', it.cls ?? 'text-ink-strong')}>{it.value}</span>
+              <span className="text-xs text-ink-faint">{it.label}</span>
             </span>
           ))}
         </div>
       ))}
-      {summary.isError && <span className="text-xs text-amber-600">汇总暂不可用：{errorMessage(summary.error)}</span>}
+      {summary.isError && <span className="text-xs text-warn-200">汇总暂不可用：{errorMessage(summary.error)}</span>}
     </div>
   )
 }

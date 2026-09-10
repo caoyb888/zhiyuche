@@ -76,11 +76,11 @@ function RoleForm({ role, onCancel, onSaved }: { role?: Role; onCancel: () => vo
           name="permissions"
           label={
             <span>
-              初始权限 <span className="font-normal text-slate-400">（可选，已选 {selectedCount} 项；创建后也可在"分配权限"中调整）</span>
+              初始权限 <span className="font-normal text-ink-faint">（可选，已选 {selectedCount} 项；创建后也可在"分配权限"中调整）</span>
             </span>
           }
         >
-          <div className="rounded-lg border border-slate-200 p-2 max-h-72 overflow-y-auto">
+          <div className="rounded-lg border border-line-strong p-2 max-h-72 overflow-y-auto">
             {perms.query.isPending ? (
               <div className="flex justify-center py-6">
                 <Spinner size="sm" label="加载权限树" />
@@ -98,7 +98,7 @@ function RoleForm({ role, onCancel, onSaved }: { role?: Role; onCancel: () => vo
         </FormField>
       )}
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <div className="flex justify-end gap-2 pt-2 border-t border-line">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

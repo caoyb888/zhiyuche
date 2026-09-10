@@ -37,8 +37,8 @@ function useInvalidateApproval() {
 
 function Summary({ a }: { a: Approval }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-      <span className="font-mono text-slate-700">{a.apply_no}</span>
+    <div className="rounded-lg bg-surface-3 px-3 py-2 text-xs text-ink-muted">
+      <span className="font-mono text-ink">{a.apply_no}</span>
       <span className="mx-1.5">·</span>
       {a.applicant.name}
       <span className="mx-1.5">·</span>
@@ -115,15 +115,15 @@ function ApproveForm({ a, onClose, onSuccess }: { a: Approval; onClose: () => vo
     >
       <div className="space-y-4">
         <Summary a={a} />
-        {a.status === 'pending_l1' && a.level_required === 2 && <div className="text-xs text-slate-500">该申请需二级审批：本步骤通过后将转交二级审批人。</div>}
+        {a.status === 'pending_l1' && a.level_required === 2 && <div className="text-xs text-ink-muted">该申请需二级审批：本步骤通过后将转交二级审批人。</div>}
 
         {!needVehicle && (
           <div className="text-sm">
-            <span className="text-xs text-slate-400">申请车辆</span>
+            <span className="text-xs text-ink-faint">申请车辆</span>
             <div className="mt-0.5 flex flex-wrap items-center gap-3">
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-ink-strong">
                 {a.vehicle?.plate_no}
-                {a.vehicle?.model && <span className="ml-1 text-xs text-slate-400">{a.vehicle.model}</span>}
+                {a.vehicle?.model && <span className="ml-1 text-xs text-ink-faint">{a.vehicle.model}</span>}
               </span>
               {canReassign && <Checkbox label="改派其他车辆" checked={reassign} onChange={(e) => setReassign(e.target.checked)} />}
             </div>
@@ -132,32 +132,32 @@ function ApproveForm({ a, onClose, onSuccess }: { a: Approval; onClose: () => vo
 
         {pickVehicle && (
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-ink">
               {needVehicle ? '指派车辆' : '改派为'}
-              <span className="ml-0.5 text-red-500">*</span>
+              <span className="ml-0.5 text-danger-200">*</span>
             </label>
             {available.isPending ? (
-              <div className="flex items-center gap-2 py-1 text-xs text-slate-400">
+              <div className="flex items-center gap-2 py-1 text-xs text-ink-faint">
                 <Spinner size="sm" /> 正在查询该时段可用车辆…
               </div>
             ) : available.isError ? (
-              <div className="text-xs text-red-500">可用车辆查询失败：{errorMessage(available.error)}</div>
+              <div className="text-xs text-danger-200">可用车辆查询失败：{errorMessage(available.error)}</div>
             ) : (
               <>
                 <Select options={options} placeholder={options.length === 0 ? '该时段无可用车辆' : '请选择车辆'} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} invalid={touched && vehicleInvalid} aria-label="指派车辆" />
                 {touched && vehicleInvalid && (
-                  <p className="text-xs text-red-500" role="alert">
+                  <p className="text-xs text-danger-200" role="alert">
                     {needVehicle ? '申请未指定车辆，通过前必须指派车辆' : '请选择改派的车辆'}
                   </p>
                 )}
-                <p className="text-xs text-slate-400">仅列出 {formatTimeRange(a.planned_start, a.planned_end)} 内空闲且无冲突申请的车辆</p>
+                <p className="text-xs text-ink-faint">仅列出 {formatTimeRange(a.planned_start, a.planned_end)} 内空闲且无冲突申请的车辆</p>
               </>
             )}
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label htmlFor="approve-remark" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="approve-remark" className="block text-sm font-medium text-ink">
             审批备注
           </label>
           <Textarea id="approve-remark" placeholder="可选" value={remark} onChange={(e) => setRemark(e.target.value)} maxLength={500} />
@@ -246,20 +246,20 @@ function ReasonForm({
     >
       <div className="space-y-4">
         {description && (
-          <div className="flex gap-2 text-sm text-slate-600">
-            <AlertTriangle size={18} className={clsx('mt-0.5 shrink-0', danger ? 'text-red-500' : 'text-amber-500')} />
+          <div className="flex gap-2 text-sm text-ink">
+            <AlertTriangle size={18} className={clsx('mt-0.5 shrink-0', danger ? 'text-danger-200' : 'text-warn-200')} />
             <span>{description}</span>
           </div>
         )}
         <Summary a={a} />
         <div className="space-y-1.5">
-          <label htmlFor="reason-input" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="reason-input" className="block text-sm font-medium text-ink">
             {label}
-            {required && <span className="ml-0.5 text-red-500">*</span>}
+            {required && <span className="ml-0.5 text-danger-200">*</span>}
           </label>
           <Textarea id="reason-input" placeholder={placeholder} value={reason} onChange={(e) => setReason(e.target.value)} invalid={touched && invalid} maxLength={500} />
           {touched && invalid && (
-            <p className="text-xs text-red-500" role="alert">
+            <p className="text-xs text-danger-200" role="alert">
               请填写{label}
             </p>
           )}
@@ -364,9 +364,9 @@ function StartTripForm({ a, onClose, onSuccess }: { a: Approval; onClose: () => 
     >
       <div className="space-y-4">
         <Summary a={a} />
-        <div className="text-xs text-slate-500">车辆将立即进入在途状态；通常由网关刷卡自动开始，仅在网关异常时手动调度。</div>
+        <div className="text-xs text-ink-muted">车辆将立即进入在途状态；通常由网关刷卡自动开始，仅在网关异常时手动调度。</div>
         <div className="space-y-1.5">
-          <label htmlFor="start-trip-driver" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="start-trip-driver" className="block text-sm font-medium text-ink">
             驾驶员
           </label>
           {canPickDriver ? (
@@ -374,10 +374,10 @@ function StartTripForm({ a, onClose, onSuccess }: { a: Approval; onClose: () => 
           ) : (
             <Input id="start-trip-driver" value={`${a.applicant.name}（申请人）`} readOnly />
           )}
-          <p className="text-xs text-slate-400">缺省为申请人 {a.applicant.name}</p>
+          <p className="text-xs text-ink-faint">缺省为申请人 {a.applicant.name}</p>
         </div>
         <div className="space-y-1.5">
-          <label htmlFor="start-trip-remark" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="start-trip-remark" className="block text-sm font-medium text-ink">
             备注
           </label>
           <Textarea id="start-trip-remark" placeholder="可选" value={remark} onChange={(e) => setRemark(e.target.value)} maxLength={500} />

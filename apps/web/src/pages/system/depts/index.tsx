@@ -73,12 +73,12 @@ export default function DeptsPage() {
       <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)] items-start">
         {/* ── 左：部门树 ── */}
         <div className="card p-3">
-          <div className="flex items-center justify-between px-1 pb-2 border-b border-slate-100">
-            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
-              <FolderTree size={15} className="text-slate-400" />
+          <div className="flex items-center justify-between px-1 pb-2 border-b border-line">
+            <div className="flex items-center gap-1.5 text-sm font-medium text-ink">
+              <FolderTree size={15} className="text-ink-faint" />
               部门树
             </div>
-            <span className="text-xs text-slate-400">{depts.length > 0 ? `${countDepts(depts)} 个部门` : ''}</span>
+            <span className="text-xs text-ink-faint">{depts.length > 0 ? `${countDepts(depts)} 个部门` : ''}</span>
           </div>
           <div className="pt-2 max-h-[70vh] overflow-y-auto">
             {query.isPending ? (
@@ -122,10 +122,10 @@ export default function DeptsPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-slate-800 truncate">{selected.name}</h3>
+                    <h3 className="text-base font-semibold text-ink-strong truncate">{selected.name}</h3>
                     <Badge color={selected.status === 'active' ? 'green' : 'gray'}>{selected.status === 'active' ? '启用' : '停用'}</Badge>
                   </div>
-                  <div className="mt-0.5 text-xs text-slate-400">
+                  <div className="mt-0.5 text-xs text-ink-faint">
                     {selected.code ? `编码 ${selected.code} · ` : ''}直属 {selected.user_count} 人
                   </div>
                 </div>

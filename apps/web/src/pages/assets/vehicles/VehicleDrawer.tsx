@@ -224,7 +224,7 @@ function VehicleForm({ vehicle, deptNodes, deptLoading, deptUnavailable, onCance
         <Textarea placeholder="可选" {...form.register('remark')} />
       </FormField>
 
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-2">
+      <div className="flex justify-end gap-2 border-t border-line pt-2">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

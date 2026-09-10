@@ -71,7 +71,7 @@ function CreateForm({ vehicleOptions, vehiclesUnavailable, onCancel, onCreated }
       <FormField name="remark" label="备注">
         <Textarea placeholder="可选" {...form.register('remark')} />
       </FormField>
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-2">
+      <div className="flex justify-end gap-2 border-t border-line pt-2">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>
@@ -127,7 +127,7 @@ function EditForm({ device, onCancel, onUpdated }: { device: Device; onCancel: (
       <FormField name="remark" label="备注">
         <Textarea {...form.register('remark')} />
       </FormField>
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-2">
+      <div className="flex justify-end gap-2 border-t border-line pt-2">
         <Button variant="secondary" onClick={onCancel} disabled={save.isPending}>
           取消
         </Button>

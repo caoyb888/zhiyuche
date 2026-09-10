@@ -106,15 +106,15 @@ function ParamForm({ param, scopeHint, onClose, onSaved }: Props & { param: Para
 
   return (
     <Form form={form} onSubmit={(v) => save.mutate(v)}>
-      <div className="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-slate-500 space-y-1">
+      <div className="rounded-lg bg-surface-3 px-3 py-2.5 text-xs text-ink-muted space-y-1">
         <div className="flex items-center gap-2">
-          <code className="font-mono text-slate-700">{param.key}</code>
+          <code className="font-mono text-ink">{param.key}</code>
           <Badge color="gray">{paramTypeLabel[type]}</Badge>
         </div>
         <div>{scopeHint}</div>
         {param.source === 'tenant' && param.global_value !== null && param.global_value !== undefined && (
           <div>
-            全局缺省值：<code className="font-mono text-slate-700">{param.global_value}</code>
+            全局缺省值：<code className="font-mono text-ink">{param.global_value}</code>
           </div>
         )}
       </div>

@@ -97,20 +97,20 @@ export default function TenantsPage() {
       sortable: true,
       render: (t) => (
         <div className="flex items-center gap-1.5">
-          <code className="font-mono text-xs text-slate-700">{t.code}</code>
+          <code className="font-mono text-xs text-ink">{t.code}</code>
           {t.is_platform && <Badge color="purple">平台</Badge>}
           {t.id === viewTenantId && <Badge color="blue">查看中</Badge>}
         </div>
       ),
     },
-    { key: 'name', title: '名称', sortable: true, render: (t) => <span className="font-medium text-slate-800">{t.name}</span> },
+    { key: 'name', title: '名称', sortable: true, render: (t) => <span className="font-medium text-ink-strong">{t.name}</span> },
     {
       key: 'contact',
       title: '联系人',
       render: (t) => (
-        <div className="text-slate-600">
+        <div className="text-ink">
           <div>{text(t.contact_name)}</div>
-          {t.contact_phone && <div className="font-mono text-xs text-slate-400">{t.contact_phone}</div>}
+          {t.contact_phone && <div className="font-mono text-xs text-ink-faint">{t.contact_phone}</div>}
         </div>
       ),
     },
@@ -122,12 +122,12 @@ export default function TenantsPage() {
       title: '到期时间',
       sortable: true,
       render: (t) => {
-        if (!t.expires_at) return <span className="text-xs text-slate-400">长期有效</span>
+        if (!t.expires_at) return <span className="text-xs text-ink-faint">长期有效</span>
         const expired = new Date(t.expires_at).getTime() < Date.now()
-        return <span className={expired ? 'text-xs text-red-600' : 'text-xs text-slate-500'}>{formatDateTime(t.expires_at)}{expired ? '（已到期）' : ''}</span>
+        return <span className={expired ? 'text-xs text-danger-200' : 'text-xs text-ink-muted'}>{formatDateTime(t.expires_at)}{expired ? '（已到期）' : ''}</span>
       },
     },
-    { key: 'created_at', title: '创建时间', sortable: true, render: (t) => <span className="text-xs text-slate-500">{formatDateTime(t.created_at)}</span> },
+    { key: 'created_at', title: '创建时间', sortable: true, render: (t) => <span className="text-xs text-ink-muted">{formatDateTime(t.created_at)}</span> },
   ]
 
   const renderActions = (t: Tenant) => {
@@ -152,7 +152,7 @@ export default function TenantsPage() {
             variant="ghost"
             size="sm"
             icon={active ? PowerOff : Power}
-            className={active ? '!px-2 text-red-500 hover:bg-red-50 hover:text-red-600' : '!px-2 text-emerald-600 hover:bg-emerald-50'}
+            className={active ? '!px-2 text-danger-200 hover:bg-danger-500/10 hover:text-danger-200' : '!px-2 text-ev-200 hover:bg-ev-500/10'}
             title={t.is_platform ? '平台租户不可停用' : active ? '停用' : '启用'}
             aria-label={active ? '停用' : '启用'}
             disabled={active && t.is_platform}

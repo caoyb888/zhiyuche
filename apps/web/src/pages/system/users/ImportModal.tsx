@@ -23,7 +23,7 @@ const MAX_SIZE = 10 * 1024 * 1024
 const errorColumns: Column<ImportError>[] = [
   { key: 'row', title: '行号', width: 70, render: (e) => <span className="font-mono text-xs">{e.row}</span> },
   { key: 'username', title: '用户名', width: 140, render: (e) => e.username ?? '—' },
-  { key: 'message', title: '失败原因', render: (e) => <span className="text-red-600">{e.message}</span> },
+  { key: 'message', title: '失败原因', render: (e) => <span className="text-danger-200">{e.message}</span> },
 ]
 
 function ImportBody({ onClose, onImported }: Omit<Props, 'open'>) {
@@ -65,8 +65,8 @@ function ImportBody({ onClose, onImported }: Omit<Props, 'open'>) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-slate-500 leading-relaxed">
-        模板列：<span className="text-slate-700">用户名*、姓名*、手机号、邮箱、工号、部门名称、角色代码</span>（多个角色用逗号分隔）。
+      <div className="rounded-lg bg-surface-3 px-3 py-2.5 text-xs text-ink-muted leading-relaxed">
+        模板列：<span className="text-ink">用户名*、姓名*、手机号、邮箱、工号、部门名称、角色代码</span>（多个角色用逗号分隔）。
         逐行校验，失败行不影响其他行；导入用户的密码为系统缺省密码。
       </div>
 
@@ -88,8 +88,8 @@ function ImportBody({ onClose, onImported }: Omit<Props, 'open'>) {
           选择文件
         </Button>
         {file && (
-          <span className="text-sm text-slate-600 truncate max-w-[16rem]" title={file.name}>
-            {file.name} <span className="text-slate-400">({Math.max(1, Math.round(file.size / 1024))} KB)</span>
+          <span className="text-sm text-ink truncate max-w-[16rem]" title={file.name}>
+            {file.name} <span className="text-ink-faint">({Math.max(1, Math.round(file.size / 1024))} KB)</span>
           </span>
         )}
       </div>
@@ -97,21 +97,21 @@ function ImportBody({ onClose, onImported }: Omit<Props, 'open'>) {
       {result && (
         <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg bg-slate-50 py-2">
-              <div className="text-lg font-semibold text-slate-800">{result.total}</div>
-              <div className="text-xs text-slate-400">总计</div>
+            <div className="rounded-lg bg-surface-3 py-2">
+              <div className="text-lg font-semibold text-ink-strong">{result.total}</div>
+              <div className="text-xs text-ink-faint">总计</div>
             </div>
-            <div className="rounded-lg bg-emerald-50 py-2">
-              <div className="text-lg font-semibold text-emerald-700">{result.success}</div>
-              <div className="text-xs text-emerald-600">成功</div>
+            <div className="rounded-lg bg-ev-500/10 py-2">
+              <div className="text-lg font-semibold text-ev-200">{result.success}</div>
+              <div className="text-xs text-ev-200">成功</div>
             </div>
-            <div className="rounded-lg bg-red-50 py-2">
-              <div className="text-lg font-semibold text-red-700">{result.failed}</div>
-              <div className="text-xs text-red-600">失败</div>
+            <div className="rounded-lg bg-danger-500/10 py-2">
+              <div className="text-lg font-semibold text-danger-200">{result.failed}</div>
+              <div className="text-xs text-danger-200">失败</div>
             </div>
           </div>
           {result.errors.length > 0 && (
-            <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-100 px-3">
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-line px-3">
               <Table columns={errorColumns} data={result.errors} rowKey={(e) => `${e.row}-${e.username ?? ''}`} />
             </div>
           )}

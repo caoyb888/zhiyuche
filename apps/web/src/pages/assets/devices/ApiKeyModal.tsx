@@ -26,16 +26,16 @@ function ApiKeyBody({ device, reason, onClose }: { device: DeviceWithKey; reason
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
-        设备 <span className="font-mono font-medium text-slate-800">{device.serial_no}</span> 的{reason === 'rotate' ? '新' : ''}接入密钥（api_key）：
+      <p className="text-sm text-ink">
+        设备 <span className="font-mono font-medium text-ink-strong">{device.serial_no}</span> 的{reason === 'rotate' ? '新' : ''}接入密钥（api_key）：
       </p>
       <div className="flex items-center gap-2">
-        <code className="flex-1 select-all break-all rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800">{device.api_key}</code>
+        <code className="flex-1 select-all break-all rounded-lg border border-line-strong bg-surface-3 px-3 py-2 font-mono text-sm text-ink-strong">{device.api_key}</code>
         <Button variant="secondary" icon={copied ? Check : Copy} onClick={() => void copy()}>
           {copied ? '已复制' : '复制'}
         </Button>
       </div>
-      <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+      <p className="rounded-lg bg-warn-500/10 px-3 py-2 text-xs text-warn-200">
         密钥仅显示这一次，请立即写入网关配置；关闭后无法再次查看。{reason === 'rotate' ? '旧密钥已立即失效。' : '网关上报时以 X-Device-Key 携带该密钥。'}
       </p>
       <div className="flex justify-end">

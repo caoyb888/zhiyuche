@@ -42,14 +42,14 @@ function sortSettlements(list: Settlement[]): Settlement[] {
 
 function UsageCell({ s }: { s: Settlement }) {
   const pct = budgetUsage(s.total, s.budget)
-  if (pct === null) return <span className="text-xs text-slate-400">未设预算</span>
+  if (pct === null) return <span className="text-xs text-ink-faint">未设预算</span>
   return (
     <div className="min-w-[7rem]">
       <div className="flex items-center justify-between text-[11px]">
-        <span className={clsx(pct >= 100 ? 'font-medium text-red-600' : 'text-slate-500')}>{pct.toFixed(0)}%</span>
-        <span className="text-slate-400">/ {formatMoney(s.budget)}</span>
+        <span className={clsx(pct >= 100 ? 'font-medium text-danger-200' : 'text-ink-muted')}>{pct.toFixed(0)}%</span>
+        <span className="text-ink-faint">/ {formatMoney(s.budget)}</span>
       </div>
-      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-4">
         <div className={clsx('h-full rounded-full', usageBarClass(pct))} style={{ width: `${Math.min(100, pct)}%` }} />
       </div>
     </div>
@@ -164,7 +164,7 @@ export default function BillingSettlementsPage() {
       title: '结算对象',
       render: (s) => (
         <div className="flex items-center gap-2">
-          <span className={clsx('text-sm', s.dept_id ? 'text-slate-800' : 'font-semibold text-slate-900')}>{s.dept_id ? (s.dept_name ?? '未命名部门') : '企业汇总'}</span>
+          <span className={clsx('text-sm', s.dept_id ? 'text-ink-strong' : 'font-semibold text-ink-strong')}>{s.dept_id ? (s.dept_name ?? '未命名部门') : '企业汇总'}</span>
           {!s.dept_id && <Badge color="purple">全企业</Badge>}
         </div>
       ),
@@ -173,8 +173,8 @@ export default function BillingSettlementsPage() {
     { key: 'trip_cost', title: '行程费', align: 'right', render: (s) => <span className={clsx('font-mono', !s.dept_id && 'font-semibold')}>{formatMoney(s.trip_cost)}</span> },
     { key: 'charge_count', title: '充电数', align: 'right', render: (s) => <span className="font-mono text-xs">{s.charge_count}</span> },
     { key: 'charge_cost', title: '充电费', align: 'right', render: (s) => <span className={clsx('font-mono', !s.dept_id && 'font-semibold')}>{formatMoney(s.charge_cost)}</span> },
-    { key: 'penalty', title: '罚金', align: 'right', render: (s) => <span className={clsx('font-mono', s.penalty > 0 ? 'text-red-600' : 'text-slate-500', !s.dept_id && 'font-semibold')}>{formatMoney(s.penalty)}</span> },
-    { key: 'total', title: '合计（元）', align: 'right', render: (s) => <span className={clsx('font-mono font-semibold', !s.dept_id ? 'text-brand-700' : 'text-slate-800')}>{formatMoney(s.total)}</span> },
+    { key: 'penalty', title: '罚金', align: 'right', render: (s) => <span className={clsx('font-mono', s.penalty > 0 ? 'text-danger-200' : 'text-ink-muted', !s.dept_id && 'font-semibold')}>{formatMoney(s.penalty)}</span> },
+    { key: 'total', title: '合计（元）', align: 'right', render: (s) => <span className={clsx('font-mono font-semibold', !s.dept_id ? 'text-brand-300' : 'text-ink-strong')}>{formatMoney(s.total)}</span> },
     { key: 'budget', title: '预算 / 使用率', render: (s) => <UsageCell s={s} /> },
     { key: 'status', title: '状态', render: (s) => <Badge color={SETTLEMENT_STATUS_BADGE[s.status]}>{SETTLEMENT_STATUS_LABEL[s.status]}</Badge> },
   ]
@@ -182,7 +182,7 @@ export default function BillingSettlementsPage() {
   const renderActions = (s: Settlement) => (
     <div className="flex items-center justify-end gap-0.5">
       <Button variant="ghost" size="sm" icon={Eye} className="!px-2" title="查看明细" aria-label="查看明细" onClick={() => setParam('id', s.id)} />
-      {canConfirm && s.status === 'draft' && <Button variant="ghost" size="sm" icon={CheckCircle2} className="!px-2 text-emerald-600 hover:bg-emerald-50" title="确认" aria-label="确认" onClick={() => setConfirmTarget(s)} />}
+      {canConfirm && s.status === 'draft' && <Button variant="ghost" size="sm" icon={CheckCircle2} className="!px-2 text-ev-200 hover:bg-ev-500/10" title="确认" aria-label="确认" onClick={() => setConfirmTarget(s)} />}
       {canExport && <Button variant="ghost" size="sm" icon={Download} className="!px-2" title="导出 xlsx" aria-label="导出" disabled={exporting.isPending} onClick={() => exporting.mutate(s)} />}
       <Button variant="ghost" size="sm" icon={Printer} className="!px-2" title="打印" aria-label="打印" onClick={() => void print(s)} />
     </div>
@@ -208,7 +208,7 @@ export default function BillingSettlementsPage() {
       />
 
       <div className="card p-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <span className="text-sm font-medium text-slate-700 shrink-0">结算期</span>
+        <span className="text-sm font-medium text-ink shrink-0">结算期</span>
         {periods.isError || (periods.isSuccess && periodList.length === 0) ? (
           <div className="flex items-center gap-2">
             <div className="w-44">
@@ -222,7 +222,7 @@ export default function BillingSettlementsPage() {
                 aria-label="结算期"
               />
             </div>
-            <span className="text-xs text-slate-400">{periods.isError ? `期列表暂不可用（${errorMessage(periods.error)}），可手动选择月份` : '暂无可结算的月份，可手动选择'}</span>
+            <span className="text-xs text-ink-faint">{periods.isError ? `期列表暂不可用（${errorMessage(periods.error)}），可手动选择月份` : '暂无可结算的月份，可手动选择'}</span>
           </div>
         ) : (
           <div className="w-full sm:w-72">
@@ -230,7 +230,7 @@ export default function BillingSettlementsPage() {
           </div>
         )}
         {periodInfo && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-ink-muted">
             <Badge color={periodInfo.status === 'none' ? 'gray' : SETTLEMENT_STATUS_BADGE[periodInfo.status]}>{PERIOD_STATUS_LABEL[periodInfo.status]}</Badge>
             {enterprise?.confirmed_at && <span>确认于 {formatDateTime(enterprise.confirmed_at)}{enterprise.confirmed_by_name ? ` · ${enterprise.confirmed_by_name}` : ''}</span>}
           </div>

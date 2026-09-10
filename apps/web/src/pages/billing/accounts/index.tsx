@@ -39,9 +39,9 @@ function countNodes(n: AccountNode): { total: number; existing: number; negative
 
 function Stat({ label, value, className }: { label: string; value: string; className?: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 px-4 py-3">
-      <div className="text-[11px] text-slate-400">{label}</div>
-      <div className={clsx('mt-0.5 font-mono text-lg font-semibold text-slate-800', className)}>{value}</div>
+    <div className="rounded-xl border border-line px-4 py-3">
+      <div className="text-[11px] text-ink-faint">{label}</div>
+      <div className={clsx('mt-0.5 font-mono text-lg font-semibold text-ink-strong', className)}>{value}</div>
     </div>
   )
 }
@@ -97,7 +97,7 @@ export default function BillingAccountsPage() {
           <Stat label="企业账户余额（元）" value={formatMoney(root.balance)} className={balanceClass(root.balance)} />
           <Stat label="企业本月支出（元）" value={formatMoney(root.month_spent ?? 0)} />
           <Stat label="已创建账户" value={`${stats.existing} / ${stats.total}`} />
-          <Stat label="余额为负" value={String(stats.negative)} className={stats.negative > 0 ? 'text-red-600' : undefined} />
+          <Stat label="余额为负" value={String(stats.negative)} className={stats.negative > 0 ? 'text-danger-200' : undefined} />
         </div>
       )}
 
